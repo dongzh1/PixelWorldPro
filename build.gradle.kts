@@ -11,7 +11,7 @@ plugins {
     `maven-publish`
 }
 
-group = "com.xbaimiao.template"
+group = "com.dongzh1.pixelworldpro"
 version = "1.0.0"
 
 repositories {

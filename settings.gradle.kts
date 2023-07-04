@@ -1,2 +1,2 @@
-rootProject.name = "EasyTemplate"
+rootProject.name = "PixelWorldPro"
 

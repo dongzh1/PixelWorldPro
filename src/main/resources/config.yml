@@ -1,0 +1,29 @@
+#单端可以不用管,使用db即可，bungee群组需要使用mysql
+#If you are a single server, you can use db, if you are a bungee group, you need to use mysql
+Database: db
+#是否在bungee群组中，如果是，那么需要配置redis，且此项改为true
+#Whether in the bungee group, if so, you need to configure redis, and this item is changed to true
+Bungee: false
+#如果你不知道数据库对应的配置，那么只需要改host,port,database,user,passwd即可
+#If you don't know the configuration corresponding to the database, you only need to change host, port, database, user, passwd
+Mysql:
+  host: 127.0.0.1
+  port: 3306
+  database: PixelWorldPro
+  user: Adear
+  passwd: '123456'
+  ssl: false
+  HikariCP: true
+#redis数据库配置,Bungee为false可以不管
+#Redis database configuration, Bungee is false can not care
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: ""
+#世界存放位置，填写绝对路径
+#World storage location, fill in the absolute path
+#WorldPath: "D:\\PixelWorldPro\\worlds"
+WorldPath: "D:\\PixelWorldPro\\worlds"
+#世界模板存放位置，填写绝对路径
+#World template storage location, fill in the absolute path
+WorldTemplatePath: "D:\\PixelWorldPro\\template"

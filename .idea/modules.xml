@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/EasyTemplate.main.iml" filepath="$PROJECT_DIR$/.idea/modules/EasyTemplate.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PixelWorldPro.main.iml" filepath="$PROJECT_DIR$/.idea/modules/PixelWorldPro.main.iml" />
     </modules>
   </component>
 </project>
