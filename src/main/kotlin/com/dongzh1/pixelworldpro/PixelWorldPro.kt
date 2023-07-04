@@ -1,9 +1,9 @@
-package com.xbaimiao.template
+package com.dongzh1.pixelworldpro
 
 import com.xbaimiao.easylib.EasyPlugin
 
 @Suppress("unused")
-class EasyTemplate : EasyPlugin() {
+class PixelWorldPro : EasyPlugin() {
 
     override fun enable() {
 
