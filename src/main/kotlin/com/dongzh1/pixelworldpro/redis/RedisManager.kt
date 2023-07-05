@@ -1,10 +1,10 @@
 package com.dongzh1.pixelworldpro.redis
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
+import com.dongzh1.pixelworldpro.PixelWorldPro.Companion.channel
 import com.dongzh1.pixelworldpro.database.WorldData
 import com.xbaimiao.easylib.EasyPlugin
 import com.xbaimiao.easylib.module.utils.Module
-import org.bukkit.Bukkit
 import java.util.*
 
 
@@ -29,6 +29,9 @@ object RedisManager : Module<EasyPlugin> {
             return deserialize(value)
         }
     }
+    fun push(message: String) {
+        jedisPool.resource.use { jedis -> jedis.publish(channel, message) }
+    }
 
     //序列化存入的数据
     fun serialize(worldData: WorldData): String {
@@ -47,7 +50,10 @@ object RedisManager : Module<EasyPlugin> {
                 "${worldData.memberNumber}"
 
     }
-    fun deserialize(value: String): WorldData {
+    fun deserialize(value: String?): WorldData? {
+        if (value == null) {
+            return null
+        }
         val list = value.split(",|.|,")
         return WorldData(
             list[0],

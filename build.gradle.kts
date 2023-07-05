@@ -32,7 +32,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.xbaimiao:EasyLib:2.1.0")
+    implementation("com.xbaimiao:EasyLib:2.1.1")
     implementation(kotlin("stdlib-jdk8"))
 //    implementation ("de.tr7zw:item-nbt-api:2.11.2")
     implementation ("com.j256.ormlite:ormlite-core:6.1")
