@@ -1,2 +1,11 @@
 AlreadyHasWorld: "&cYou already have a world !"
 OtherAlreadyHasWorld: "&cThis player already have a world!"
+NeedArg: "&cNot enough arguments!"
+TemplateWorld: "&aTemplate world"
+PlayerName: "&aPlayer name"
+PlayerNotFound: "&cPlayer not online or not exist!"
+
+
+
+
+

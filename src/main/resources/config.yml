@@ -1,5 +1,5 @@
-# 使用自定义的语言文件，可以在lang文件夹中添加语言文件，然后在此处填写文件名
-# Use custom language files, you can add language files in the lang folder, and then fill in the file name here
+#可以在lang文件夹查看已有的语言文件，如果你想要新增语言文件，请联系我
+#You can view the existing language files in the lang folder. If you want to add a new language file, please contact me
 lang: english
 #单端可以不用管,使用db即可，bungee群组需要使用mysql
 #If you are a single server, you can use db, if you are a bungee group, you need to use mysql
@@ -30,3 +30,4 @@ WorldPath: "D://PixelWorldPro//worlds"
 #世界模板存放位置，填写绝对路径
 #World template storage location, fill in the absolute path
 WorldTemplatePath: "D://PixelWorldPro//template"
+nes: "ss"

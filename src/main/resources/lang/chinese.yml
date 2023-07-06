@@ -1,2 +1,6 @@
 AlreadyHasWorld: "&c你已经有一个世界了!"
 OtherAlreadyHasWorld: "&c这个玩家已经有一个世界了!"
+NeedArg: "&c参数不足!"
+TemplateWorld: "&a模板世界"
+PlayerName: "&a玩家名字"
+PlayerNotFound: "&c玩家不在线或不存在!"
