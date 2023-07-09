@@ -1,0 +1,44 @@
+title: "创建世界"
+
+slots:
+  - 'NNNNNNNNN'
+  - 'AB       '
+  - '    C    '
+  - 'NNNNXNNNN'
+
+items:
+  N:
+    material: GLASS_PANE
+    name: ' '
+    lore:
+      - ' '
+    amount: 1
+  X:
+    material: BARRIER
+    name: '&c&l关闭'
+    lore:
+      - '&f点击关闭'
+    commands:
+      - '[op] say 测试op指令功能'
+      - '[console] say 测试控制台指令功能'
+      - '[player] say 测试玩家指令功能'
+  A:
+    type: Template
+    material: PAPER
+    model: 1
+    name: '&a&l沙漠模板'
+    lore:
+      - '&f选择此模板'
+  B:
+    type: Template
+    material: PAPER
+    model: 2
+    name: '&a&l平原模板'
+    lore:
+      - '&f选择此模板'
+  C:
+    type: CreateWorld
+    material: GRASS_BLOCK
+    name: '&a&l创建世界'
+    lore:
+      - '&f当前选择的模板为: %template%'

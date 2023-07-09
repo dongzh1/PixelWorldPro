@@ -315,7 +315,7 @@ class WorldImpl : WorldApi {
         }
     }
 
-    private fun setWorldBorder(world: World, level: String?) {
+    fun setWorldBorder(world: World, level: String?) {
         var realLevel =
             PixelWorldPro.instance.config.getConfigurationSection("WorldSetting.WorldLevel")!!.getKeys(false).first()
         if (level != null) {

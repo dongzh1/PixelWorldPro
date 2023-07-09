@@ -16,9 +16,41 @@ import java.util.UUID
 
 class RedisListener : JedisPubSub() {
 
+    private val onlineServer = mutableListOf(PixelWorldPro.instance.config.getString("ServerName"))
+    private val newOnlineServer = mutableListOf(PixelWorldPro.instance.config.getString("ServerName"))
+    init {
+        submit(async = true, period = 20L, delay = 20L) {
+            RedisManager.push("ServerOnline|,|${PixelWorldPro.instance.config.getString("ServerName")}")
+        }
+        submit(async = true, period = 80L, delay = 100L) {
+            //如果onlineServer没有数据库里的名字就删除
+            if (newOnlineServer.size < onlineServer.size){
+                for (server in onlineServer){
+                    if (!newOnlineServer.contains(server)){
+                        RedisManager.closeServer(server!!)
+                    }
+                }
+            }
+            newOnlineServer.clear()
+        }
+        submit(async = true, delay = 80L) {
+
+        }
+    }
+
     override fun onMessage(channel: String?, message: String?) {
         if (channel == PixelWorldPro.channel) {
             when(message!!.split("|,|")[0]){
+                "ServerOnline" ->{
+                    val serverName = message.split("|,|")[1]
+                    if (!newOnlineServer.contains(serverName)){
+                        newOnlineServer.add(serverName)
+                    }
+                    if (newOnlineServer.size > onlineServer.size){
+                        onlineServer.clear()
+                        onlineServer.addAll(newOnlineServer)
+                    }
+                }
                 "createWorld" ->{
                     //获取最低mspt服务器
                     val serverName = TickListener.getLowestMsptServer()
@@ -117,6 +149,17 @@ class RedisListener : JedisPubSub() {
                         return
                     }
                     world.time = time
+                }
+                "updateWorldLevel" ->{
+                    val uuid = UUID.fromString(message.split("|,|")[1])
+                    val level = message.split("|,|")[2]
+                    val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
+                    val world = Bukkit.getWorld(worldData!!.worldName)
+                    if (world == null){
+                        return
+                    }else{
+                        WorldImpl().setWorldBorder(world,level)
+                    }
                 }
                 else ->{
                     Bukkit.getLogger().warning("未知的redis消息类型")

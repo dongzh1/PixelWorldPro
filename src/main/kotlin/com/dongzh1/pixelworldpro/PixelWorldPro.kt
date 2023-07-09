@@ -4,6 +4,7 @@ import com.dongzh1.pixelworldpro.commands.Commands
 import com.dongzh1.pixelworldpro.api.DatabaseApi
 import com.dongzh1.pixelworldpro.database.MysqlDatabaseApi
 import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
+import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.listener.TickListener
 import com.dongzh1.pixelworldpro.redis.RedisConfig
 import com.dongzh1.pixelworldpro.redis.RedisListener
@@ -127,6 +128,7 @@ class PixelWorldPro : EasyPlugin() {
     override fun reloadConfig() {
         super.reloadConfig()
         reloadLang()
+        Gui.reloadConfig()
         isBungee = config.getBoolean("Bungee")
     }
 
