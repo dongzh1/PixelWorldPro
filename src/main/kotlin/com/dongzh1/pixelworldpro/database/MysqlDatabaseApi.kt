@@ -1,11 +1,9 @@
-package com.xbaimiao.template.database
+package com.dongzh1.pixelworldpro.database
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
-import com.dongzh1.pixelworldpro.database.AbstractDatabaseApi
-import com.xbaimiao.easylib.module.database.OrmliteMysql
 
-class MysqlDatabaseApi : AbstractDatabaseApi(OrmliteMysql(
+class MysqlDatabaseApi : AbstractDatabaseApi(Mysql(
     PixelWorldPro.instance.config.getConfigurationSection("Mysql")!!,
-    PixelWorldPro.instance.config.getBoolean("Mysql.Hikari")
+    PixelWorldPro.instance.config.getBoolean("Mysql.HikariCP")
 )
 )

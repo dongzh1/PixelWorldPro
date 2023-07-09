@@ -1,12 +1,21 @@
+#配置文件版本号,用于更新配置文件，请勿修改
+#Configuration file version number, used to update the configuration file, please do not modify
+version: 2
 #可以在lang文件夹查看已有的语言文件，如果你想要新增语言文件，请联系我
 #You can view the existing language files in the lang folder. If you want to add a new language file, please contact me
 lang: english
+#你的操作系统，windows或者linux
+#Your operating system, windows or linux
+os: windows
 #单端可以不用管,使用db即可，bungee群组需要使用mysql
 #If you are a single server, you can use db, if you are a bungee group, you need to use mysql
 Database: db
 #是否在bungee群组中，如果是，那么需要配置redis，且此项改为true
 #Whether in the bungee group, if so, you need to configure redis, and this item is changed to true
 Bungee: false
+#填写此服在bungee配置中的名称，如果不是bungee群组，那么此项可以不管
+#Fill in the name of this server in the bungee configuration. If it is not a bungee group, this item can be ignored
+ServerName: "server1"
 #如果你不知道数据库对应的配置，那么只需要改host,port,database,user,passwd即可
 #If you don't know the configuration corresponding to the database, you only need to change host, port, database, user, passwd
 Mysql:
@@ -23,11 +32,67 @@ redis:
   host: 127.0.0.1
   port: 6379
   password: ""
-#世界存放位置，填写绝对路径
-#World storage location, fill in the absolute path
-#WorldPath: "D://PixelWorldPro//worlds"
-WorldPath: "D://PixelWorldPro//worlds"
-#世界模板存放位置，填写绝对路径
-#World template storage location, fill in the absolute path
-WorldTemplatePath: "D://PixelWorldPro//template"
-nes: "ss"
+#世界存放位置，填写绝对路径,禁止出现空格,使用/作为分隔符，路径只能有字母数字和/_-
+#World storage location, fill in the absolute path, no spaces are allowed, use / as a separator, the path can only have letters, numbers and /_-
+#WorldPath: "D:/PixelWorldPro/worlds_test-120"
+WorldPath: ""
+#世界模板存放位置，填写绝对路径,禁止出现空格,使用/作为分隔符，路径只能有英文数字和/_-
+#World template storage location, fill in the absolute path, no spaces are allowed, use / as a separator, the path can only have letters, numbers and /_-
+WorldTemplatePath: ""
+#玩家世界的设置
+#Player world settings
+WorldSetting:
+  #世界游戏规则,写多少就设置多少，不写就是默认值
+  #World game rules, write as many as you want, if you don't write it, it is the default value
+  GameRule:
+    #死亡不掉落
+    # Keep inventory on death
+    keepInventory: true
+    #火焰传播
+    # Fire spread
+    doFireTick: false
+    # doImmediate: false
+  #世界难度
+  #World difficulty
+  WorldDifficulty: HARD
+  #玩家世界和一个世界同步时间，填写世界名称，如果不需要同步时间，那么此项改为null，如果是bungee群组,时间格式为:世界名称:服务器名
+  #Synchronize the time of the player world with a world, fill in the world name, if you don't need to synchronize the time, then this item is changed to null, if it is a bungee group, the time format is: world name: server name
+  #WorldTime: 'world:server1'
+  #WorldTime: 'world'
+  WorldTime: 'null'
+  #世界等级和对应的屏障范围大小
+  #World level and corresponding barrier range size
+  WorldLevel:
+    level1: 100
+    2level: 200
+    #等级是自定义的文字,按照上下顺序进行升级,屏障范围大小为-1时,不会生成屏障
+    #The level is custom text, and the upgrade is performed in the order of up and down. When the barrier range size is -1, the barrier will not be generated
+    3: -1
+#一些插件对应的事件触发指令，例如创建世界时触发
+#Some plugin corresponding event trigger instructions, such as when creating a world
+EventCommand:
+  #第一次创建世界时触发
+  #Triggered when creating a world for the first time
+  CreateWorld:
+    #"player"代表玩家执行,"op"代表玩家以op权限执行,"cmd”代表控制台执行
+    #"player" represents the player to execute, "op" represents the player to execute with op permission, "cmd" represents the console to execute
+    - 'player:spawn'
+    - 'cmd:money give %player% 100'
+    - 'op:money give %player% 100'
+#插件提供papi变量的一些格式
+#Some formats of papi variables provided by the plugin
+Papi:
+  #使用%pixelworldpro_showName%可获得此变量,代表玩家所在世界的显示名称,{player}代表世界主人
+  #Use %pixelworldpro_showName% to get this variable，Represents the display name of the world where the player is located,{player} represents the owner of the world
+  showName: '&a{player}`s world'
+  #对于特定世界的显示名称，比如玩家处于world世界，那么显示名称为world
+  #The display name for a specific world, such as the player in the world world, then the display name is world
+  showNameSet:
+    world: '&aworld'
+    world_nether: '&aworld_nether'
+    world_the_end: '&aworld_the_end'
+  #获取此玩家世界的创建时间,此处设置的是时间格式
+  #Get the creation time of this player world, the time format set here
+  createTime: 'yyyy_MM_dd_HH_mm_ss'
+
+

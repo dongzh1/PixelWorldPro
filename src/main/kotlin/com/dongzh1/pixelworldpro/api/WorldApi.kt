@@ -1,30 +1,55 @@
 package com.dongzh1.pixelworldpro.api
 
 import com.dongzh1.pixelworldpro.impl.WorldImpl
+import org.bukkit.World
 import java.io.File
 import java.util.UUID
 
 interface WorldApi {
     /**
-     * 根据模板文件夹名新建世界
+     * 根据模板文件夹名新建世界,会存储到数据库,如果玩家在线则传送
+     * @param uuid 玩家uuid
+     * @param templateName 模板文件夹名
      */
     fun createWorld(uuid: UUID, templateName: String)
     /**
-     * 根据模板文件新建世界
+     * 根据模板文件新建世界，会存储到数据库,如果玩家在线则传送
+     * @param uuid 玩家uuid
+     * @param file 模板文件
      */
     fun createWorld(uuid: UUID, file: File)
     /**
-     * 卸载指定玩家世界
+     * 卸载指定玩家世界,在玩家世界操作
+     * @param world 世界
      */
-    fun unloadWorld(uuid: UUID)
+    fun unloadWorld(world:World): Boolean
     /**
-     * 删除指定玩家世界
+     * 删除指定玩家世界和数据库记录
+     * @param uuid 玩家uuid
      */
-    fun deleteWorld(uuid: UUID)
+    fun deleteWorld(uuid: UUID): Boolean
     /**
      * 重置指定玩家世界
+     * @param uuid 玩家uuid
      */
     fun resetWorld(uuid: UUID)
+    /**
+     * 加载指定玩家世界,加载到指定服务器,如果服务器为null则加载到本服
+     * @param uuid 玩家uuid
+     * @param serverName 服务器名
+     */
+    fun loadWorld(uuid: UUID,serverName:String?): Boolean
+    /**
+     * 加载指定玩家世界，群组获取mspt最低服务器加载,不是群组不要使用
+     * @param uuid 玩家uuid
+     */
+    fun loadWorldGroup(uuid: UUID)
+    /**
+     * 加载指定玩家世界，并将指定玩家传送到该世界
+     * @param world 玩家uuid对应的世界
+     * @param player 指定玩家
+     */
+    fun loadWorldGroupTp(world: UUID,player: UUID)
 
     object Factory {
         private var instance: WorldApi? = null

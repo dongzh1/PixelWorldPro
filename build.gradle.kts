@@ -16,6 +16,8 @@ version = "1.0.0"
 
 repositories {
     mavenCentral()
+    maven ("https://repo.papermc.io/repository/maven-public/")
+    maven ("https://oss.sonatype.org/content/groups/public/")
     maven("https://papermc.io/repo/repository/maven-public/")
     maven("https://repo.aikar.co/content/groups/aikar/")
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
@@ -32,7 +34,8 @@ repositories {
 }
 
 dependencies {
-    implementation("com.xbaimiao:EasyLib:2.1.1")
+    compileOnly ("com.destroystokyo.paper:paper-api:1.14.1-R0.1-SNAPSHOT")
+    implementation("com.xbaimiao:EasyLib:2.1.4")
     implementation(kotlin("stdlib-jdk8"))
 //    implementation ("de.tr7zw:item-nbt-api:2.11.2")
     implementation ("com.j256.ormlite:ormlite-core:6.1")
@@ -41,6 +44,7 @@ dependencies {
     implementation ("redis.clients:jedis:3.7.0")
     compileOnly(fileTree("libs"))
     compileOnly(dependencyNotation = "org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
+
 //    compileOnly ("com.mojang:authlib:1.5.21")
 }
 

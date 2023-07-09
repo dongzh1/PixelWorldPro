@@ -1,20 +1,32 @@
 package com.dongzh1.pixelworldpro.tools
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
-import org.bukkit.Bukkit
+
 import org.bukkit.configuration.file.YamlConfiguration
+
 import java.io.File
+
 import java.io.InputStreamReader
 
 
-object CommentConfig  {
+object CommentConfig : YamlConfiguration() {
+
     fun updateLang(path:String){
         //获取文件夹的语言文件
         updateYaml("lang/$path.yml")
     }
-    fun updateConfig(path:String){
-        val configFile = File(PixelWorldPro.instance.dataFolder, path)
-        val config = PixelWorldPro.instance.getResource(path)
+    fun updateConfig(){
+        val configFile = File(PixelWorldPro.instance.dataFolder, "config.yml")
+        when(PixelWorldPro.instance.config.getInt("version")){
+            1 ->{
+                PixelWorldPro.instance.config.set("version", 2)
+                PixelWorldPro.instance.saveConfig()
+                configFile.appendText("#是否使用worldBorder插件生成世界边界\n" +
+                        "#Whether to use the worldBorder plugin to generate the world border\n" +
+                        "WorldBorder: false\n")
+            }
+            else ->return
+        }
 
     }
     private fun updateYaml(path: String){
@@ -23,8 +35,8 @@ object CommentConfig  {
         //获取插件内的语言文件
         val yaml = InputStreamReader(PixelWorldPro.instance.getResource(path)!!)
 
-        val yamlFileConfig = YamlConfiguration.loadConfiguration(yamlFile)
-        val yamlConfig = YamlConfiguration.loadConfiguration(yaml)
+        val yamlFileConfig = loadConfiguration(yamlFile)
+        val yamlConfig = loadConfiguration(yaml)
         //遍历两个的所有key
         for (key in yamlConfig.getKeys(true)) {
             //如果文件中没有这个key就写入
@@ -34,4 +46,7 @@ object CommentConfig  {
         }
         yamlFileConfig.save(yamlFile)
     }
+
+
+
 }

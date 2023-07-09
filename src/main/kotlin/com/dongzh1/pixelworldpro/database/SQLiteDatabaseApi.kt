@@ -1,6 +1,5 @@
-package com.xbaimiao.template.database
+package com.dongzh1.pixelworldpro.database
 
-import com.dongzh1.pixelworldpro.database.AbstractDatabaseApi
 import com.xbaimiao.easylib.module.database.OrmliteSQLite
 
 class SQLiteDatabaseApi : AbstractDatabaseApi(OrmliteSQLite("database.db"))

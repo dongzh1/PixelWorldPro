@@ -2,20 +2,25 @@ package com.dongzh1.pixelworldpro
 
 import com.dongzh1.pixelworldpro.commands.Commands
 import com.dongzh1.pixelworldpro.api.DatabaseApi
+import com.dongzh1.pixelworldpro.database.MysqlDatabaseApi
+import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
+import com.dongzh1.pixelworldpro.listener.TickListener
 import com.dongzh1.pixelworldpro.redis.RedisConfig
 import com.dongzh1.pixelworldpro.redis.RedisListener
+import com.dongzh1.pixelworldpro.redis.RedisManager
 import com.dongzh1.pixelworldpro.tools.CommentConfig
+import com.dongzh1.pixelworldpro.tools.RegisterListener
 import com.xbaimiao.easylib.EasyPlugin
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
+import com.xbaimiao.easylib.module.utils.registerListener
 import com.xbaimiao.easylib.module.utils.submit
 import com.xbaimiao.easylib.task.EasyLibTask
-import com.xbaimiao.template.database.MysqlDatabaseApi
-import com.xbaimiao.template.database.SQLiteDatabaseApi
+
 import org.bukkit.Bukkit
-import org.bukkit.configuration.file.YamlConfiguration
+
 import redis.clients.jedis.JedisPool
 import java.io.File
-import java.io.InputStreamReader
+
 import java.util.UUID
 
 @Suppress("unused")
@@ -33,23 +38,34 @@ class PixelWorldPro : EasyPlugin() {
     }
 
     private var lang = BuiltInConfiguration("lang/${config.getString("lang")}.yml")
-
     private val dataMap = mutableMapOf<String, String>()
-
+    private var isBungee = false
 
 
     override fun enable() {
-
-
-        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro加载中....祈祷成功")
+        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro is loading")
         instance = this
         //加载默认配置文件
         saveDefaultConfig()
-        saveConfig()
         //加载语言文件
         saveLang()
+        //更新配置文件
+        CommentConfig.updateConfig()
+        //注册全局监听
+        RegisterListener.registerAll()
+
+        if (config.getString("WorldPath") == null || config.getString("WorldPath") == "") {
+            //关闭插件
+            Bukkit.getConsoleSender().sendMessage("§cPlease set config.yml")
+            Bukkit.getConsoleSender().sendMessage("§cPlugin has been closed")
+            Bukkit.getPluginManager().disablePlugin(this)
+            return
+        }
+
         //加载redis
         if (config.getBoolean("Bungee")) {
+            isBungee = true
+            Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord")
             val redisConfig = RedisConfig(config)
             Bukkit.getConsoleSender().sendMessage("RedisInfo: " + redisConfig.host + ":" + redisConfig.port)
             jedisPool = if (redisConfig.password != null) {
@@ -62,6 +78,8 @@ class PixelWorldPro : EasyPlugin() {
                     jedis.subscribe(RedisListener(), channel)
                 }
             }
+            RedisManager.setMspt(100.0)
+            registerListener(TickListener)
         }
         //加载数据库
         if (config.getString("Database").equals("db", true)) {
@@ -69,12 +87,21 @@ class PixelWorldPro : EasyPlugin() {
         }
         if (config.getString("Database").equals("mysql", true)) {
             databaseApi = MysqlDatabaseApi()
+
         }
         //提取到内存
         databaseApi.importWorldData()
         //注册指令
         Commands().commandRoot.register()
+    }
+    override fun disable() {
 
+        //关闭redis
+        if (config.getBoolean("Bungee")) {
+            RedisManager.closeServer()
+            subscribeTask.cancel()
+            jedisPool.close()
+        }
     }
 
     fun lang(): BuiltInConfiguration {
@@ -92,9 +119,15 @@ class PixelWorldPro : EasyPlugin() {
                 CommentConfig.updateLang(lang)
             }
         }
+        reloadLang()
     }
-    fun reloadLang() {
+    private fun reloadLang() {
         lang = BuiltInConfiguration("lang/${config.getString("lang")}.yml")
+    }
+    override fun reloadConfig() {
+        super.reloadConfig()
+        reloadLang()
+        isBungee = config.getBoolean("Bungee")
     }
 
     fun setData(uuid: UUID, value: String) {
@@ -103,6 +136,12 @@ class PixelWorldPro : EasyPlugin() {
 
     fun getData(uuid: UUID): String? {
         return dataMap[uuid.toString()]
+    }
+    fun removeData(uuid: UUID) {
+        dataMap.remove(uuid.toString())
+    }
+    fun isBungee(): Boolean {
+        return isBungee
     }
 
 }
