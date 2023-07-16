@@ -1,0 +1,29 @@
+title: "重置世界"
+
+slots:
+  - 'NNNNNNNNN'
+  - '    A    '
+  - 'NNNNXNNNN'
+
+items:
+  N:
+    material: GLASS_PANE
+  A:
+    type: Confirm
+    #both/money/points/none
+    value: both
+    material: PAPER
+    name: '&a&l确认重置'
+    lore:
+      - '&f消耗金币100'
+      - '&f消耗点券100'
+  X:
+    material: BARRIER
+    name: '&c&l关闭'
+    lore:
+      - '&f点击关闭'
+    commands:
+      - '[close]'
+Confirm:
+  Money: 100.0
+  Points: 100.0

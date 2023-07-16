@@ -16,26 +16,37 @@ import java.util.UUID
 
 class RedisListener : JedisPubSub() {
 
-    private val onlineServer = mutableListOf(PixelWorldPro.instance.config.getString("ServerName"))
-    private val newOnlineServer = mutableListOf(PixelWorldPro.instance.config.getString("ServerName"))
-    init {
-        submit(async = true, period = 20L, delay = 20L) {
-            RedisManager.push("ServerOnline|,|${PixelWorldPro.instance.config.getString("ServerName")}")
-        }
-        submit(async = true, period = 80L, delay = 100L) {
-            //如果onlineServer没有数据库里的名字就删除
-            if (newOnlineServer.size < onlineServer.size){
-                for (server in onlineServer){
-                    if (!newOnlineServer.contains(server)){
-                        RedisManager.closeServer(server!!)
-                    }
+    private val onlineServer = mutableListOf(PixelWorldPro.instance.config.getString("ServerName")!!)
+    private val newOnlineServer = mutableListOf(PixelWorldPro.instance.config.getString("ServerName")!!)
+    private val push = submit(async = true, period = 20L) {
+        RedisManager.push("ServerOnline|,|${PixelWorldPro.instance.config.getString("ServerName")}")
+    }
+    private val checkServer = submit(async = true, period = 60L, delay = 60L) {
+        //如果onlineServer没有数据库里的名字就删除
+        if (newOnlineServer.size < onlineServer.size){
+            for (server in onlineServer){
+                if (!newOnlineServer.contains(server)){
+                    RedisManager.closeServer(server)
                 }
             }
-            newOnlineServer.clear()
         }
-        submit(async = true, delay = 80L) {
+        newOnlineServer.clear()
+    }
+    init {
+        submit(async = true, delay = 50L) {
+            if (onlineServer.size == 1 && onlineServer[0] == PixelWorldPro.instance.config.getString("ServerName")){
+                RedisManager.removeMspt()
+                RedisManager.removeLock()
+            }
+        }
+    }
+    fun stop(){
+        push.cancel()
+        checkServer.cancel()
+    }
 
-        }
+    fun getOnlineServer(): List<String> {
+        return onlineServer
     }
 
     override fun onMessage(channel: String?, message: String?) {
@@ -60,11 +71,22 @@ class RedisListener : JedisPubSub() {
                     }
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     val template = message.split("|,|")[2]
-                    WorldImpl().createWorldLocal(uuid, template)
+                    submit {
+                        if (WorldImpl().createWorldLocal(uuid, template)){
+                            RedisManager.push("createWorldSuccess|,|${uuid}")
+                        }
+                    }
+
+                }
+                "createWorldSuccess" ->{
+                    val uuid = UUID.fromString(message.split("|,|")[1])
+                    if (WorldImpl().getCreateWorldList().contains(uuid)){
+                        WorldImpl().removeCreateWorldList(uuid)
+                    }
                 }
                 "loadWorldGroup" ->{
                     //获取最低mspt服务器
-                    val serverName = TickListener.getLowestMsptServer()
+                    val serverName = message.split("|,|")[2]
                     //如果当前服务器为最低mspt服务器则加载世界
                     if (serverName != PixelWorldPro.instance.config.getString("ServerName")){
                         return
@@ -76,7 +98,7 @@ class RedisListener : JedisPubSub() {
 
                 }
                 "loadWorldGroupTp" -> {
-                    val serverName = TickListener.getLowestMsptServer()
+                    val serverName = message.split("|,|")[3]
                     if (serverName != PixelWorldPro.instance.config.getString("ServerName")){
                         return
                     }
@@ -95,7 +117,15 @@ class RedisListener : JedisPubSub() {
                     }
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     submit {
-                        WorldImpl().loadWorldLocal(uuid)
+                        if (WorldImpl().loadWorldLocal(uuid)){
+                            RedisManager.push("loadWorldSuccess|,|${uuid}")
+                        }
+                    }
+                }
+                "loadWorldSuccess" ->{
+                    val uuid = UUID.fromString(message.split("|,|")[1])
+                    if (WorldImpl().getLoadWorldList().contains(uuid)){
+                        WorldImpl().removeLoadWorldList(uuid)
                     }
                 }
                 "teleportUUID" ->{
@@ -159,6 +189,25 @@ class RedisListener : JedisPubSub() {
                         return
                     }else{
                         WorldImpl().setWorldBorder(world,level)
+                    }
+                }
+                "unloadWorld" ->{
+                    val uuid = UUID.fromString(message.split("|,|")[1])
+                    val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
+                    val world = Bukkit.getWorld(worldData!!.worldName)
+                    if (world == null){
+                        return
+                    }else{
+                        if (WorldImpl().unloadWorld(world)){
+                            RedisManager.push("unloadWorldBack|,|${uuid}")
+                        }
+                    }
+                }
+                "unloadWorldBack" ->{
+                    val uuid = UUID.fromString(message.split("|,|")[1])
+                    //获取要卸载是世界uuid，并移除
+                    if (WorldImpl().getUnloadWorldList().contains(uuid)){
+                        WorldImpl().removeUnloadWorldList(uuid)
                     }
                 }
                 else ->{

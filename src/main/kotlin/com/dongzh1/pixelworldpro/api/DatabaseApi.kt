@@ -1,6 +1,7 @@
 package com.dongzh1.pixelworldpro.api
 
 
+import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.database.WorldData
 import java.util.*
@@ -18,6 +19,10 @@ interface DatabaseApi {
      */
     fun getWorldData(uuid: UUID): WorldData?
     /**
+     * 删除一个世界记录
+     */
+    fun deleteWorldData(uuid: UUID)
+    /**
      * 创建或覆盖一个玩家记录,此操作为同步数据库操作
      */
     fun setPlayerData(uuid: UUID,playerData: PlayerData)
@@ -25,6 +30,11 @@ interface DatabaseApi {
      * 获取一个玩家记录，此操作为同步数据库操作
      */
     fun getPlayerData(uuid: UUID): PlayerData?
+    /**
+     * 获取所有世界记录,按照在线人数排序
+     * @param num 获取数量
+     */
+    fun getWorldDataMap(): Map<UUID,WorldData>
     /**
      * 删除一个世界记录
      */
@@ -34,6 +44,12 @@ interface DatabaseApi {
      * 将所有世界记录导入内存，一般插件加载时使用
      */
     fun importWorldData()
+    /**
+     * 返回本插件的数据库实列，方便操作数据库
+     */
+    fun getInstance():DatabaseApi{
+        return PixelWorldPro.databaseApi
+    }
 
 
 }

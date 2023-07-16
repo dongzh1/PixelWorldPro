@@ -5,17 +5,17 @@ import com.dongzh1.pixelworldpro.api.TeleportApi
 import com.dongzh1.pixelworldpro.api.WorldApi
 import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.gui.Gui
+import com.dongzh1.pixelworldpro.gui.WorldCreate
 import com.dongzh1.pixelworldpro.impl.WorldImpl
 import com.dongzh1.pixelworldpro.redis.RedisManager
+import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.command.ArgNode
 import com.xbaimiao.easylib.module.command.command
+import com.xbaimiao.easylib.module.item.giveItem
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
-import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import java.io.File
 import java.util.UUID
 
@@ -32,6 +32,14 @@ class Commands {
         }
     )
 
+    private val guiArgNode = ArgNode(lang("GuiName"),
+        exec = {
+            getGuiList()
+        }, parse = {
+            BuiltInConfiguration("gui/${it}")
+        }
+    )
+
     private val singleOnlinePlayer = ArgNode(lang("PlayerName"),
         exec = {
             //获取在线玩家名
@@ -39,6 +47,13 @@ class Commands {
         }, parse = {
             //不存在就报错没有
             Bukkit.getPlayer(it) ?: throw Exception(lang("PlayerNotFound"))
+        }
+    )
+    private val modeArgNode = ArgNode(lang("Mode"),
+        exec = {
+            listOf("anyone", "member", "owner")
+        }, parse = {
+            it
         }
     )
 
@@ -319,7 +334,7 @@ class Commands {
 
     private val blacklist = command<CommandSender>("blacklist") {
         //pixelworldpro blacklist add/remove <player> <world>
-        permission = "pixelworldpro.blacklist"
+        permission = "pixelworldpro.command.blacklist"
         exec {
             sender.sendMessage(lang("ArgNotValid"))
             return@exec
@@ -330,7 +345,7 @@ class Commands {
 
     private val members = command<CommandSender>("members") {
         // pixelworldpro members add/remove <player> <world>
-        permission = "pixelworldpro.members"
+        permission = "pixelworldpro.command.members"
         exec {
             sender.sendMessage(lang("ArgNotValid"))
             return@exec
@@ -340,7 +355,7 @@ class Commands {
     }
 
     private val load = command<CommandSender>("load") {
-        permission = "pixelworldpro.load"
+        permission = "pixelworldpro.command.load"
         exec {
             if (args.isEmpty()) {
                 //加载自己的世界
@@ -411,7 +426,7 @@ class Commands {
     }
 
     private val unload = command<Player>("unload") {
-        permission = "pixelworldpro.unload"
+        permission = "pixelworldpro.command.unload"
         exec {
             if (args.size != 0) {
                 sender.sendMessage(lang("ArgNotValid"))
@@ -428,7 +443,7 @@ class Commands {
     }
 
     private val delete = command<CommandSender>("delete") {
-        permission = "pixelworldpro.delete"
+        permission = "pixelworldpro.command.delete"
         exec {
             if (args.isEmpty()) {
                 //删除自己的世界
@@ -471,14 +486,18 @@ class Commands {
     }
 
     private val debug = command<CommandSender>("debug") {
-        permission = "pixelworldpro.debug"
+        permission = "pixelworldpro.command.debug"
         exec {
             PixelWorldPro.instance.reloadConfig()
+            val item =
+            Gui.buildItem(Gui.getWorldCreateConfig().getConfigurationSection("YX")!!,Bukkit.getOfflinePlayer("Pixel_meng"))
+            (sender as Player).giveItem(item!!)
+
         }
     }
 
     private val mspt = command<CommandSender>("mspt") {
-        permission = "pixelworldpro.mspt"
+        permission = "pixelworldpro.command.mspt"
         exec {
             if (!PixelWorldPro.instance.isBungee()) {
                 sender.sendMessage("§cNeed Bungee")
@@ -498,14 +517,14 @@ class Commands {
     }
 
     private val create = command<CommandSender>("create") {
-        fun createWorld(uuid: UUID, name: String, file: File) {
-            if (PixelWorldPro.instance.isBungee()) {
+        fun createWorld(uuid: UUID, name: String, file: File):Boolean {
+            return if (PixelWorldPro.instance.isBungee()) {
                 WorldApi.Factory.worldApi!!.createWorld(uuid, name)
             } else {
                 WorldApi.Factory.worldApi!!.createWorld(uuid, file)
             }
         }
-        permission = "pixelworldpro.create"
+        permission = "pixelworldpro.command.create"
         arg(templateArgNode) { file ->
             arg(singleOnlinePlayer, optional = true) { player ->
                 exec {
@@ -515,7 +534,12 @@ class Commands {
                             if (PixelWorldPro.databaseApi.getWorldData(uuid) != null) {
                                 sender.sendMessage(lang("AlreadyHasWorld"))
                             } else {
-                                createWorld(uuid, args[0], valueOf(file))
+                                if (createWorld(uuid, args[0], valueOf(file))){
+                                    sender.sendMessage(lang("WorldCreateSuccess"))
+                                    TeleportApi.Factory.teleportApi!!.teleport((sender as Player).uniqueId)
+                                } else {
+                                    sender.sendMessage(lang("WorldCreateFail"))
+                                }
                             }
                         } else {
                             sender.sendMessage(lang("NeedArg"))
@@ -526,17 +550,19 @@ class Commands {
                     if (PixelWorldPro.databaseApi.getWorldData(uuid) != null) {
                         sender.sendMessage(lang("OtherAlreadyHasWorld"))
                     } else {
-                        createWorld(uuid, args[0], valueOf(file))
+                        if (createWorld(uuid, args[0], valueOf(file))){
+                            sender.sendMessage(lang("WorldCreateSuccess"))
+                        } else {
+                            sender.sendMessage(lang("WorldCreateFail"))
+                        }
                     }
                 }
             }
         }
-
-
     }
 
     private val tp = command<CommandSender>("tp") {
-        permission = "pixelworldpro.tp"
+        permission = "pixelworldpro.command.tp"
         exec {
             if (args.size == 0) {
                 //传送到自己的世界
@@ -618,7 +644,7 @@ class Commands {
             }
             if(args.size == 1){
                 //权限判断
-                if (!sender.hasPermission("pixelworldpro.admin")) {
+                if (!sender.hasPermission("pixelworldpro.command.admin")) {
                     sender.sendMessage(lang("NoPermission"))
                     return@exec
                 }
@@ -654,24 +680,26 @@ class Commands {
         }
     }
 
-    val commandRoot = command<CommandSender>("pixelworldpro") {
-        permission = "pixelworldpro.use"
-        exec {
+    private val gui = command<CommandSender>("gui"){
+        permission = "pixelworldpro.command.gui"
+        arg(guiArgNode){gui ->
+            onlinePlayers(optional = true) { player ->
+                exec {
+                    if (valueOfOrNull(player) == null){
+                        Gui.open(sender as Player, valueOf(gui))
+                    }else{
+                        //打开指定玩家的gui
+                        val playerList = mutableListOf<Player>()
+                        playerList.forEach{
+                            Gui.open(it, valueOf(gui))
+                        }
+                    }
+                }
+            }
         }
-        sub(create)
-        sub(tp)
-        sub(debug)
-        sub(mspt)
-        sub(delete)
-        sub(unload)
-        sub(load)
-        sub(members)
-        sub(blacklist)
-        sub(levelup)
     }
-
     //获取指定绝对路径下的所有文件夹并将文件夹名添加到模板列表中
-    private fun getTemplateList(templateList: MutableList<String>): MutableList<String> {
+    fun getTemplateList(templateList: MutableList<String>): MutableList<String> {
         val file = File(PixelWorldPro.instance.config.getString("WorldTemplatePath")!!)
         val tempList = file.listFiles()
         if (tempList != null) {
@@ -684,9 +712,93 @@ class Commands {
         return templateList
     }
 
+    private fun getGuiList(): MutableList<String> {
+        val guiList = mutableListOf<String>()
+        val file = File(PixelWorldPro.instance.dataFolder, "gui")
+        val uiList = file.listFiles()
+        if (uiList != null) {
+            for (i in uiList.indices) {
+                if (!uiList[i].isDirectory) {
+                    guiList.add(uiList[i].name)
+                }else{
+                    val fileList = uiList[i].listFiles()
+                    if (fileList != null) {
+                        for (j in fileList.indices) {
+                            if (!fileList[j].isDirectory) {
+                                guiList.add("${uiList[i].name}/${fileList[j].name}")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return guiList
+    }
+    private val mode = command<CommandSender>("mode"){
+        permission = "pixelworldpro.command.mode"
+        arg(modeArgNode){
+            exec {
+                if(args.size ==0){
+                    if (sender !is Player) {
+                        sender.sendMessage(lang("NeedPlayer"))
+                        return@exec
+                    }
+                    val uuid = (sender as Player).uniqueId
+                    val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
+                    if (worldData == null) {
+                        sender.sendMessage(lang("WorldNotExist"))
+                        return@exec
+                    }
+                    val mode = valueOf(modeArgNode)
+
+                    //数据库更新
+                    val worldDataNew = worldData.copy(state = mode)
+                    PixelWorldPro.databaseApi.setWorldData(uuid, worldDataNew)
+                    sender.sendMessage(lang("ModeChange"))
+                }
+                if(args.size == 1){
+                    if (!sender.hasPermission("pixelworldpro.command.admin")) {
+                        sender.sendMessage(lang("NoPermission"))
+                        return@exec
+                    }
+                    val uuid = Bukkit.getOfflinePlayer(args[0]).uniqueId
+                    val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
+                    if (worldData == null) {
+                        sender.sendMessage(lang("WorldNotExist"))
+                        return@exec
+                    }
+                    val mode = valueOf(modeArgNode)
+
+                    //数据库更新
+                    val worldDataNew = worldData.copy(state = mode)
+                    PixelWorldPro.databaseApi.setWorldData(uuid, worldDataNew)
+                    sender.sendMessage(lang("ModeChange"))
+                }
+            }
+        }
+    }
+
     private fun lang(string: String): String {
         return PixelWorldPro.instance.lang().getStringColored(string)
     }
 
+    val commandRoot = command<CommandSender>("pixelworldpro") {
+        permission = "pixelworldpro.command"
+        exec {
+        }
+        sub(create)
 
+        sub(tp)
+
+        sub(debug)
+        sub(mspt)
+        sub(delete)
+        sub(unload)
+        sub(load)
+        sub(members)
+        sub(blacklist)
+        sub(levelup)
+        sub(gui)
+        sub(mode)
+    }
 }

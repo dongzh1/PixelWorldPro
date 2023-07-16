@@ -21,14 +21,12 @@ class TeleportImpl: TeleportApi {
         if (PixelWorldPro.instance.isBungee()) {
             //如果是bungee模式则发送消息到bungee
             if (serverName == null){
-
                 if (Bukkit.getPlayer(uuid) != null){
                     submit {
                         Bukkit.getPlayer(uuid)?.teleport(location)
                     }
                     return
                 }
-
                 OnPlayerJoin.add(uuid, location)
                 RedisManager.push("teleportUUID|,|$uuid|,|${PixelWorldPro.instance.config.getString("ServerName")}")
                 return

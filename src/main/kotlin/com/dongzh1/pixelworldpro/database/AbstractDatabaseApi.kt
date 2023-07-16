@@ -118,6 +118,40 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
         return data
     }
 
+    override fun deleteWorldData(uuid: UUID) {
+        //删除redis或内存中的数据
+        if (PixelWorldPro.instance.isBungee()) {
+            RedisManager.remove(uuid)
+        } else {
+            PixelWorldPro.instance.removeData(uuid)
+        }
+        //删除数据库中的数据
+        submit(async = true) {
+            val queryBuilder = dataTable.queryBuilder()
+            val dao = queryBuilder.where().eq("user", uuid).queryForFirst()!!
+            dataTable.delete(dao)
+        }
+    }
+    override fun getWorldDataMap(): MutableMap<UUID,WorldData> {
+        var map = mutableMapOf<UUID,WorldData>()
+        if (PixelWorldPro.instance.isBungee()) {
+            map = RedisManager.getWorldDataMap()
+        }else{
+            val dataMap = PixelWorldPro.instance.getDataMap()
+            for (data in dataMap){
+                val uuid = UUID.fromString(data.key)
+                val worldData = Serialize.deserialize(data.value)!!
+                map[uuid] = worldData
+            }
+            if (map.isEmpty()){
+                return map
+            }
+            //排序
+            map = map.toList().sortedBy { (_, value) -> value.onlinePlayerNumber }.toMap() as MutableMap<UUID, WorldData>
+        }
+        return map
+    }
+
     override fun removeWorldData(uuid: UUID) {
         //删除redis或内存中的数据
         if (PixelWorldPro.instance.isBungee()) {

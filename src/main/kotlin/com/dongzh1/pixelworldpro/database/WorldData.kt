@@ -7,6 +7,7 @@ data class WorldData (
     val worldLevel: String,
     val members: List<UUID>,
     val banPlayers: List<UUID>,
+    //anyone, member, owner
     val state: String,
     val createTime: String,
     val lastTime: Long,

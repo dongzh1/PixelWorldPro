@@ -2,13 +2,10 @@ package com.dongzh1.pixelworldpro.redis
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.PixelWorldPro.Companion.channel
-import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.database.WorldData
-import com.dongzh1.pixelworldpro.impl.WorldImpl
 import com.dongzh1.pixelworldpro.tools.Serialize
 import com.xbaimiao.easylib.EasyPlugin
 import com.xbaimiao.easylib.module.utils.Module
-import org.bukkit.Bukkit
 import java.util.*
 
 
@@ -32,6 +29,29 @@ object RedisManager : Module<EasyPlugin> {
             }
             return Serialize.deserialize(value)
         }
+    }
+
+    fun getWorldDataMap(): MutableMap<UUID, WorldData> {
+        val map = mutableMapOf<UUID, WorldData>()
+        jedisPool.resource.also {
+            val keys = it.keys("PixelWorldPro*-*-*-*-*")
+            for (key in keys) {
+                val value = it.get(key) ?: continue
+                val mapKey = key.replace("PixelWorldPro", "")
+                val worldData = Serialize.deserialize(value)!!
+                map[UUID.fromString(mapKey)] = worldData
+            }
+            it.close()
+        }
+        //排序,根据worldData的onlinePlayer
+        if (map.isEmpty()) {
+            return map
+        }
+        return map.toList().sortedByDescending { (_, value) -> value.onlinePlayerNumber }
+            .toMap() as MutableMap<UUID, WorldData>
+    }
+    fun getUUID(worldName:String){
+
     }
 
 
@@ -76,6 +96,31 @@ object RedisManager : Module<EasyPlugin> {
             return value
         }
     }
+    fun removeMspt() {
+        jedisPool.resource.also {
+            it.del("PixelWorldPromspt")
+            it.close()
+        }
+    }
+    fun removeLock() {
+        jedisPool.resource.also {
+            it.del("PixelWorldProlock")
+            it.close()
+        }
+    }
+    fun getMsptServerList(): List<String>? {
+        val value = getMspt() ?: return null
+        val list = mutableListOf<String>()
+        for (server in value.split(",")){
+            val serverName = server.split(":")[0]
+            if(list.contains(serverName)){
+                continue
+            }else{
+                list.add(serverName)
+            }
+        }
+        return list
+    }
 
     fun setLock(uuid: UUID) {
         val lockValue = getLock()
@@ -106,6 +151,7 @@ object RedisManager : Module<EasyPlugin> {
             return value
         }
     }
+
 
     fun removeLock(uuid: UUID) {
         val lockValue = getLock()

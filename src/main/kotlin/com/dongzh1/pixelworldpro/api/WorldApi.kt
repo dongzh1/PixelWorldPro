@@ -4,35 +4,39 @@ import com.dongzh1.pixelworldpro.impl.WorldImpl
 import org.bukkit.World
 import java.io.File
 import java.util.UUID
-
+/**
+ * 世界操作接口
+ * 所有操作都要先查询uuid对应的worldData是否存在
+ * create除外
+ */
 interface WorldApi {
     /**
-     * 根据模板文件夹名新建世界,会存储到数据库,如果玩家在线则传送
+     * 根据模板文件夹名新建世界,会存储到数据库,自行判断是否存在先
      * @param uuid 玩家uuid
      * @param templateName 模板文件夹名
      */
-    fun createWorld(uuid: UUID, templateName: String)
+    fun createWorld(uuid: UUID, templateName: String): Boolean
     /**
-     * 根据模板文件新建世界，会存储到数据库,如果玩家在线则传送
+     * 根据模板文件新建世界，会存储到数据库
      * @param uuid 玩家uuid
      * @param file 模板文件
      */
-    fun createWorld(uuid: UUID, file: File)
+    fun createWorld(uuid: UUID, file: File): Boolean
     /**
      * 卸载指定玩家世界,在玩家世界操作
      * @param world 世界
      */
     fun unloadWorld(world:World): Boolean
+/**
+     * 卸载指定玩家世界
+     * @param uuid 玩家uuid
+     */
+    fun unloadWorld(uuid: UUID): Boolean
     /**
      * 删除指定玩家世界和数据库记录
      * @param uuid 玩家uuid
      */
     fun deleteWorld(uuid: UUID): Boolean
-    /**
-     * 重置指定玩家世界
-     * @param uuid 玩家uuid
-     */
-    fun resetWorld(uuid: UUID)
     /**
      * 加载指定玩家世界,加载到指定服务器,如果服务器为null则加载到本服
      * @param uuid 玩家uuid
