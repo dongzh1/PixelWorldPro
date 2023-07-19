@@ -32,14 +32,14 @@ interface DatabaseApi {
     fun getPlayerData(uuid: UUID): PlayerData?
     /**
      * 获取所有世界记录,按照在线人数排序
-     * @param num 获取数量
      */
     fun getWorldDataMap(): Map<UUID,WorldData>
     /**
-     * 删除一个世界记录
+     * 获取所有世界UUID,按照在线人数排序
+     * @param start 开始位置
+     * @param number 获取数量
      */
-    fun removeWorldData(uuid: UUID)
-
+    fun getWorldList(start:Int,number: Int): List<UUID>
     /**
      * 将所有世界记录导入内存，一般插件加载时使用
      */

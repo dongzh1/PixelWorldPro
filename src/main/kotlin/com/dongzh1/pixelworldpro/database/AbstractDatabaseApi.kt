@@ -130,6 +130,12 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
             val queryBuilder = dataTable.queryBuilder()
             val dao = queryBuilder.where().eq("user", uuid).queryForFirst()!!
             dataTable.delete(dao)
+            val queryBuilder2 = playerTable.queryBuilder()
+            val dao2List = queryBuilder2.where().like("data", "%$uuid%").query()
+            for (dao2 in dao2List){
+                dao2.data = dao2.data.replace("$uuid,","")
+                playerTable.update(dao2)
+            }
         }
     }
     override fun getWorldDataMap(): MutableMap<UUID,WorldData> {
@@ -151,20 +157,27 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
         }
         return map
     }
-
-    override fun removeWorldData(uuid: UUID) {
-        //删除redis或内存中的数据
+    override fun getWorldList(start:Int,number: Int): List<UUID> {
+        var list = mutableListOf<UUID>()
         if (PixelWorldPro.instance.isBungee()) {
-            RedisManager.remove(uuid)
-        } else {
-            PixelWorldPro.instance.removeData(uuid)
+            list = RedisManager.getWorldList()
+        }else{
+            val dataMap = PixelWorldPro.instance.getDataMap()
+            for (data in dataMap){
+                val uuid = UUID.fromString(data.key)
+                list.add(uuid)
+            }
         }
-        //删除数据库中的数据
-        submit(async = true) {
-            val queryBuilder = dataTable.queryBuilder()
-            val dao = queryBuilder.where().eq("user", uuid).queryForFirst()!!
-            dataTable.delete(dao)
+        if (list.size < start){
+            return listOf()
         }
+        if (list.size < start + number){
+            return list.subList(start,list.size)
+        }
+        return list.subList(start,start + number)
+    }
+    override fun getInstance(): DatabaseApi {
+        return super.getInstance()
     }
     private fun redisToMysql(mapData: Map<UUID,String>){
         mapData.forEach {

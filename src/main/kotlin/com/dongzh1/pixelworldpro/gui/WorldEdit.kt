@@ -5,7 +5,6 @@ import com.dongzh1.pixelworldpro.impl.WorldImpl
 import com.dongzh1.pixelworldpro.redis.RedisManager
 import com.xbaimiao.easylib.bridge.economy.PlayerPoints
 import com.xbaimiao.easylib.bridge.economy.Vault
-import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
@@ -24,6 +23,9 @@ class WorldEdit(val player: Player) {
         }
         for(guiData in charMap){
             basic.onClick(guiData.key) {
+                if (guiData.value.commands != null) {
+                    Gui.runCommand(player, guiData.value.commands!!)
+                }
                 when(guiData.value.type){
                     "LevelUp" ->{
                         when(guiData.value.value){
@@ -112,13 +114,13 @@ class WorldEdit(val player: Player) {
                         player.closeInventory()
                     }
                     "Restart"->{
-                        //
+                        WorldRestart(player).open()
                     }
                     "Member"->{
-
+                        MembersEdit(player).open()
                     }
                     "Ban" ->{
-
+                        BanEdit(player).open()
                     }
                     "Mode" ->{
                         val worldData = PixelWorldPro.databaseApi.getWorldData(player.uniqueId)

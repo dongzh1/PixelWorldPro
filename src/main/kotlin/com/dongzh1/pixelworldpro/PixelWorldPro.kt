@@ -1,12 +1,13 @@
 package com.dongzh1.pixelworldpro
 
-import com.dongzh1.pixelworldpro.commands.Commands
 import com.dongzh1.pixelworldpro.api.DatabaseApi
+import com.dongzh1.pixelworldpro.commands.Commands
 import com.dongzh1.pixelworldpro.commands.Server
 import com.dongzh1.pixelworldpro.database.MysqlDatabaseApi
 import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
 import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.listener.OnPlayerJoin
+import com.dongzh1.pixelworldpro.listener.Permission
 import com.dongzh1.pixelworldpro.listener.TickListener
 import com.dongzh1.pixelworldpro.papi.Papi
 import com.dongzh1.pixelworldpro.redis.RedisConfig
@@ -16,18 +17,19 @@ import com.dongzh1.pixelworldpro.tools.CommentConfig
 import com.dongzh1.pixelworldpro.tools.RegisterListener
 import com.xbaimiao.easylib.EasyPlugin
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
-import com.xbaimiao.easylib.module.command.registerCommand
+import com.xbaimiao.easylib.module.utils.Module
 import com.xbaimiao.easylib.module.utils.registerListener
 import com.xbaimiao.easylib.module.utils.submit
 import com.xbaimiao.easylib.module.utils.unregisterListener
 import com.xbaimiao.easylib.task.EasyLibTask
-
+import net.luckperms.api.LuckPerms
+import net.luckperms.api.event.node.NodeAddEvent
+import net.luckperms.api.event.node.NodeRemoveEvent
 import org.bukkit.Bukkit
-
 import redis.clients.jedis.JedisPool
 import java.io.File
+import java.util.*
 
-import java.util.UUID
 
 @Suppress("unused")
 class PixelWorldPro : EasyPlugin() {
@@ -47,6 +49,7 @@ class PixelWorldPro : EasyPlugin() {
     private val dataMap = mutableMapOf<String, String>()
     private var isBungee = false
     private var redisListener: RedisListener? = null
+    private var useLuckPerm = false
 
 
     override fun enable() {
@@ -62,14 +65,6 @@ class PixelWorldPro : EasyPlugin() {
         CommentConfig.updateConfig()
         //注册全局监听
         RegisterListener.registerAll()
-
-        if (config.getString("WorldPath") == null || config.getString("WorldPath") == "") {
-            //关闭插件
-            Bukkit.getConsoleSender().sendMessage("§cPlease set config.yml")
-            Bukkit.getConsoleSender().sendMessage("§cPlugin has been closed")
-            Bukkit.getPluginManager().disablePlugin(this)
-            return
-        }
 
         //加载redis
         if (config.getBoolean("Bungee")) {
@@ -89,7 +84,9 @@ class PixelWorldPro : EasyPlugin() {
                 }
             }
             RedisManager.setMspt(100.0)
-            registerListener(TickListener)
+            if (config.getBoolean("buildWorld")) {
+                registerListener(TickListener)
+            }
             Server().commandRoot.register()
         }
         //加载数据库
@@ -104,10 +101,12 @@ class PixelWorldPro : EasyPlugin() {
         databaseApi.importWorldData()
         //注册指令
         Commands().commandRoot.register()
+
         //避免数据库未初始化玩家进入
         val initListener = OnPlayerJoin()
         registerListener(initListener)
         Papi.register()
+        registerLuckPerm()
         //等待3秒后注销事件
         submit(delay = 60) {
             unregisterListener(initListener)
@@ -149,6 +148,7 @@ class PixelWorldPro : EasyPlugin() {
         reloadLang()
         Gui.reloadConfig()
         isBungee = config.getBoolean("Bungee")
+        registerLuckPerm()
     }
 
     fun setData(uuid: UUID, value: String) {
@@ -193,6 +193,33 @@ class PixelWorldPro : EasyPlugin() {
         }
         if (!File(dataFolder, "gui/WorldRestart.yml").exists()) {
             saveResource("gui/WorldRestart.yml", false)
+        }
+    }
+    private fun registerLuckPerm(){
+        if (useLuckPerm) {
+            return
+        }
+        val memberEditConfiguration = BuiltInConfiguration("gui/MembersEdit.yml")
+        val keys = BuiltInConfiguration("gui/MembersEdit.yml").getConfigurationSection("items")!!
+            .getKeys(false)
+        for (key in keys) {
+            if (memberEditConfiguration.getString("items.$key.type") == "MemberList") {
+                if (memberEditConfiguration.getString("items.$key.value") == "permission") {
+                    useLuckPerm = true
+                }
+            }
+        }
+        if (!useLuckPerm) {
+            return
+        }
+        val provider = Bukkit.getServicesManager().getRegistration(
+            LuckPerms::class.java
+        )
+        if (provider != null) {
+            val api = provider.provider
+            //注册监听
+            api.eventBus.subscribe(this, NodeAddEvent::class.java, Permission()::permissionAdd)
+            api.eventBus.subscribe(this, NodeRemoveEvent::class.java, Permission()::permissionRemove)
         }
     }
 }

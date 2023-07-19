@@ -22,6 +22,7 @@ object Gui {
     private var worldListConfig = BuiltInConfiguration("gui/WorldList.yml")
     private var worldEditConfig = BuiltInConfiguration("gui/WorldEdit.yml")
     private var worldRestartConfig = BuiltInConfiguration("gui/WorldRestart.yml")
+    private var banEditConfig = BuiltInConfiguration("gui/BanEdit.yml")
 
     fun open(player: Player,config: BuiltInConfiguration){
         when (config.getString("guiType")){
@@ -38,6 +39,12 @@ object Gui {
                     }
                     "WorldEdit.yml" ->{
                         WorldEdit(player).open()
+                    }
+                    "WorldRestart.yml" ->{
+                        WorldRestart(player).open()
+                    }
+                    "BanEdit.yml" ->{
+                        BanEdit(player).open()
                     }
                     else ->{
                         player.sendMessage("是否更改了内置菜单的名称:"+config.file.name)
@@ -61,6 +68,9 @@ object Gui {
             "MembersEdit" ->{
                 MembersEdit(player).open(gui = "custom/${config.file.name}")
             }
+            "BanEdit" ->{
+                BanEdit(player).open(gui = "custom/${config.file.name}")
+            }
             else ->{
                 player.sendMessage("菜单guiType填写错误:"+config.getString("guiType"))
             }
@@ -83,10 +93,16 @@ object Gui {
     fun getWorldRestartConfig(): BuiltInConfiguration{
         return worldRestartConfig
     }
+    fun getBanEditConfig(): BuiltInConfiguration{
+        return banEditConfig
+    }
     fun reloadConfig(){
         membersEditConfig = BuiltInConfiguration("gui/MembersEdit.yml")
         worldCreateConfig = BuiltInConfiguration("gui/WorldCreate.yml")
         worldListConfig = BuiltInConfiguration("gui/WorldList.yml")
+        worldEditConfig = BuiltInConfiguration("gui/WorldEdit.yml")
+        worldRestartConfig = BuiltInConfiguration("gui/WorldRestart.yml")
+        banEditConfig = BuiltInConfiguration("gui/BanEdit.yml")
     }
     fun buildBaseGui(gui:String,player: Player): BasicCharMap {
         val typeValue = getTypeValue(gui,player)
@@ -124,7 +140,8 @@ object Gui {
     private fun buildItemBase(config:BuiltInConfiguration, char:Char,player: Player):ItemStack?{
 
         if (config.getString("items.$char.type") == "List"
-            || config.getString("items.$char.type") == "MemberList"){
+            || config.getString("items.$char.type") == "MemberList"
+            || config.getString("items.$char.type") == "BanList"){
             return null
         }
         val itemConfiguration = config.getConfigurationSection("items.$char")?:return null

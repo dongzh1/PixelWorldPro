@@ -116,6 +116,7 @@ class WorldImpl : WorldApi {
             setTime(world)
             //设置世界边界
             setWorldBorder(world, null)
+            world.save()
             //数据库操作
             PixelWorldPro.databaseApi.setWorldData(
                 uuid,
@@ -151,6 +152,31 @@ class WorldImpl : WorldApi {
         return true
     }
 
+    override fun restartWorld(uuid: UUID,templateName: String): Boolean {
+        if (deleteWorld(uuid)) {
+            val file = File(PixelWorldPro.instance.config.getString("WorldTemplatePath"), templateName)
+            val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
+            file.copyRecursively(File(worldPath(), worldData.worldName))
+            val world = Bukkit.createWorld(WorldCreator(worldData.worldName))
+            if (world == null) {
+                return false
+            } else {
+                //设置世界规则
+                setGamerule(world)
+                //设置世界难度
+                world.difficulty =
+                    Difficulty.valueOf(PixelWorldPro.instance.config.getString("WorldSetting.WorldDifficulty")!!)
+                //设置世界时间
+                setTime(world)
+                //设置世界边界
+                setWorldBorder(world, worldData.worldLevel)
+                world.save()
+                return true
+            }
+        }else{
+            return false
+        }
+    }
     fun worldPath(): String {
         return if (PixelWorldPro.instance.config.getString("os") == "windows") {
             "PixelWorldPro"
@@ -167,6 +193,7 @@ class WorldImpl : WorldApi {
         world.players.forEach {
             it.teleport(Bukkit.getWorlds()[0].spawnLocation)
         }
+        world.save()
         return Bukkit.unloadWorld(world, true)
     }
 
@@ -269,14 +296,25 @@ class WorldImpl : WorldApi {
                     RedisManager.removeLock(uuid)
                     false
                 } else {
+                    setTime(world)
+                    setWorldBorder(world, worldData.worldLevel)
                     true
                 }
             }
         } else {
             return if (Bukkit.getWorld(worldData.worldName) != null) {
+                setTime(Bukkit.getWorld(worldData.worldName)!!)
+                setWorldBorder(Bukkit.getWorld(worldData.worldName)!!, worldData.worldLevel)
                 true
             } else {
-                Bukkit.createWorld(WorldCreator(worldData.worldName)) != null
+                val world = Bukkit.createWorld(WorldCreator(worldData.worldName))
+                if (world == null) {
+                    false
+                } else {
+                    setTime(world)
+                    setWorldBorder(world, worldData.worldLevel)
+                    true
+                }
             }
         }
     }

@@ -25,7 +25,7 @@ items:
     value: desert
     material: PLAYER_HEAD
     #url
-    skull: a35a50a3ab62e86ac1c1502f23ed17facd423c83fb7cc5ae532d78d542486f8
+    skull: 'a35a50a3ab62e86ac1c1502f23ed17facd423c83fb7cc5ae532d78d542486f8'
     name: '&a&l沙漠模板'
     lore:
       - '&f选择此模板'
@@ -53,15 +53,16 @@ items:
   E:
     material: PLAYER_HEAD
     #value:
-    skull: eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTc5NmRlNjAxYjUxYjk4Y2VhNWI4OTk5NDRiMWE0ODcxODQ4NDAxNzRkODQ4ZjhjNTdmZTBiNDRjODQ5Y2U0MCJ9fX0=
+    skull: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTc5NmRlNjAxYjUxYjk4Y2VhNWI4OTk5NDRiMWE0ODcxODQ4NDAxNzRkODQ4ZjhjNTdmZTBiNDRjODQ5Y2U0MCJ9fX0='
     name: '&a&l下一页'
     commands:
       - '[player] pixelworldpro gui custom/customGui.yml'
 setting:
-    #money/points/both/none
+    #money/points/both/none/permission
     createUse: both
     createMoney: 100.0
     createPoints: 100.0
+    createPermission: 'pixelworldpro.worldcreate.create'
 Template:
   random: '随机模板'
   desert: '沙漠模板'

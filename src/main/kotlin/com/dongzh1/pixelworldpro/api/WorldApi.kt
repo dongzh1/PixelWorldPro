@@ -38,6 +38,11 @@ interface WorldApi {
      */
     fun deleteWorld(uuid: UUID): Boolean
     /**
+     * 重载指定玩家世界
+     * @param uuid 玩家uuid
+     */
+    fun restartWorld(uuid: UUID,templateName: String): Boolean
+    /**
      * 加载指定玩家世界,加载到指定服务器,如果服务器为null则加载到本服
      * @param uuid 玩家uuid
      * @param serverName 服务器名

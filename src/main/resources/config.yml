@@ -16,6 +16,12 @@ Bungee: false
 #填写此服在bungee配置中的名称，如果不是bungee群组，那么此项可以不管
 #Fill in the name of this server in the bungee configuration. If it is not a bungee group, this item can be ignored
 ServerName: "server1"
+#这个服务器是否会用于创建世界，如果为false,则只有指定该服创建才会在该服创建世界
+#Whether this server will be used to create the world, if false, only the specified server will create the world on this server
+buildWorld: true
+#用于在菜单按钮中开启权限判断，如果为false,则不应该在gui中配置permission选项，仅支持luckperms插件
+#Used to open permission judgment in the menu button, if false, the permission option should not be configured in the gui, only support luckperms plugin
+useLuckPerm: false
 #如果你不知道数据库对应的配置，那么只需要改host,port,database,user,passwd即可
 #If you don't know the configuration corresponding to the database, you only need to change host, port, database, user, passwd
 Mysql:
@@ -68,17 +74,6 @@ WorldSetting:
     #等级是自定义的文字,按照上下顺序进行升级,屏障范围大小为-1时,不会生成屏障
     #The level is custom text, and the upgrade is performed in the order of up and down. When the barrier range size is -1, the barrier will not be generated
     3: -1
-#一些插件对应的事件触发指令，例如创建世界时触发
-#Some plugin corresponding event trigger instructions, such as when creating a world
-EventCommand:
-  #第一次创建世界时触发
-  #Triggered when creating a world for the first time
-  CreateWorld:
-    #"player"代表玩家执行,"op"代表玩家以op权限执行,"cmd”代表控制台执行
-    #"player" represents the player to execute, "op" represents the player to execute with op permission, "cmd" represents the console to execute
-    - 'player:spawn'
-    - 'cmd:money give %player% 100'
-    - 'op:money give %player% 100'
 #插件提供papi变量的一些格式
 #Some formats of papi variables provided by the plugin
 Papi:
@@ -97,6 +92,9 @@ Papi:
   #当获取世界没有记录时的提示
   #Prompt when there is no record when getting the world
   noRecord: 'noRecord'
+  #世界的状态,开放,成员,不开放
+  #World status, open, member, not open
+
   state:
     anyone: '&a开放'
     member: '&a成员'

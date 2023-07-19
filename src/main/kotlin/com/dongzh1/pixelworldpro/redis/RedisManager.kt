@@ -50,7 +50,17 @@ object RedisManager : Module<EasyPlugin> {
         return map.toList().sortedByDescending { (_, value) -> value.onlinePlayerNumber }
             .toMap() as MutableMap<UUID, WorldData>
     }
-    fun getUUID(worldName:String){
+    fun getWorldList(): MutableList<UUID> {
+        val list = mutableListOf<UUID>()
+        jedisPool.resource.also {
+            val keys = it.keys("PixelWorldPro*-*-*-*-*")
+            for (key in keys) {
+                val mapKey = key.replace("PixelWorldPro", "")
+                list.add(UUID.fromString(mapKey))
+            }
+            it.close()
+        }
+        return list
 
     }
 

@@ -34,8 +34,9 @@ repositories {
 }
 
 dependencies {
+    compileOnly("net.luckperms:api:5.4")
     compileOnly ("com.destroystokyo.paper:paper-api:1.14.1-R0.1-SNAPSHOT")
-    implementation("com.xbaimiao:EasyLib:2.1.4")
+    implementation("com.xbaimiao:EasyLib:2.1.6")
     implementation(kotlin("stdlib-jdk8"))
 //    implementation ("de.tr7zw:item-nbt-api:2.11.2")
     implementation ("com.j256.ormlite:ormlite-core:6.1")

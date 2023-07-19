@@ -25,6 +25,7 @@ items:
 Member:
   material: PLAYER_HEAD
   name: '&a&l%player_name%'
+  skull: '%player_name%'
   lore:
     - '&f点击删除并拉黑'
 UnMember:

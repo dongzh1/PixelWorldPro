@@ -5,13 +5,11 @@ import com.dongzh1.pixelworldpro.api.TeleportApi
 import com.dongzh1.pixelworldpro.api.WorldApi
 import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.gui.Gui
-import com.dongzh1.pixelworldpro.gui.WorldCreate
 import com.dongzh1.pixelworldpro.impl.WorldImpl
 import com.dongzh1.pixelworldpro.redis.RedisManager
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.command.ArgNode
 import com.xbaimiao.easylib.module.command.command
-import com.xbaimiao.easylib.module.item.giveItem
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
@@ -153,23 +151,27 @@ class Commands {
                     sender.sendMessage(lang("PlayerAlreadyInMembers"))
                     return@exec
                 }
-                worldData = worldData.copy(members = worldData.members + player.uniqueId)
-                PixelWorldPro.databaseApi.setWorldData((sender as Player).uniqueId, worldData)
-                //指定玩家的信息也要更新
                 submit(async = true) {
-                    var playerData = PixelWorldPro.databaseApi.getPlayerData(player.uniqueId)
-                    if (playerData == null) {
-                        playerData = PlayerData(
-                            mutableListOf((sender as Player).uniqueId),
-                            Gui.getMembersEditConfig().getInt("DefaultMembersNumber")
-                        )
-                        PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData)
-                    } else {
-                        playerData =
-                            playerData.copy(joinedWorld = playerData.joinedWorld + (sender as Player).uniqueId)
-                        PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData)
+                    val playerData = PixelWorldPro.databaseApi.getPlayerData((sender as Player).uniqueId)!!
+                    if(worldData!!.members.size < playerData.memberNumber){
+                        worldData = worldData!!.copy(members = worldData!!.members + player.uniqueId)
+                        PixelWorldPro.databaseApi.setWorldData((sender as Player).uniqueId, worldData!!)
+                        var playerData1 = PixelWorldPro.databaseApi.getPlayerData(player.uniqueId)
+                        if (playerData1 == null) {
+                            playerData1 = PlayerData(
+                                mutableListOf((sender as Player).uniqueId),
+                                Gui.getMembersEditConfig().getInt("DefaultMembersNumber")
+                            )
+                            PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData1)
+                        } else {
+                            playerData1 =
+                                playerData1.copy(joinedWorld = playerData.joinedWorld + (sender as Player).uniqueId)
+                            PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData1)
+                        }
+                        sender.sendMessage(lang("Success"))
+                    }else{
+                        sender.sendMessage(lang("WorldMembersFull"))
                     }
-                    sender.sendMessage(lang("Success"))
                 }
                 return@exec
             }
@@ -202,11 +204,11 @@ class Commands {
                             mutableListOf(worldPlayer.uniqueId),
                             Gui.getMembersEditConfig().getInt("DefaultMembersNumber")
                         )
-                        PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData!!)
+                        PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData)
                     } else {
                         playerData =
-                            playerData!!.copy(joinedWorld = playerData!!.joinedWorld + worldPlayer.uniqueId)
-                        PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData!!)
+                            playerData.copy(joinedWorld = playerData.joinedWorld + worldPlayer.uniqueId)
+                        PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData)
                     }
                     sender.sendMessage(lang("Success"))
                 }
@@ -460,6 +462,7 @@ class Commands {
                 }
 
                 if (WorldApi.Factory.worldApi!!.deleteWorld(uuid)) {
+                    PixelWorldPro.databaseApi.deleteWorldData(uuid)
                     sender.sendMessage(lang("DeleteSuccess"))
                 } else {
                     sender.sendMessage(lang("DeleteFail"))
@@ -475,6 +478,7 @@ class Commands {
                     return@exec
                 }
                 if (WorldApi.Factory.worldApi!!.deleteWorld(uuid)) {
+                    PixelWorldPro.databaseApi.deleteWorldData(uuid)
                     sender.sendMessage(lang("DeleteSuccess"))
                 } else {
                     sender.sendMessage(lang("DeleteFail"))
@@ -489,10 +493,6 @@ class Commands {
         permission = "pixelworldpro.command.debug"
         exec {
             PixelWorldPro.instance.reloadConfig()
-            val item =
-            Gui.buildItem(Gui.getWorldCreateConfig().getConfigurationSection("YX")!!,Bukkit.getOfflinePlayer("Pixel_meng"))
-            (sender as Player).giveItem(item!!)
-
         }
     }
 

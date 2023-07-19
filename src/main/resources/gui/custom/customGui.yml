@@ -13,7 +13,6 @@ slots:
 items:
   N:
     material: GLASS_PANE
-    amount: 1
   X:
     material: BARRIER
     name: '&c&l关闭'

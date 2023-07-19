@@ -28,13 +28,10 @@ items:
     type: ChangeList
     #value: public/trust
     value: public
-    material: GRASS_BLOCK
-    name: '&a&l切换列表'
   A:
     type: List
-    value: list
     material: PLAYER_HEAD
-    skull: %player_name%
+    skull: '%player_name%'
     name: '&a&l进入该世界'
     lore:
       - '&f你在该世界的身份为'
@@ -58,13 +55,19 @@ items:
       - '第{page}页'
 ChangeList:
   public:
-    - '点击切换列表'
-    - '当前列表为公开列表'
-    - '下一个列表为信任列表'
+    material: GRASS_BLOCK
+    name: '&a&l公开列表'
+    lore:
+      - '点击切换列表'
+      - '当前列表为公开列表'
+      - '下一个列表为信任列表'
   trust:
-    - '点击切换列表'
-    - '当前列表为信任列表'
-    - '下一个列表为公开列表'
+    material: GRASS_BLOCK
+    name: '&a&l信任列表'
+    lore:
+      - '点击切换列表'
+      - '当前列表为信任列表'
+      - '下一个列表为公开列表'
 List:
   role:
     owner: '&c&l世界主人'
