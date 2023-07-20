@@ -92,7 +92,7 @@ class Commands {
                 return@exec
             }
             if (args.size == 2) {
-                if (!sender.hasPermission("pixelworldpro.admin")) {
+                if (!sender.hasPermission("pixelworldpro.command.admin")) {
                     sender.sendMessage(lang("NoPermission"))
                     return@exec
                 }
@@ -176,7 +176,7 @@ class Commands {
                 return@exec
             }
             if (args.size == 2) {
-                if (!sender.hasPermission("pixelworldpro.admin")) {
+                if (!sender.hasPermission("pixelworldpro.command.admin")) {
                     sender.sendMessage(lang("NoPermission"))
                     return@exec
                 }
@@ -247,7 +247,7 @@ class Commands {
                 return@exec
             }
             if (args.size == 2) {
-                if (!sender.hasPermission("pixelworldpro.admin")) {
+                if (!sender.hasPermission("pixelworldpro.command.admin")) {
                     sender.sendMessage(lang("NoPermission"))
                     return@exec
                 }
@@ -305,7 +305,7 @@ class Commands {
                 return@exec
             }
             if (args.size == 2) {
-                if (!sender.hasPermission("pixelworldpro.admin")) {
+                if (!sender.hasPermission("pixelworldpro.command.admin")) {
                     sender.sendMessage(lang("NoPermission"))
                     return@exec
                 }
@@ -395,6 +395,10 @@ class Commands {
                 return@exec
             }
             if (args.size == 1) {
+                if (!sender.hasPermission("pixelworldpro.command.admin")) {
+                    sender.sendMessage(lang("NoPermission"))
+                    return@exec
+                }
                 //加载指定玩家的世界
                 val uuid = Bukkit.getOfflinePlayer(args[0]).uniqueId
                 if (PixelWorldPro.instance.isBungee()) {
@@ -470,6 +474,10 @@ class Commands {
                 return@exec
             }
             if (args.size == 1) {
+                if (!sender.hasPermission("pixelworldpro.command.admin")) {
+                    sender.sendMessage(lang("NoPermission"))
+                    return@exec
+                }
                 //删除指定玩家的世界
                 val uuid = Bukkit.getOfflinePlayer(args[0]).uniqueId
                 val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
@@ -489,15 +497,15 @@ class Commands {
         }
     }
 
-    private val debug = command<CommandSender>("debug") {
-        permission = "pixelworldpro.command.debug"
+    private val reload = command<CommandSender>("reload") {
+        permission = "pixelworldpro.command.admin"
         exec {
             PixelWorldPro.instance.reloadConfig()
         }
     }
 
     private val mspt = command<CommandSender>("mspt") {
-        permission = "pixelworldpro.command.mspt"
+        permission = "pixelworldpro.command.admin"
         exec {
             if (!PixelWorldPro.instance.isBungee()) {
                 sender.sendMessage("§cNeed Bungee")
@@ -544,6 +552,10 @@ class Commands {
                         } else {
                             sender.sendMessage(lang("NeedArg"))
                         }
+                        return@exec
+                    }
+                    if (!sender.hasPermission("pixelworldpro.command.admin")){
+                        sender.sendMessage(lang("NoPermission"))
                         return@exec
                     }
                     val uuid = valueOf(player).uniqueId
@@ -593,9 +605,13 @@ class Commands {
                 sender.sendMessage(lang("Teleport"))
             }
             if (args.size == 2) {
+                if (!sender.hasPermission("pixelworldpro.command.admin")){
+                    sender.sendMessage(lang("NoPermission"))
+                    return@exec
+                }
                 //指定玩家传送到指定世界
-                val playeruuid = Bukkit.getOfflinePlayer(args[0]).uniqueId
-                val worlduuid = Bukkit.getOfflinePlayer(args[1]).uniqueId
+                val worlduuid = Bukkit.getOfflinePlayer(args[0]).uniqueId
+                val playeruuid = Bukkit.getOfflinePlayer(args[1]).uniqueId
                 if (PixelWorldPro.databaseApi.getWorldData(worlduuid) == null) {
                     sender.sendMessage(lang("WorldNotExist"))
                     return@exec
@@ -607,6 +623,7 @@ class Commands {
     }
 
     private val levelup = command<CommandSender>("levelup") {
+        permission = "pixelworldpro.command.levelup"
         exec {
             if(args.size == 0){
                 if (sender !is Player) {
@@ -688,6 +705,10 @@ class Commands {
                     if (valueOfOrNull(player) == null){
                         Gui.open(sender as Player, valueOf(gui))
                     }else{
+                        if (!sender.hasPermission("pixelworldpro.command.admin")){
+                            sender.sendMessage(lang("NoPermission"))
+                            return@exec
+                        }
                         //打开指定玩家的gui
                         val playerList = mutableListOf<Player>()
                         playerList.forEach{
@@ -790,7 +811,7 @@ class Commands {
 
         sub(tp)
 
-        sub(debug)
+        sub(reload)
         sub(mspt)
         sub(delete)
         sub(unload)
