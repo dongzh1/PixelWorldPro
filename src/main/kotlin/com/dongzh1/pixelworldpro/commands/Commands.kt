@@ -6,6 +6,7 @@ import com.dongzh1.pixelworldpro.api.WorldApi
 import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.impl.WorldImpl
+import com.dongzh1.pixelworldpro.online.Online
 import com.dongzh1.pixelworldpro.redis.RedisManager
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.command.ArgNode
@@ -743,20 +744,20 @@ class Commands {
     }
 
     private val gui = command<CommandSender>("gui"){
-        permission = "pixelworldpro.command.gui"
+        //permission = "pixelworldpro.command.gui"
         arg(guiArgNode){gui ->
             onlinePlayers(optional = true) { player ->
                 exec {
-                    if (valueOfOrNull(player) == null){
+                    if (valueOfOrNull(player) == null) {
                         Gui.open(sender as Player, valueOf(gui))
-                    }else{
-                        if (!sender.hasPermission("pixelworldpro.command.admin")){
+                    } else {
+                        if (!sender.hasPermission("pixelworldpro.command.admin")) {
                             sender.sendMessage(lang("NoPermission"))
                             return@exec
                         }
                         //打开指定玩家的gui
                         val playerList = mutableListOf<Player>()
-                        playerList.forEach{
+                        playerList.forEach {
                             Gui.open(it, valueOf(gui))
                         }
                     }
@@ -849,7 +850,7 @@ class Commands {
     }
 
     val commandRoot = command<CommandSender>("pixelworldpro") {
-        permission = "pixelworldpro.command"
+        //permission = "pixelworldpro.command"
         exec {
         }
         sub(create)

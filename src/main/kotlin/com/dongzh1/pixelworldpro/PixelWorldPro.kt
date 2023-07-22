@@ -6,10 +6,10 @@ import com.dongzh1.pixelworldpro.commands.Server
 import com.dongzh1.pixelworldpro.database.MysqlDatabaseApi
 import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
 import com.dongzh1.pixelworldpro.gui.Gui
-import com.dongzh1.pixelworldpro.listener.OnPlayerJoin
 import com.dongzh1.pixelworldpro.listener.OnPlayerLogin
 import com.dongzh1.pixelworldpro.listener.Permission
 import com.dongzh1.pixelworldpro.listener.TickListener
+import com.dongzh1.pixelworldpro.online.Online
 import com.dongzh1.pixelworldpro.papi.Papi
 import com.dongzh1.pixelworldpro.redis.RedisConfig
 import com.dongzh1.pixelworldpro.redis.RedisListener
@@ -18,7 +18,6 @@ import com.dongzh1.pixelworldpro.tools.CommentConfig
 import com.dongzh1.pixelworldpro.tools.RegisterListener
 import com.xbaimiao.easylib.EasyPlugin
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
-import com.xbaimiao.easylib.module.utils.Module
 import com.xbaimiao.easylib.module.utils.registerListener
 import com.xbaimiao.easylib.module.utils.submit
 import com.xbaimiao.easylib.module.utils.unregisterListener
@@ -36,6 +35,7 @@ import java.util.*
 class PixelWorldPro : EasyPlugin() {
 
     companion object {
+
         lateinit var databaseApi: DatabaseApi
         lateinit var instance: PixelWorldPro
         lateinit var jedisPool: JedisPool
@@ -46,6 +46,7 @@ class PixelWorldPro : EasyPlugin() {
         useUIModule()
     }
 
+    private var config = BuiltInConfiguration("config.yml")
     private var lang = BuiltInConfiguration("lang/${config.getString("lang")}.yml")
     private val dataMap = mutableMapOf<String, String>()
     private var isBungee = false
@@ -64,53 +65,57 @@ class PixelWorldPro : EasyPlugin() {
         saveGui()
         //更新配置文件
         CommentConfig.updateConfig()
-        //注册全局监听
-        RegisterListener.registerAll()
+        if(config.getString("token")?.let { Online.auth(it) } == true) {
+            //注册全局监听
+            RegisterListener.registerAll()
 
-        //加载redis
-        if (config.getBoolean("Bungee")) {
-            isBungee = true
-            Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord")
-            val redisConfig = RedisConfig(config)
-            Bukkit.getConsoleSender().sendMessage("RedisInfo: " + redisConfig.host + ":" + redisConfig.port)
-            jedisPool = if (redisConfig.password != null) {
-                JedisPool(redisConfig, redisConfig.host, redisConfig.port, 1000, redisConfig.password)
-            } else {
-                JedisPool(redisConfig, redisConfig.host, redisConfig.port)
-            }
-            redisListener = RedisListener()
-            subscribeTask = submit(async = true) {
-                jedisPool.resource.use { jedis ->
-                    jedis.subscribe(redisListener, channel)
+            //加载redis
+            if (config.getBoolean("Bungee")) {
+                isBungee = true
+                Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord")
+                val redisConfig = RedisConfig(config)
+                Bukkit.getConsoleSender().sendMessage("RedisInfo: " + redisConfig.host + ":" + redisConfig.port)
+                jedisPool = if (redisConfig.password != null) {
+                    JedisPool(redisConfig, redisConfig.host, redisConfig.port, 1000, redisConfig.password)
+                } else {
+                    JedisPool(redisConfig, redisConfig.host, redisConfig.port)
                 }
+                redisListener = RedisListener()
+                subscribeTask = submit(async = true) {
+                    jedisPool.resource.use { jedis ->
+                        jedis.subscribe(redisListener, channel)
+                    }
+                }
+                RedisManager.setMspt(100.0)
+                if (config.getBoolean("buildWorld")) {
+                    registerListener(TickListener)
+                }
+                Server().commandRoot.register()
             }
-            RedisManager.setMspt(100.0)
-            if (config.getBoolean("buildWorld")) {
-                registerListener(TickListener)
+            //加载数据库
+            if (config.getString("Database").equals("db", true)) {
+                databaseApi = SQLiteDatabaseApi()
             }
-            Server().commandRoot.register()
-        }
-        //加载数据库
-        if (config.getString("Database").equals("db", true)) {
-            databaseApi = SQLiteDatabaseApi()
-        }
-        if (config.getString("Database").equals("mysql", true)) {
-            databaseApi = MysqlDatabaseApi()
+            if (config.getString("Database").equals("mysql", true)) {
+                databaseApi = MysqlDatabaseApi()
 
-        }
-        //提取到内存
-        databaseApi.importWorldData()
-        //注册指令
-        Commands().commandRoot.register()
+            }
+            //提取到内存
+            databaseApi.importWorldData()
+            //注册指令
+            Commands().commandRoot.register()
 
-        //避免数据库未初始化玩家进入
-        val initListener = OnPlayerLogin()
-        registerListener(initListener)
-        Papi.register()
-        registerLuckPerm()
-        //等待3秒后注销事件
-        submit(delay = 60) {
-            unregisterListener(initListener)
+            //避免数据库未初始化玩家进入
+            val initListener = OnPlayerLogin()
+            registerListener(initListener)
+            Papi.register()
+            registerLuckPerm()
+            //等待3秒后注销事件
+            submit(delay = 60) {
+                unregisterListener(initListener)
+            }
+        }else{
+            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro Invalid token")
         }
     }
     override fun disable() {
@@ -126,6 +131,9 @@ class PixelWorldPro : EasyPlugin() {
 
     fun lang(): BuiltInConfiguration {
         return lang
+    }
+    private fun gettoken(): String? {
+        return config.getString("token")
     }
     private fun saveLang() {
         val langs = listOf(

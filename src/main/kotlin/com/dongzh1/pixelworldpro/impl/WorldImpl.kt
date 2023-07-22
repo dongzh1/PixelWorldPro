@@ -377,7 +377,7 @@ object WorldImpl : WorldApi {
         RedisManager.push("loadWorldGroupTp|,|$world|,|$player|,|${TickListener.getLowestMsptServer()}")
     }
 
-    private fun lang(string: String): String {
+    fun lang(string: String): String {
         return PixelWorldPro.instance.lang().getStringColored(string)
     }
 
