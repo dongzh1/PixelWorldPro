@@ -37,6 +37,7 @@ class RedisListener : JedisPubSub() {
             if (onlineServer.size == 1 && onlineServer[0] == PixelWorldPro.instance.config.getString("ServerName")){
                 RedisManager.removeMspt()
                 RedisManager.removeLock()
+                RedisManager.setMspt(100.0)
             }
         }
     }
@@ -72,7 +73,7 @@ class RedisListener : JedisPubSub() {
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     val template = message.split("|,|")[2]
                     submit {
-                        if (WorldImpl().createWorldLocal(uuid, template)){
+                        if (WorldImpl.createWorldLocal(uuid, template)){
                             RedisManager.push("createWorldSuccess|,|${uuid}")
                         }
                     }
@@ -80,8 +81,8 @@ class RedisListener : JedisPubSub() {
                 }
                 "createWorldSuccess" ->{
                     val uuid = UUID.fromString(message.split("|,|")[1])
-                    if (WorldImpl().getCreateWorldList().contains(uuid)){
-                        WorldImpl().removeCreateWorldList(uuid)
+                    if (WorldImpl.getCreateWorldList().contains(uuid)){
+                        WorldImpl.removeCreateWorldList(uuid)
                     }
                 }
                 "loadWorldGroup" ->{
@@ -93,7 +94,7 @@ class RedisListener : JedisPubSub() {
                     }
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     submit {
-                        WorldImpl().loadWorldLocal(uuid)
+                        WorldImpl.loadWorldLocal(uuid)
                     }
 
                 }
@@ -104,7 +105,7 @@ class RedisListener : JedisPubSub() {
                     }
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     submit {
-                        if (WorldImpl().loadWorldLocal(uuid)){
+                        if (WorldImpl.loadWorldLocal(uuid)){
                             val playerUuid = UUID.fromString(message.split("|,|")[2])
                             TeleportApi.Factory.teleportApi!!.teleport(playerUuid,uuid)
                         }
@@ -117,15 +118,15 @@ class RedisListener : JedisPubSub() {
                     }
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     submit {
-                        if (WorldImpl().loadWorldLocal(uuid)){
+                        if (WorldImpl.loadWorldLocal(uuid)){
                             RedisManager.push("loadWorldSuccess|,|${uuid}")
                         }
                     }
                 }
                 "loadWorldSuccess" ->{
                     val uuid = UUID.fromString(message.split("|,|")[1])
-                    if (WorldImpl().getLoadWorldList().contains(uuid)){
-                        WorldImpl().removeLoadWorldList(uuid)
+                    if (WorldImpl.getLoadWorldList().contains(uuid)){
+                        WorldImpl.removeLoadWorldList(uuid)
                     }
                 }
                 "teleportUUID" ->{
@@ -188,7 +189,7 @@ class RedisListener : JedisPubSub() {
                     if (world == null){
                         return
                     }else{
-                        WorldImpl().setWorldBorder(world,level)
+                        WorldImpl.setWorldBorder(world,level)
                     }
                 }
                 "unloadWorld" ->{
@@ -198,7 +199,7 @@ class RedisListener : JedisPubSub() {
                     if (world == null){
                         return
                     }else{
-                        if (WorldImpl().unloadWorld(world)){
+                        if (WorldImpl.unloadWorld(world)){
                             RedisManager.push("unloadWorldBack|,|${uuid}")
                         }
                     }
@@ -206,8 +207,8 @@ class RedisListener : JedisPubSub() {
                 "unloadWorldBack" ->{
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     //获取要卸载是世界uuid，并移除
-                    if (WorldImpl().getUnloadWorldList().contains(uuid)){
-                        WorldImpl().removeUnloadWorldList(uuid)
+                    if (WorldImpl.getUnloadWorldList().contains(uuid)){
+                        WorldImpl.removeUnloadWorldList(uuid)
                     }
                 }
                 else ->{

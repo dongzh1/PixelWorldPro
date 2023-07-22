@@ -168,7 +168,7 @@ object RedisManager : Module<EasyPlugin> {
         if (lockValue == null){
             return
         }else{
-            if (lockValue.contains("${uuid},")){
+            if (lockValue.contains("$uuid")){
                 jedisPool.resource.also {
                     it.set("PixelWorldProlock", lockValue.replace("${uuid}:${PixelWorldPro.instance.config.getString("ServerName")},",""))
                     it.close()

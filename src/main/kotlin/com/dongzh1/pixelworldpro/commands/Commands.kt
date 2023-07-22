@@ -16,6 +16,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.io.File
 import java.util.UUID
+import java.util.concurrent.CompletableFuture
 
 @Suppress("DEPRECATION")
 class Commands {
@@ -77,6 +78,11 @@ class Commands {
                     sender.sendMessage(lang("PlayerNotInMembers"))
                     return@exec
                 }
+                //如果是owner则不能删除
+                if ((sender as Player).uniqueId == player.uniqueId) {
+                    sender.sendMessage(lang("PlayerIsOwner"))
+                    return@exec
+                }
                 worldData = worldData.copy(members = worldData.members - player.uniqueId)
                 PixelWorldPro.databaseApi.setWorldData((sender as Player).uniqueId, worldData)
                 //指定玩家的信息也要更新
@@ -106,6 +112,11 @@ class Commands {
                 //世界成员中是否有这个玩家
                 if (!worldData.members.contains(player.uniqueId)) {
                     sender.sendMessage(lang("PlayerNotInMembers"))
+                    return@exec
+                }
+                //如果是owner则不能删除
+                if (worldPlayer.uniqueId == player.uniqueId) {
+                    sender.sendMessage(lang("PlayerIsOwner"))
                     return@exec
                 }
                 PixelWorldPro.databaseApi.setWorldData(
@@ -141,6 +152,10 @@ class Commands {
                     return@exec
                 }
                 val player = Bukkit.getOfflinePlayer(args[0])
+                if(player.name == null){
+                    sender.sendMessage(lang("PlayerNotFound"))
+                    return@exec
+                }
                 var worldData = PixelWorldPro.databaseApi.getWorldData((sender as Player).uniqueId)
                 if (worldData == null) {
                     sender.sendMessage(lang("WorldNotExist"))
@@ -181,6 +196,10 @@ class Commands {
                     return@exec
                 }
                 val player = Bukkit.getOfflinePlayer(args[0])
+                if(player.name == null){
+                    sender.sendMessage(lang("PlayerNotFound"))
+                    return@exec
+                }
                 val worldPlayer = Bukkit.getOfflinePlayer(args[1])
                 val worldData = PixelWorldPro.databaseApi.getWorldData(worldPlayer.uniqueId)
                 if (worldData == null) {
@@ -288,6 +307,10 @@ class Commands {
                     return@exec
                 }
                 val player = Bukkit.getOfflinePlayer(args[0])
+                if(player.name == null){
+                    sender.sendMessage(lang("PlayerNotFound"))
+                    return@exec
+                }
                 var worldData = PixelWorldPro.databaseApi.getWorldData((sender as Player).uniqueId)
                 if (worldData == null) {
                     sender.sendMessage(lang("WorldNotExist"))
@@ -296,6 +319,11 @@ class Commands {
                 //把指定玩家加入到世界黑名单
                 if (worldData.banPlayers.contains(player.uniqueId)) {
                     sender.sendMessage(lang("PlayerAlreadyInBlackList"))
+                    return@exec
+                }
+                //如果是owner则不能加入黑名单
+                if ((sender as Player).uniqueId == player.uniqueId) {
+                    sender.sendMessage(lang("PlayerIsOwner"))
                     return@exec
                 }
                 worldData = worldData.copy(banPlayers = worldData.banPlayers + player.uniqueId)
@@ -310,6 +338,10 @@ class Commands {
                     return@exec
                 }
                 val player = Bukkit.getOfflinePlayer(args[0])
+                if(player.name == null){
+                    sender.sendMessage(lang("PlayerNotFound"))
+                    return@exec
+                }
                 val worldPlayer = Bukkit.getOfflinePlayer(args[1])
                 val worldData = PixelWorldPro.databaseApi.getWorldData(worldPlayer.uniqueId)
                 if (worldData == null) {
@@ -386,10 +418,12 @@ class Commands {
                 }
 
                 submit {
-                    if (WorldApi.Factory.worldApi!!.loadWorld(uuid, null)) {
-                        sender.sendMessage(lang("LoadSuccess"))
-                    } else {
-                        sender.sendMessage(lang("LoadFail"))
+                    WorldApi.Factory.worldApi!!.loadWorld(uuid, null).thenApply {
+                        if (it) {
+                            sender.sendMessage(lang("LoadSuccess"))
+                        } else {
+                            sender.sendMessage(lang("LoadFail"))
+                        }
                     }
                 }
                 return@exec
@@ -419,10 +453,12 @@ class Commands {
                     }
                 }
                 submit {
-                    if (WorldApi.Factory.worldApi!!.loadWorld(uuid, null)) {
-                        sender.sendMessage(lang("LoadSuccess"))
-                    } else {
-                        sender.sendMessage(lang("LoadFail"))
+                    WorldApi.Factory.worldApi!!.loadWorld(uuid, null).thenApply {
+                        if (it) {
+                            sender.sendMessage(lang("LoadSuccess"))
+                        } else {
+                            sender.sendMessage(lang("LoadFail"))
+                        }
                     }
                 }
                 return@exec
@@ -465,11 +501,13 @@ class Commands {
                     return@exec
                 }
 
-                if (WorldApi.Factory.worldApi!!.deleteWorld(uuid)) {
-                    PixelWorldPro.databaseApi.deleteWorldData(uuid)
-                    sender.sendMessage(lang("DeleteSuccess"))
-                } else {
-                    sender.sendMessage(lang("DeleteFail"))
+                WorldApi.Factory.worldApi!!.deleteWorld(uuid).thenApply {
+                    if (it){
+                        PixelWorldPro.databaseApi.deleteWorldData(uuid)
+                        sender.sendMessage(lang("DeleteSuccess"))
+                    }else{
+                        sender.sendMessage(lang("DeleteFail"))
+                    }
                 }
                 return@exec
             }
@@ -485,11 +523,13 @@ class Commands {
                     sender.sendMessage(lang("WorldNotExist"))
                     return@exec
                 }
-                if (WorldApi.Factory.worldApi!!.deleteWorld(uuid)) {
-                    PixelWorldPro.databaseApi.deleteWorldData(uuid)
-                    sender.sendMessage(lang("DeleteSuccess"))
-                } else {
-                    sender.sendMessage(lang("DeleteFail"))
+                WorldApi.Factory.worldApi!!.deleteWorld(uuid).thenApply {
+                    if (it){
+                        PixelWorldPro.databaseApi.deleteWorldData(uuid)
+                        sender.sendMessage(lang("DeleteSuccess"))
+                    }else{
+                        sender.sendMessage(lang("DeleteFail"))
+                    }
                 }
                 return@exec
             }
@@ -525,7 +565,7 @@ class Commands {
     }
 
     private val create = command<CommandSender>("create") {
-        fun createWorld(uuid: UUID, name: String, file: File):Boolean {
+        fun createWorld(uuid: UUID, name: String, file: File): CompletableFuture<Boolean> {
             return if (PixelWorldPro.instance.isBungee()) {
                 WorldApi.Factory.worldApi!!.createWorld(uuid, name)
             } else {
@@ -542,11 +582,13 @@ class Commands {
                             if (PixelWorldPro.databaseApi.getWorldData(uuid) != null) {
                                 sender.sendMessage(lang("AlreadyHasWorld"))
                             } else {
-                                if (createWorld(uuid, args[0], valueOf(file))){
-                                    sender.sendMessage(lang("WorldCreateSuccess"))
-                                    TeleportApi.Factory.teleportApi!!.teleport((sender as Player).uniqueId)
-                                } else {
-                                    sender.sendMessage(lang("WorldCreateFail"))
+                                createWorld(uuid, args[0], valueOf(file)).thenApply {
+                                    if (it){
+                                        sender.sendMessage(lang("WorldCreateSuccess"))
+                                        TeleportApi.Factory.teleportApi!!.teleport((sender as Player).uniqueId)
+                                    }else{
+                                        sender.sendMessage(lang("WorldCreateFail"))
+                                    }
                                 }
                             }
                         } else {
@@ -562,10 +604,13 @@ class Commands {
                     if (PixelWorldPro.databaseApi.getWorldData(uuid) != null) {
                         sender.sendMessage(lang("OtherAlreadyHasWorld"))
                     } else {
-                        if (createWorld(uuid, args[0], valueOf(file))){
-                            sender.sendMessage(lang("WorldCreateSuccess"))
-                        } else {
-                            sender.sendMessage(lang("WorldCreateFail"))
+                        createWorld(uuid, args[0], valueOf(file)).thenApply {
+                            if (it){
+                                sender.sendMessage(lang("WorldCreateSuccess"))
+                                TeleportApi.Factory.teleportApi!!.teleport((sender as Player).uniqueId, uuid)
+                            }else{
+                                sender.sendMessage(lang("WorldCreateFail"))
+                            }
                         }
                     }
                 }
@@ -654,7 +699,7 @@ class Commands {
                     val world = Bukkit.getWorld(worldData.worldName)
                     if (world != null) {
                         //世界边界更新
-                        WorldImpl().setWorldBorder(world, nextLevel)
+                        WorldImpl.setWorldBorder(world, nextLevel)
                     }
                 }
                 sender.sendMessage(lang("LevelUp"))
@@ -689,7 +734,7 @@ class Commands {
                     val world = Bukkit.getWorld(worldData.worldName)
                     if (world != null) {
                         //世界边界更新
-                        WorldImpl().setWorldBorder(world, nextLevel)
+                        WorldImpl.setWorldBorder(world, nextLevel)
                     }
                 }
                 sender.sendMessage(lang("LevelUp"))

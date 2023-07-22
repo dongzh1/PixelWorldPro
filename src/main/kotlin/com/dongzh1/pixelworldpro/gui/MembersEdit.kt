@@ -59,6 +59,9 @@ class MembersEdit(val player: Player) {
 
         val worldData = PixelWorldPro.databaseApi.getWorldData(player.uniqueId)
         val memberUUIDList = worldData?.members
+        if (memberUUIDList?.contains(player.uniqueId) == true){
+            (memberUUIDList as MutableList).remove(player.uniqueId)
+        }
         val slotsList = basic.getSlots(char)
         var i = 0
         //填充成员列表
@@ -68,10 +71,7 @@ class MembersEdit(val player: Player) {
                     val memberUUID = memberUUIDList[i]
                     val member = Bukkit.getOfflinePlayer(memberUUID)
                     val memberConfig = config.getConfigurationSection("Member")!!
-                    memberConfig.set("name",memberConfig.getString("name")?.colored()?.replacePlaceholder(member))
-                    memberConfig.set("lore",memberConfig.getStringList("lore").colored().replacePlaceholder(member))
-                    memberConfig.set("skull",memberConfig.getString("skull")?.colored()?.replacePlaceholder(member))
-                    val item = XItemStack.deserialize(memberConfig)
+                    val item = Gui.buildItem(memberConfig,member)!!
                     basic.set(slot,item)
                     memberMap[slot] = memberUUID
                 }
@@ -79,10 +79,7 @@ class MembersEdit(val player: Player) {
                 continue
             }
             val unMemberConfig = config.getConfigurationSection("UnMember")!!
-            unMemberConfig.set("name",unMemberConfig.getString("name")?.colored()?.replacePlaceholder(player))
-            unMemberConfig.set("lore",unMemberConfig.getStringList("lore").colored().replacePlaceholder(player))
-            unMemberConfig.set("skull",unMemberConfig.getString("skull")?.colored()?.replacePlaceholder(player))
-            val item = XItemStack.deserialize(unMemberConfig)
+            val item = Gui.buildItem(unMemberConfig,player)!!
             basic.set(slot,item)
             unlockList.add(slot)
         }

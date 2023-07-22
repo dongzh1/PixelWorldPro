@@ -57,9 +57,7 @@ class WorldList(val player: Player) {
                     val item = basic.items[guiData.key]?:continue
                     val meta = item.itemMeta
                     meta.setDisplayName(meta.displayName.replace("{page}", page.toString()))
-                    val lore = meta.lore
-                    if (lore != null)
-                        Collections.replaceAll(lore, "{page}", page.toString())
+                    val lore = meta.lore?.map { it.replace("{page}", page.toString()) }?.toMutableList()
                     meta.lore = lore
                     item.itemMeta = meta
                     basic.set(guiData.key, item)
@@ -70,13 +68,19 @@ class WorldList(val player: Player) {
                         fillListMap(player, true, page)
                         basic.set(
                             guiData.key,
-                            XItemStack.deserialize(config.getConfigurationSection("ChangeList.trust")!!)
+                            Gui.buildItem(
+                                config.getConfigurationSection("ChangeList.trust")!!,
+                                player
+                            ) ?: continue
                         )
                     } else {
                         fillListMap(player, false, page)
                         basic.set(
                             guiData.key,
-                            XItemStack.deserialize(config.getConfigurationSection("ChangeList.public")!!)
+                            Gui.buildItem(
+                                config.getConfigurationSection("ChangeList.public")!!,
+                                player
+                            ) ?: continue
                         )
                     }
                 }
@@ -88,12 +92,18 @@ class WorldList(val player: Player) {
                     if (isTrust) {
                         basic.set(
                             guiData.key,
-                            XItemStack.deserialize(config.getConfigurationSection("ChangeList.trust")!!)
+                            Gui.buildItem(
+                                config.getConfigurationSection("ChangeList.trust")!!,
+                                player
+                            ) ?: continue
                         )
                     } else {
                         basic.set(
                             guiData.key,
-                            XItemStack.deserialize(config.getConfigurationSection("ChangeList.public")!!)
+                            Gui.buildItem(
+                                config.getConfigurationSection("ChangeList.public")!!,
+                                player
+                            ) ?: continue
                         )
                     }
                     break
@@ -108,6 +118,9 @@ class WorldList(val player: Player) {
             val worldData = PixelWorldPro.databaseApi.getWorldData(list.value) ?: continue
             val worldOwner = Bukkit.getOfflinePlayer(list.value)
             val listConfig = configCustom.getConfigurationSection("items.$listChar")!!
+            val name = listConfig.getString("name")
+            val lore = listConfig.getStringList("lore")
+            val skull = listConfig.getString("skull")
             listConfig.set("name", listConfig.getString("name")?.replacePlaceholder(worldOwner).colored())
 
             if (list.value == player.uniqueId)
@@ -125,19 +138,26 @@ class WorldList(val player: Player) {
             listConfig.set("lore", listConfig.getStringList("lore").replacePlaceholder(worldOwner).colored())
 
             if (list.value == player.uniqueId)
-                listConfig.set("lore",Collections.replaceAll(listConfig.getStringList("lore"),
-                "{role}",config.getStringColored("List.role.owner")))
+                listConfig.set("lore",listConfig.getStringList("lore").map {
+                    it.replace("{role}",config.getStringColored("List.role.owner"))
+                })
             if (worldData.banPlayers.contains(player.uniqueId))
-                listConfig.set("lore",Collections.replaceAll(listConfig.getStringList("lore"),
-                "{role}",config.getStringColored("List.role.ban")))
+                listConfig.set("lore",listConfig.getStringList("lore").map {
+                    it.replace("{role}",config.getStringColored("List.role.ban"))
+                })
             if (worldData.members.contains(player.uniqueId))
-                listConfig.set("lore",Collections.replaceAll(listConfig.getStringList("lore"),
-                "{role}",config.getStringColored("List.role.member")))
-            listConfig.set("lore",Collections.replaceAll(listConfig.getStringList("lore"),
-                "{role}",config.getStringColored("List.role.visitor")))
+                listConfig.set("lore",listConfig.getStringList("lore").map {
+                    it.replace("{role}",config.getStringColored("List.role.member"))
+                })
+            listConfig.set("lore",listConfig.getStringList("lore").map {
+                it.replace("{role}",config.getStringColored("List.role.visitor"))
+            })
 
             listConfig.set("skull", listConfig.getString("skull")?.replacePlaceholder(worldOwner).colored())
             val item = XItemStack.deserialize(listConfig)
+            listConfig.set("name", name)
+            listConfig.set("lore", lore)
+            listConfig.set("skull", skull)
             basic.set(list.key, item)
         }
         return BasicCharMap(basic, charMap)
@@ -233,6 +253,10 @@ class WorldList(val player: Player) {
             }
         } else {
             val worldList = PixelWorldPro.databaseApi.getWorldList(start, intList.size) as MutableList<UUID>
+            if (worldList.isEmpty()) {
+                isLastPage = true
+                return
+            }
             if (worldList.size > intList.size) {
                 //数据超过这一页能显示的内容，不是最后一页，截取本页显示内容
                 for (slot in intList) {

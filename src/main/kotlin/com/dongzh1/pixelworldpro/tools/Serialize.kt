@@ -11,8 +11,8 @@ object Serialize {
     fun serialize(worldData: WorldData): String {
         return "${worldData.worldName},|.|," +
                 "${worldData.worldLevel},|.|," +
-                "${worldData.members.joinToString(",")},|.|," +
-                "${worldData.banPlayers.joinToString(",")},|.|," +
+                "${worldData.members.joinToString(",")},,|.|," +
+                "${worldData.banPlayers.joinToString(",")},,|.|," +
                 "${worldData.state},|.|," +
                 "${worldData.createTime},|.|," +
                 "${worldData.lastTime},|.|," +
@@ -27,15 +27,17 @@ object Serialize {
         }
 
         val list = value.split(",|.|,")
-        val members = if (list[2].split(",").size == 1 && list[2].split(",")[0] == "") {
+        val members = if ((list[2].split(",").size == 1 && list[2].split(",")[0] == "")||
+            (list[2].split(",").size == 2 && list[2].split(",")[1] == ""&&list[2].split(",")[0] == "")) {
             mutableListOf<UUID>()
         } else {
-            list[2].split(",").map { UUID.fromString(it) }
+            list[2].split(",").dropLast(1).map{ UUID.fromString(it) }
         }
-        val banPlayers = if (list[3].split(",").size == 1 && list[3].split(",")[0] == "") {
+        val banPlayers = if ((list[3].split(",").size == 1 && list[3].split(",")[0] == "")||
+            (list[3].split(",").size == 2 && list[3].split(",")[1] == ""&&list[3].split(",")[0] == "")) {
             mutableListOf<UUID>()
         } else {
-            list[3].split(",").map { UUID.fromString(it) }
+            list[3].split(",").dropLast(1).map { UUID.fromString(it) }
         }
         return WorldData(
             worldName = list[0],
@@ -52,7 +54,7 @@ object Serialize {
     }
 
     fun serializePlayerData(playerData: PlayerData): String {
-        return "${playerData.joinedWorld.joinToString(",")},|.|," +
+        return "${playerData.joinedWorld.joinToString(",")},,|.|," +
                 "${playerData.memberNumber}"
     }
     fun deserializePlayerData(value: String?): PlayerData? {
@@ -61,10 +63,12 @@ object Serialize {
         }
 
         val list = value.split(",|.|,")
-        val joinedWorld = if (list[0].split(",").size == 1 && list[0].split(",")[0] == "") {
+        val joinedWorld = if ((list[0].split(",").size == 1 && list[0].split(",")[0] == "")||
+            (list[0].split(",").size == 2 && list[0].split(",")[1] == ""&&list[0].split(",")[0] == "")) {
             mutableListOf<UUID>()
         } else {
-            list[0].split(",").map { UUID.fromString(it) }
+            //去掉最后一个
+            list[0].split(",").dropLast(1).map { UUID.fromString(it) }
         }
         return PlayerData(
             joinedWorld = joinedWorld,

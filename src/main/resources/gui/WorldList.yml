@@ -38,7 +38,7 @@ items:
       - '&f{role}'
       - '&f该世界主人%player_name%'
       - '&f该世界创建时间%pixelworldpro_createtime%'
-      - '&f该世界等级%pixelworldpro_leve%'
+      - '&f该世界等级%pixelworldpro_worldlevel%'
   U:
     type: Page
     value: back

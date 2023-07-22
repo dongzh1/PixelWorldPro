@@ -55,7 +55,7 @@ class TeleportImpl: TeleportApi {
                     RedisManager.push("teleportWorld|,|${uuid}|,|${worldData.worldName}")
                 }else{
                     //加载世界再传送玩家
-                    WorldImpl().loadWorldGroupTp(playerUuid,uuid)
+                    WorldImpl.loadWorldGroupTp(playerUuid,uuid)
                 }
             }else{
                 //如果是本地模式则直接传送

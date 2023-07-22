@@ -107,7 +107,7 @@ class WorldEdit(val player: Player) {
                             val world = Bukkit.getWorld(worldData.worldName)
                             if (world != null) {
                                 //世界边界更新
-                                WorldImpl().setWorldBorder(world, nextLevel)
+                                WorldImpl.setWorldBorder(world, nextLevel)
                             }
                         }
                         player.sendMessage(lang("LevelUp"))
@@ -157,10 +157,18 @@ class WorldEdit(val player: Player) {
                             player.closeInventory()
                             return@onClick
                         }
-                        WorldImpl().deleteWorld(player.uniqueId)
-                        PixelWorldPro.databaseApi.deleteWorldData(player.uniqueId)
-                        player.sendMessage(lang("DeleteSuccess"))
-                        player.closeInventory()
+                        WorldImpl.deleteWorld(player.uniqueId).thenApply {
+                            if (it){
+                                PixelWorldPro.databaseApi.deleteWorldData(player.uniqueId)
+                                player.sendMessage(lang("DeleteSuccess"))
+                                player.closeInventory()
+                            }else{
+                                player.sendMessage(lang("DeleteFail"))
+                                player.closeInventory()
+                            }
+                        }
+
+
                     }
                     else ->{
                     }

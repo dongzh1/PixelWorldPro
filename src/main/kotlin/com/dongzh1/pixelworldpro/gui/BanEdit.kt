@@ -4,12 +4,11 @@ import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import java.util.Collections
 import java.util.UUID
 
 class BanEdit(val player: Player) {
     private val banSlots = mutableMapOf<Int,UUID>()
-    private fun build(page:Int =1,gui: String = "MembersEdit.yml"):BasicCharMap{
+    private fun build(page:Int =1,gui: String = "BanEdit.yml"):BasicCharMap{
         val basicCharMap = Gui.buildBaseGui(gui,player)
         val basic = basicCharMap.basic
         val charMap = basicCharMap.charMap
@@ -20,10 +19,9 @@ class BanEdit(val player: Player) {
             if (guiData.value.type == "Page"){
                 val item = basic.items[guiData.key] ?: continue
                 val itemMeta = item.itemMeta ?: continue
-                if (itemMeta.lore != null){
-                    val lore = itemMeta.lore!!
-                    Collections.replaceAll(lore,"{page}",page.toString())
-                    item.lore = lore
+                if (itemMeta.hasLore()){
+                    val lore = itemMeta.lore!!.map { it.replace("{page}",page.toString()) }
+                    itemMeta.lore = lore
                 }
                 itemMeta.setDisplayName(itemMeta.displayName.replace("{page}",page.toString()))
                 item.itemMeta = itemMeta
@@ -35,6 +33,8 @@ class BanEdit(val player: Player) {
                 banList = banList.drop((page-1)*slots.size)
                 banSlots.clear()
                 for (slot in slots){
+                    if (banList.isEmpty())
+                        break
                     val banPlayer = Bukkit.getOfflinePlayer(banList[0])
                     banList = banList.drop(1)
                     val item = Gui.buildItem(config.getConfigurationSection("items.${guiData.key}")!!,banPlayer)?:continue
@@ -45,7 +45,7 @@ class BanEdit(val player: Player) {
         }
         return BasicCharMap(basic,charMap)
     }
-    fun open(page: Int=1,gui: String = "MembersEdit.yml"){
+    fun open(page: Int=1,gui: String = "BanEdit.yml"){
         val basicCharMap = build(page,gui)
         val basic = basicCharMap.basic
         val charMap = basicCharMap.charMap

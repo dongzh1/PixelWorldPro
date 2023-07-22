@@ -4,8 +4,6 @@ package com.dongzh1.pixelworldpro.impl
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 
-import com.dongzh1.pixelworldpro.api.MessageApi
-import com.dongzh1.pixelworldpro.api.TeleportApi
 import com.dongzh1.pixelworldpro.api.WorldApi
 import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.database.WorldData
@@ -18,11 +16,10 @@ import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.*
 import java.io.File
 import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
+import java.util.concurrent.CompletableFuture
 
-class WorldImpl : WorldApi {
+object WorldImpl : WorldApi {
     private val unloadWorldList: MutableList<UUID> = mutableListOf()
     private val createWorldList: MutableList<UUID> = mutableListOf()
     private val loadWorldList: MutableList<UUID> = mutableListOf()
@@ -30,21 +27,30 @@ class WorldImpl : WorldApi {
     /**
      * 根据模板文件夹名新建世界,如果玩家在线则传送
      */
-    override fun createWorld(uuid: UUID, templateName: String): Boolean {
-        var isSuccess = false
+    override fun createWorld(uuid: UUID, templateName: String): CompletableFuture<Boolean> {
 
         if (PixelWorldPro.instance.isBungee()) {
             createWorldList.add(uuid)
-            //如果是bungee模式则发送消息到bungee
-            RedisManager.push("createWorld|,|$uuid|,|$templateName")
-            submit(period = 2L, maxRunningNum = 100) {
+            val future = CompletableFuture<Boolean>()
+            //查询是否创建成功
+            var i = 0
+            submit(async = true,period = 2L, maxRunningNum = 60, delay = 0L) {
+                if (i==0){
+                    RedisManager.push("createWorld|,|$uuid|,|$templateName")
+                }
+                i++
                 if (!createWorldList.contains(uuid)) {
-                    isSuccess = true
+                    future.complete(true)
+                    this.cancel()
+                    return@submit
+                }
+                if (i >= 50) {
+                    future.complete(false)
                     this.cancel()
                     return@submit
                 }
             }
-            return isSuccess
+            return future
         } else {
             val file = File(PixelWorldPro.instance.config.getString("WorldTemplatePath"), templateName)
             return createWorld(uuid, file)
@@ -62,11 +68,17 @@ class WorldImpl : WorldApi {
     /**
      * 根据模板文件新建世界,如果玩家在线则传送
      */
-    override fun createWorld(uuid: UUID, file: File): Boolean {
+    override fun createWorld(uuid: UUID, file: File): CompletableFuture<Boolean> {
         return if (PixelWorldPro.instance.isBungee()) {
             createWorld(uuid, file.name)
         } else {
-            createWorldLocal(uuid, file)
+            val future = CompletableFuture<Boolean>()
+            if (createWorldLocal(uuid, file)){
+                future.complete(true)
+            }else{
+                future.complete(false)
+            }
+            return future
         }
     }
 
@@ -116,6 +128,7 @@ class WorldImpl : WorldApi {
             setTime(world)
             //设置世界边界
             setWorldBorder(world, null)
+            world.keepSpawnInMemory = false
             world.save()
             //数据库操作
             PixelWorldPro.databaseApi.setWorldData(
@@ -152,30 +165,35 @@ class WorldImpl : WorldApi {
         return true
     }
 
-    override fun restartWorld(uuid: UUID,templateName: String): Boolean {
-        if (deleteWorld(uuid)) {
-            val file = File(PixelWorldPro.instance.config.getString("WorldTemplatePath"), templateName)
-            val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
-            file.copyRecursively(File(worldPath(), worldData.worldName))
-            val world = Bukkit.createWorld(WorldCreator(worldData.worldName))
-            if (world == null) {
-                return false
-            } else {
-                //设置世界规则
-                setGamerule(world)
-                //设置世界难度
-                world.difficulty =
-                    Difficulty.valueOf(PixelWorldPro.instance.config.getString("WorldSetting.WorldDifficulty")!!)
-                //设置世界时间
-                setTime(world)
-                //设置世界边界
-                setWorldBorder(world, worldData.worldLevel)
-                world.save()
-                return true
+    override fun restartWorld(uuid: UUID,templateName: String): CompletableFuture<Boolean> {
+        val future = CompletableFuture<Boolean>()
+        deleteWorld(uuid).thenApply {
+            if (it){
+                val file = File(PixelWorldPro.instance.config.getString("WorldTemplatePath"), templateName)
+                val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
+                file.copyRecursively(File(worldPath(), worldData.worldName))
+                val world = Bukkit.createWorld(WorldCreator(worldData.worldName))
+                if (world == null) {
+                    future.complete(false)
+                } else {
+                    //设置世界规则
+                    setGamerule(world)
+                    //设置世界难度
+                    world.difficulty =
+                        Difficulty.valueOf(PixelWorldPro.instance.config.getString("WorldSetting.WorldDifficulty")!!)
+                    //设置世界时间
+                    setTime(world)
+                    //设置世界边界
+                    setWorldBorder(world, worldData.worldLevel)
+                    world.keepSpawnInMemory = false
+                    world.save()
+                    future.complete(true)
+                }
+            }else{
+                future.complete(false)
             }
-        }else{
-            return false
         }
+        return future
     }
     fun worldPath(): String {
         return if (PixelWorldPro.instance.config.getString("os") == "windows") {
@@ -197,35 +215,49 @@ class WorldImpl : WorldApi {
         return Bukkit.unloadWorld(world, true)
     }
 
-    override fun unloadWorld(uuid: UUID): Boolean {
-        var unloadResult = false
+    override fun unloadWorld(uuid: UUID): CompletableFuture<Boolean> {
+        val future = CompletableFuture<Boolean>()
         val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
         if (PixelWorldPro.instance.isBungee()) {
             if (RedisManager.isLock(uuid)) {
                 val world = Bukkit.getWorld(worldData.worldName)
                 if (world != null) {
-                    return unloadWorld(world)
+                    future.complete(unloadWorld(world))
+                    return future
                 }else{
                     unloadWorldList.add(uuid)
-                    RedisManager.push("unloadWorld|,|${uuid}")
-                    submit(period = 2L, maxRunningNum = 100) {
+
+                    var i =0
+                    submit(async = true,period = 2L, maxRunningNum = 60) {
+                        if (i == 0){
+                            RedisManager.push("unloadWorld|,|${uuid}")
+                        }
+                        i++
                         if (!unloadWorldList.contains(uuid)) {
-                            unloadResult = true
+                            future.complete(true)
+                            this.cancel()
+                            return@submit
+                        }
+                        if (i >= 50) {
+                            future.complete(false)
                             this.cancel()
                             return@submit
                         }
                     }
-                    return unloadResult
+                    return future
                 }
             } else {
-                return true
+                future.complete(true)
+                return future
             }
         } else {
             val world = Bukkit.getWorld(worldData.worldName)
             return if (world != null) {
-                unloadWorld(world)
+                future.complete(unloadWorld(world))
+                future
             }else{
-                true
+                future.complete(true)
+                future
             }
         }
     }
@@ -242,39 +274,56 @@ class WorldImpl : WorldApi {
     /**
      * 删除指定玩家世界
      */
-    override fun deleteWorld(uuid: UUID): Boolean {
-        return if (unloadWorld(uuid)) {
-            val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
-            File(worldData.worldName).deleteRecursively()
-        } else {
-            false
+    override fun deleteWorld(uuid: UUID): CompletableFuture<Boolean> {
+        val future = CompletableFuture<Boolean>()
+        unloadWorld(uuid).thenApply {
+            if(it){
+                val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
+                File(worldData.worldName).deleteRecursively()
+                future.complete(true)
+            }else{
+                future.complete(false)
+            }
         }
+        return future
     }
 
 
-    override fun loadWorld(uuid: UUID, serverName: String?): Boolean {
+    override fun loadWorld(uuid: UUID, serverName: String?): CompletableFuture<Boolean> {
+        val future = CompletableFuture<Boolean>()
         if (serverName == null || serverName == PixelWorldPro.instance.config.getString("ServerName")) {
-            return loadWorldLocal(uuid)
+            future.complete(loadWorldLocal(uuid))
+            return future
         } else {
-            return if (PixelWorldPro.instance.isBungee()) {
+            if (PixelWorldPro.instance.isBungee()) {
                 if (RedisManager.isLock(uuid)) {
-                    true
+                    future.complete(true)
+                    return future
                 } else {
-                    var isSuccess = false
-                    //发送消息到bungee,找到对应服务器加载世界
-                    RedisManager.push("loadWorldServer|,|$uuid|,|$serverName")
+                    loadWorldList.add(uuid)
+                    var i = 0
                     submit(period = 2L, maxRunningNum = 100) {
+                        if (i == 0) {
+                            //发送消息到bungee,找到对应服务器加载世界
+                            RedisManager.push("loadWorldServer|,|$uuid|,|$serverName")
+                        }
+                        i++
                         if (!loadWorldList.contains(uuid)) {
-                            isSuccess = true
+                            future.complete(true)
+                            this.cancel()
+                            return@submit
+                        }
+                        if (i >= 50) {
+                            future.complete(false)
                             this.cancel()
                             return@submit
                         }
                     }
-                    isSuccess
+                    return future
                 }
-            } else {
-                false
             }
+            future.complete(false)
+            return future
         }
     }
     fun getLoadWorldList(): MutableList<UUID> {
@@ -298,6 +347,7 @@ class WorldImpl : WorldApi {
                 } else {
                     setTime(world)
                     setWorldBorder(world, worldData.worldLevel)
+                    world.keepSpawnInMemory = false
                     true
                 }
             }
@@ -388,10 +438,17 @@ class WorldImpl : WorldApi {
         }
         val borderRange = PixelWorldPro.instance.config.getInt("WorldSetting.WorldLevel.$realLevel")
         if (borderRange == -1) {
-            return
+            submit{
+                world.worldBorder.center = world.spawnLocation
+                world.worldBorder.size = 60000000.0
+            }
+        }else{
+            submit {
+                world.worldBorder.center = world.spawnLocation
+                world.worldBorder.size = borderRange.toDouble()
+            }
         }
-        world.worldBorder.center = world.spawnLocation
-        world.worldBorder.size = borderRange.toDouble()
+
     }
 
     /**

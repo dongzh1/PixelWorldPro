@@ -23,13 +23,16 @@ class WorldCreate(val player: Player) {
                     defaultTemplate = Gui.getWorldCreateConfig().getStringColored("Template.$templateChoose")
                 val item = basic.items[guiData.key]
                 val itemMeta = item?.itemMeta
-                itemMeta?.setDisplayName(itemMeta.displayName.replace("{template}","$defaultTemplate"))
-                itemMeta?.lore?.let { Collections.replaceAll(it,"{template}","$defaultTemplate") }
+                itemMeta?.setDisplayName(itemMeta.displayName.replace("{template}",defaultTemplate))
+                val lore = itemMeta?.lore?.map { it.replace("{template}",defaultTemplate) }?.toMutableList() ?: continue
+                itemMeta.lore = lore
+                item.itemMeta = itemMeta
+                basic.set(guiData.key,item)
                 break
             }
         }
         return BasicCharMap(basic, charMap)
-        }
+    }
         fun open(gui: String = "WorldCreate.yml", templateChoose: String? = null) {
             val basicCharMap = build(gui, templateChoose)
             val basic = basicCharMap.basic
@@ -141,8 +144,14 @@ class WorldCreate(val player: Player) {
                                 if (value != "random" && !lockTemplate) {
                                     template = value!!
                                 }
-                                if (WorldApi.Factory.worldApi!!.createWorld(player.uniqueId, template))
-                                    TeleportApi.Factory.teleportApi!!.teleport(player.uniqueId)
+                                player.closeInventory()
+                                WorldApi.Factory.worldApi!!.createWorld(player.uniqueId, template).thenApply {
+                                    if (it) {
+                                        TeleportApi.Factory.teleportApi!!.teleport(player.uniqueId)
+                                    }else{
+                                        player.sendMessage(lang("WorldCreateFail"))
+                                    }
+                                }
                             }
                         }
                     }

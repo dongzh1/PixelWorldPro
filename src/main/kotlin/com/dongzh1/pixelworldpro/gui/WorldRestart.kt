@@ -23,7 +23,10 @@ class WorldRestart(val player: Player) {
                 val item = basic.items[guiData.key]
                 val itemMeta = item?.itemMeta
                 itemMeta?.setDisplayName(itemMeta.displayName.replace("{template}","$defaultTemplate"))
-                itemMeta?.lore?.let { Collections.replaceAll(it,"{template}","$defaultTemplate") }
+                val lore = itemMeta?.lore?.map { it.replace("{template}","$defaultTemplate") }?.toMutableList() ?: continue
+                itemMeta.lore = lore
+                item.itemMeta = itemMeta
+                basic.set(guiData.key,item)
                 break
             }
         }
@@ -140,12 +143,14 @@ class WorldRestart(val player: Player) {
                             if (value != "random" && !lockTemplate) {
                                 template = value!!
                             }
-                            if (WorldApi.Factory.worldApi!!.restartWorld(player.uniqueId,template)) {
-                                player.sendMessage(lang("RestartSuccess"))
-                                player.closeInventory()
-                            } else {
-                                player.sendMessage(lang("RestartFail"))
-                                player.closeInventory()
+                            WorldApi.Factory.worldApi!!.restartWorld(player.uniqueId,template).thenApply {
+                                if (it) {
+                                    player.sendMessage(lang("RestartSuccess"))
+                                    player.closeInventory()
+                                } else {
+                                    player.sendMessage(lang("RestartFail"))
+                                    player.closeInventory()
+                                }
                             }
                         }
                     }

@@ -7,6 +7,7 @@ import com.dongzh1.pixelworldpro.database.MysqlDatabaseApi
 import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
 import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.listener.OnPlayerJoin
+import com.dongzh1.pixelworldpro.listener.OnPlayerLogin
 import com.dongzh1.pixelworldpro.listener.Permission
 import com.dongzh1.pixelworldpro.listener.TickListener
 import com.dongzh1.pixelworldpro.papi.Papi
@@ -103,7 +104,7 @@ class PixelWorldPro : EasyPlugin() {
         Commands().commandRoot.register()
 
         //避免数据库未初始化玩家进入
-        val initListener = OnPlayerJoin()
+        val initListener = OnPlayerLogin()
         registerListener(initListener)
         Papi.register()
         registerLuckPerm()

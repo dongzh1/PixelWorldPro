@@ -8,11 +8,13 @@ import net.luckperms.api.event.node.NodeAddEvent
 import net.luckperms.api.event.node.NodeRemoveEvent
 import net.luckperms.api.node.NodeType
 import net.luckperms.api.node.types.PermissionNode
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
 class Permission {
 
     fun permissionAdd(e: NodeAddEvent) {
+        Bukkit.getConsoleSender().sendMessage("permissionAdd")
         if (e.node.type != NodeType.PERMISSION) return
         if (!e.isUser) return
         val permissionNode = e.node as PermissionNode
@@ -20,6 +22,7 @@ class Permission {
         val permissionList = config.getConfigurationSection("Permission")?.getKeys(false)
         if (permissionNode.permission !in permissionList!!) return
         submit(async = true) {
+            Bukkit.getConsoleSender().sendMessage("permissionAdd submit")
             val player = e.target as Player
             var playerData = PixelWorldPro.databaseApi.getPlayerData(player.uniqueId)
             if (playerData == null) {
@@ -38,6 +41,7 @@ class Permission {
         }
     }
     fun permissionRemove(e: NodeRemoveEvent) {
+        Bukkit.getConsoleSender().sendMessage("permissionRemove")
         if (e.node.type != NodeType.PERMISSION) return
         if (!e.isUser) return
         val permissionNode = e.node as PermissionNode
@@ -45,6 +49,7 @@ class Permission {
         val permissionList = config.getConfigurationSection("Permission")?.getKeys(false)
         if (permissionNode.permission !in permissionList!!) return
         submit(async = true) {
+            Bukkit.getConsoleSender().sendMessage("permissionRemove submit")
             val player = e.target as Player
             var playerData = PixelWorldPro.databaseApi.getPlayerData(player.uniqueId)
             if (playerData == null) {

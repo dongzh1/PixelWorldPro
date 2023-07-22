@@ -4,11 +4,10 @@ package com.dongzh1.pixelworldpro.gui
 import com.dongzh1.pixelworldpro.tools.OperatorCaster
 import com.xbaimiao.easylib.bridge.replacePlaceholder
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
-import com.xbaimiao.easylib.module.item.buildItem
 import com.xbaimiao.easylib.module.ui.Basic
 import com.xbaimiao.easylib.module.utils.colored
 import com.xbaimiao.easylib.xseries.XItemStack
-import com.xbaimiao.easylib.xseries.XMaterial
+import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
@@ -145,18 +144,27 @@ object Gui {
             return null
         }
         val itemConfiguration = config.getConfigurationSection("items.$char")?:return null
+        val name = itemConfiguration.getString("name")
+        val lore = itemConfiguration.getStringList("lore")
+        val skull = itemConfiguration.getString("skull")
         if (itemConfiguration.getString("material") == null)
             return null
-
         if (itemConfiguration.contains("name"))
             itemConfiguration.set("name",itemConfiguration.getString("name")!!.replacePlaceholder(player).colored())
         if (itemConfiguration.contains("lore"))
             itemConfiguration.set("lore",itemConfiguration.getStringList("lore").replacePlaceholder(player).colored())
         if (itemConfiguration.contains("skull"))
             itemConfiguration.set("skull",itemConfiguration.getString("skull")!!.replacePlaceholder(player))
-        return XItemStack.deserialize(itemConfiguration)
+        val item = XItemStack.deserialize(itemConfiguration)
+        itemConfiguration.set("name",name)
+        itemConfiguration.set("lore",lore)
+        itemConfiguration.set("skull",skull)
+        return item
     }
     fun buildItem(configuration: ConfigurationSection, player: OfflinePlayer): ItemStack? {
+        val name = configuration.getString("name")
+        val lore = configuration.getStringList("lore")
+        val skull = configuration.getString("skull")
         if (configuration.getString("material") == null)
             return null
         if (configuration.contains("name"))
@@ -165,7 +173,11 @@ object Gui {
             configuration.set("lore",configuration.getStringList("lore").replacePlaceholder(player).colored())
         if (configuration.contains("skull"))
             configuration.set("skull",configuration.getString("skull")!!.replacePlaceholder(player))
-        return XItemStack.deserialize(configuration)
+        val item = XItemStack.deserialize(configuration)
+        configuration.set("name",name)
+        configuration.set("lore",lore)
+        configuration.set("skull",skull)
+        return item
     }
     fun runCommand(player: Player, commands: List<String>) {
         for (command in commands){
