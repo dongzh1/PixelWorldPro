@@ -43,6 +43,7 @@ dependencies {
     implementation ("com.j256.ormlite:ormlite-jdbc:6.1")
     implementation ("com.zaxxer:HikariCP:4.0.3")
     implementation ("redis.clients:jedis:3.7.0")
+    implementation ("com.google.code.gson:gson:2.8.9")
     compileOnly(fileTree("libs"))
     compileOnly(dependencyNotation = "org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
 
