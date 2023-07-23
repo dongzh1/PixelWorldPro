@@ -12,7 +12,9 @@ object Serialize {
         return "${worldData.worldName},|.|," +
                 "${worldData.worldLevel},|.|," +
                 "${worldData.members.joinToString(",")},,|.|," +
+                "${worldData.memberName.joinToString(",")},,|.|," +
                 "${worldData.banPlayers.joinToString(",")},,|.|," +
+                "${worldData.banName.joinToString(",")},,|.|," +
                 "${worldData.state},|.|," +
                 "${worldData.createTime},|.|," +
                 "${worldData.lastTime},|.|," +
@@ -33,23 +35,37 @@ object Serialize {
         } else {
             list[2].split(",").dropLast(1).map{ UUID.fromString(it) }
         }
-        val banPlayers = if ((list[3].split(",").size == 1 && list[3].split(",")[0] == "")||
-            (list[3].split(",").size == 2 && list[3].split(",")[1] == ""&&list[3].split(",")[0] == "")) {
+        val banPlayers = if ((list[4].split(",").size == 1 && list[4].split(",")[0] == "")||
+            (list[4].split(",").size == 2 && list[4].split(",")[1] == ""&&list[4].split(",")[0] == "")) {
             mutableListOf<UUID>()
         } else {
-            list[3].split(",").dropLast(1).map { UUID.fromString(it) }
+            list[4].split(",").dropLast(1).map { UUID.fromString(it) }
+        }
+        val memberName = if ((list[3].split(",").size == 1 && list[3].split(",")[0] == "")||
+            (list[3].split(",").size == 2 && list[3].split(",")[1] == ""&&list[3].split(",")[0] == "")) {
+            mutableListOf<String>()
+        } else {
+            list[3].split(",").dropLast(1)
+        }
+        val banName = if ((list[5].split(",").size == 1 && list[5].split(",")[0] == "")||
+            (list[5].split(",").size == 2 && list[5].split(",")[1] == ""&&list[5].split(",")[0] == "")) {
+            mutableListOf<String>()
+        } else {
+            list[5].split(",").dropLast(1)
         }
         return WorldData(
             worldName = list[0],
             worldLevel = list[1],
             members = members,
+            memberName = memberName,
             banPlayers = banPlayers,
-            state = list[4],
-            createTime = list[5],
-            lastTime = list[6].toLong(),
-            onlinePlayerNumber = list[7].toInt(),
-            isCreateNether = list[8].toBoolean(),
-            isCreateEnd = list[9].toBoolean()
+            banName = banName,
+            state = list[6],
+            createTime = list[7],
+            lastTime = list[8].toLong(),
+            onlinePlayerNumber = list[9].toInt(),
+            isCreateNether = list[10].toBoolean(),
+            isCreateEnd = list[11].toBoolean()
         )
     }
 

@@ -9,6 +9,8 @@ import com.xbaimiao.easylib.module.database.Ormlite
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
 import java.util.*
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 
 abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
@@ -110,6 +112,20 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
 
     override fun getWorldData(uuid: UUID): WorldData? {
         //从redis或内存中获取
+        val data = if (PixelWorldPro.instance.isBungee()) {
+            RedisManager[uuid]
+        } else {
+            Serialize.deserialize(PixelWorldPro.instance.getData(uuid))
+        }
+        return data
+    }
+
+    override fun getWorldData(name: String): WorldData? {
+        //从redis或内存中获取
+        val realName = name.split("/").last()
+        val uuidString :String? = Regex(pattern = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-z]{12}")
+            .find(realName)?.value
+        val uuid = UUID.fromString(uuidString)
         val data = if (PixelWorldPro.instance.isBungee()) {
             RedisManager[uuid]
         } else {

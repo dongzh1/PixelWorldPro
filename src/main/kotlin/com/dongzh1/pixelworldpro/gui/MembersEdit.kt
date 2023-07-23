@@ -5,14 +5,11 @@ import com.dongzh1.pixelworldpro.database.PlayerData
 import com.xbaimiao.easylib.bridge.economy.PlayerPoints
 import com.xbaimiao.easylib.bridge.economy.Vault
 import com.xbaimiao.easylib.bridge.replacePlaceholder
-import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
-import com.xbaimiao.easylib.module.utils.colored
 import com.xbaimiao.easylib.module.utils.submit
-import com.xbaimiao.easylib.xseries.XItemStack
 import org.bukkit.Bukkit
+import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import java.util.*
-import kotlin.math.max
 
 class MembersEdit(val player: Player) {
     private val memberMap = mutableMapOf<Int, UUID>()
@@ -24,44 +21,28 @@ class MembersEdit(val player: Player) {
         val charMap = basicCharMap.charMap
         val config = Gui.getMembersEditConfig()
         var char: Char? = null
-
+        var offlinePlayerMap = Gui.getPlayerMembersMap(player)?.toMutableMap()
+        //获取玩家数据
         playerData = PixelWorldPro.databaseApi.getPlayerData(player.uniqueId)
         if (playerData == null){
             playerData = PlayerData(listOf(),Gui.getMembersEditConfig().getInt("DefaultMembersNumber"))
             PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData!!)
         }
-
         for (guiData in charMap){
             if (guiData.value.type == "MemberList"){
+                //赋值char为MemberList的key
                 char = guiData.key
-                if (guiData.value.value == "permission"){
-                    val permissionList = config.getConfigurationSection("Permission")!!.getKeys(false)
-                    var maxInt = playerData!!.memberNumber
-                    for (permission in permissionList){
-                        if (player.hasPermission(permission)){
-                            if (maxInt < config.getInt("Permission.$permission")){
-                                maxInt = config.getInt("Permission.$permission")
-                            }
-                        }
-                    }
-                    playerData = playerData!!.copy(memberNumber = maxInt)
-                    submit(async = true) {
-                        PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData!!)
-                    }
-                }
                 break
             }
         }
-
+        //如果char为null则返回
         if (char == null){
             return basicCharMap
         }
-
+        //获取玩家的世界数据
         val worldData = PixelWorldPro.databaseApi.getWorldData(player.uniqueId)
         val memberUUIDList = worldData?.members
-        if (memberUUIDList?.contains(player.uniqueId) == true){
-            (memberUUIDList as MutableList).remove(player.uniqueId)
-        }
+        //获取成员和解锁列表
         val slotsList = basic.getSlots(char)
         var i = 0
         //填充成员列表
@@ -69,7 +50,25 @@ class MembersEdit(val player: Player) {
             if (i < playerData!!.memberNumber){
                 if (memberUUIDList != null && i < memberUUIDList.size){
                     val memberUUID = memberUUIDList[i]
-                    val member = Bukkit.getOfflinePlayer(memberUUID)
+                    var member = Bukkit.getOfflinePlayer(memberUUID)
+                    if (offlinePlayerMap != null && offlinePlayerMap.containsKey(memberUUID)){
+                        member = offlinePlayerMap[memberUUID]!!
+                    }
+                    if (member.name == null){
+                        if (offlinePlayerMap == null){
+                            val memberName = worldData.memberName[i]
+                            member = Bukkit.getOfflinePlayer(memberName)
+                            val map = mutableMapOf<UUID,OfflinePlayer>()
+                            map[memberUUID] = member
+                            offlinePlayerMap = map
+                            Gui.setPlayerMembersMap(player,offlinePlayerMap)
+                        }else{
+                            val memberName = worldData.memberName[i]
+                            member = Bukkit.getOfflinePlayer(memberName)
+                            offlinePlayerMap[memberUUID] = member
+                            Gui.setPlayerMembersMap(player,offlinePlayerMap)
+                        }
+                    }
                     val memberConfig = config.getConfigurationSection("Member")!!
                     val item = Gui.buildItem(memberConfig,member)!!
                     basic.set(slot,item)
@@ -83,8 +82,6 @@ class MembersEdit(val player: Player) {
             basic.set(slot,item)
             unlockList.add(slot)
         }
-
-
         return BasicCharMap(basic,charMap)
     }
     fun open(gui: String = "MembersEdit.yml"){
@@ -147,15 +144,33 @@ class MembersEdit(val player: Player) {
                         }
                         if (it.rawSlot in memberMap.keys){
                             val memberUUID = memberMap[it.rawSlot]!!
+                            if (memberUUID == player.uniqueId){
+                                return@onClick
+                            }
                             it.inventory.setItem(it.rawSlot,null)
                             memberMap.remove(it.rawSlot)
                             val worldData = PixelWorldPro.databaseApi.getWorldData(player.uniqueId)
                             val memberUUIDList = worldData?.members as MutableList
+                            val memberNameList = worldData.memberName as MutableList
+                            val int = memberUUIDList.indexOf(memberUUID)
+                            val name = memberNameList[int]
                             memberUUIDList.remove(memberUUID)
+                            memberNameList.remove(name)
                             val banList = worldData.banPlayers as MutableList
+                            val banNameList = worldData.banName as MutableList
                             banList.add(memberUUID)
-                            PixelWorldPro.databaseApi.setWorldData(player.uniqueId,worldData.copy(members = memberUUIDList,banPlayers = banList))
-
+                            banNameList.add(name)
+                            PixelWorldPro.databaseApi.setWorldData(player.uniqueId,worldData.copy(members = memberUUIDList,
+                                banPlayers = banList,
+                                memberName = memberNameList,
+                                banName = banNameList))
+                            submit(async = true) {
+                                var memberData = PixelWorldPro.databaseApi.getPlayerData(memberUUID)
+                                if (memberData != null){
+                                    memberData = memberData.copy(joinedWorld = memberData.joinedWorld - player.uniqueId)
+                                    PixelWorldPro.databaseApi.setPlayerData(memberUUID,memberData)
+                                }
+                            }
                         }
                     }
                     else->{

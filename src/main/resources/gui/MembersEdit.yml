@@ -13,7 +13,7 @@ items:
     material: GLASS_PANE
   B:
     type: MemberList
-    #both/money/points/none/permission
+    #both/money/points/none
     value: both
   X:
     material: BARRIER
@@ -39,6 +39,3 @@ UnMember:
 DefaultMembersNumber: 1
 Money: 100.0
 Points: 100.0
-Permission:
-  pixelworldpro.vip: 10
-  pixelworldpro.svip: 20

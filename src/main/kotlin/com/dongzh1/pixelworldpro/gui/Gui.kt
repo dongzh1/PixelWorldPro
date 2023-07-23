@@ -12,10 +12,13 @@ import org.bukkit.OfflinePlayer
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import java.util.UUID
 import kotlin.collections.HashMap
 
 
 object Gui {
+    private val playerMembersMap = HashMap<Player,Map<UUID,OfflinePlayer>>()
+    private val playerBanMap = HashMap<Player,Map<UUID,OfflinePlayer>>()
     private var membersEditConfig = BuiltInConfiguration("gui/MembersEdit.yml")
     private var worldCreateConfig = BuiltInConfiguration("gui/WorldCreate.yml")
     private var worldListConfig = BuiltInConfiguration("gui/WorldList.yml")
@@ -23,6 +26,25 @@ object Gui {
     private var worldRestartConfig = BuiltInConfiguration("gui/WorldRestart.yml")
     private var banEditConfig = BuiltInConfiguration("gui/BanEdit.yml")
 
+    fun getPlayerMembersMap(player: Player):Map<UUID,OfflinePlayer>?{
+        if (playerMembersMap.containsKey(player)){
+            return playerMembersMap[player]
+        }
+        return null
+    }
+    fun setPlayerMembersMap(player: Player, map: Map<UUID,OfflinePlayer>){
+        playerMembersMap[player] = map
+    }
+
+    fun getPlayerBanMap(player: Player):Map<UUID,OfflinePlayer>?{
+        if (playerBanMap.containsKey(player)){
+            return playerBanMap[player]
+        }
+        return null
+    }
+    fun setPlayerBanMap(player: Player, map: Map<UUID,OfflinePlayer>){
+        playerBanMap[player] = map
+    }
     fun open(player: Player,config: BuiltInConfiguration){
         when (config.getString("guiType")){
             null ->{

@@ -6,7 +6,9 @@ data class WorldData (
     val worldName: String,
     val worldLevel: String,
     val members: List<UUID>,
+    var memberName: List<String>,
     val banPlayers: List<UUID>,
+    var banName: List<String>,
     //anyone, member, owner
     val state: String,
     val createTime: String,

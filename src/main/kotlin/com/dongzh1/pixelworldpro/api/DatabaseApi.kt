@@ -16,8 +16,14 @@ interface DatabaseApi {
 
     /**
      * 获取一个世界记录
+     * @param uuid 玩家UUID
      */
     fun getWorldData(uuid: UUID): WorldData?
+    /**
+     * 获取一个世界记录
+     * @param name 世界名
+     */
+    fun getWorldData(name: String): WorldData?
     /**
      * 删除一个世界记录
      */

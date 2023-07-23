@@ -21,9 +21,6 @@ ServerName: "server1"
 #这个服务器是否会用于创建世界，如果为false,则只有指定该服创建才会在该服创建世界
 #Whether this server will be used to create the world, if false, only the specified server will create the world on this server
 buildWorld: true
-#用于在菜单按钮中开启权限判断，如果为false,则不应该在gui中配置permission选项，仅支持luckperms插件
-#Used to open permission judgment in the menu button, if false, the permission option should not be configured in the gui, only support luckperms plugin
-useLuckPerm: false
 #如果你不知道数据库对应的配置，那么只需要改host,port,database,user,passwd即可
 #If you don't know the configuration corresponding to the database, you only need to change host, port, database, user, passwd
 Mysql:

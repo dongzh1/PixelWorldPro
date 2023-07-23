@@ -3,6 +3,7 @@
 package com.dongzh1.pixelworldpro.impl
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
+import com.dongzh1.pixelworldpro.api.MessageApi
 
 import com.dongzh1.pixelworldpro.api.WorldApi
 import com.dongzh1.pixelworldpro.database.PlayerData
@@ -35,6 +36,7 @@ object WorldImpl : WorldApi {
             //查询是否创建成功
             var i = 0
             submit(async = true,period = 2L, maxRunningNum = 60, delay = 0L) {
+
                 if (i==0){
                     RedisManager.push("createWorld|,|$uuid|,|$templateName")
                 }
@@ -45,6 +47,7 @@ object WorldImpl : WorldApi {
                     return@submit
                 }
                 if (i >= 50) {
+                    removeCreateWorldList(uuid)
                     future.complete(false)
                     this.cancel()
                     return@submit
@@ -105,6 +108,7 @@ object WorldImpl : WorldApi {
         //检查文件是否为世界文件
         val checkString = WorldFile.isBreak(file)
         if (checkString != "ok") {
+            MessageApi.Factory.messageApi!!.sendMessage(uuid, checkString)
             Bukkit.getConsoleSender().sendMessage(checkString)
             return false
         }
@@ -138,6 +142,8 @@ object WorldImpl : WorldApi {
                     worldLevel = PixelWorldPro.instance.config.getConfigurationSection("WorldSetting.WorldLevel")!!
                         .getKeys(false).first(),
                     arrayListOf(uuid),
+                    arrayListOf(Bukkit.getOfflinePlayer(uuid).name!!),
+                    arrayListOf(),
                     arrayListOf(),
                     "anyone",
                     createTime,

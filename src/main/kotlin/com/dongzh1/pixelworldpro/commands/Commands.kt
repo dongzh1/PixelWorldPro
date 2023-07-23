@@ -6,7 +6,6 @@ import com.dongzh1.pixelworldpro.api.WorldApi
 import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.impl.WorldImpl
-import com.dongzh1.pixelworldpro.online.Online
 import com.dongzh1.pixelworldpro.redis.RedisManager
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.command.ArgNode
@@ -84,7 +83,7 @@ class Commands {
                     sender.sendMessage(lang("PlayerIsOwner"))
                     return@exec
                 }
-                worldData = worldData.copy(members = worldData.members - player.uniqueId)
+                worldData = worldData.copy(members = worldData.members - player.uniqueId, memberName = worldData.memberName - player.name!!)
                 PixelWorldPro.databaseApi.setWorldData((sender as Player).uniqueId, worldData)
                 //指定玩家的信息也要更新
                 submit(async = true) {
@@ -122,7 +121,7 @@ class Commands {
                 }
                 PixelWorldPro.databaseApi.setWorldData(
                     worldPlayer.uniqueId,
-                    worldData.copy(members = worldData.members - player.uniqueId)
+                    worldData.copy(members = worldData.members - player.uniqueId, memberName = worldData.memberName - player.name!!)
                 )
                 //指定玩家的信息也要更新
                 submit(async = true) {
@@ -170,7 +169,7 @@ class Commands {
                 submit(async = true) {
                     val playerData = PixelWorldPro.databaseApi.getPlayerData((sender as Player).uniqueId)!!
                     if(worldData!!.members.size < playerData.memberNumber){
-                        worldData = worldData!!.copy(members = worldData!!.members + player.uniqueId)
+                        worldData = worldData!!.copy(members = worldData!!.members + player.uniqueId, memberName = worldData!!.memberName + player.name!!)
                         PixelWorldPro.databaseApi.setWorldData((sender as Player).uniqueId, worldData!!)
                         var playerData1 = PixelWorldPro.databaseApi.getPlayerData(player.uniqueId)
                         if (playerData1 == null) {
@@ -214,7 +213,7 @@ class Commands {
                 }
                 PixelWorldPro.databaseApi.setWorldData(
                     worldPlayer.uniqueId,
-                    worldData.copy(members = worldData.members + player.uniqueId)
+                    worldData.copy(members = worldData.members + player.uniqueId, memberName = worldData.memberName + player.name!!)
                 )
                 //指定玩家的信息也要更新
                 submit(async = true) {
@@ -261,7 +260,7 @@ class Commands {
                     sender.sendMessage(lang("PlayerNotInBlackList"))
                     return@exec
                 }
-                worldData = worldData.copy(banPlayers = worldData.banPlayers - player.uniqueId)
+                worldData = worldData.copy(banPlayers = worldData.banPlayers - player.uniqueId, banName = worldData.banName - player.name!!)
                 PixelWorldPro.databaseApi.setWorldData((sender as Player).uniqueId, worldData)
                 sender.sendMessage(lang("Success"))
                 return@exec
@@ -285,7 +284,7 @@ class Commands {
                 }
                 PixelWorldPro.databaseApi.setWorldData(
                     worldPlayer.uniqueId,
-                    worldData.copy(banPlayers = worldData.banPlayers - player.uniqueId)
+                    worldData.copy(banPlayers = worldData.banPlayers - player.uniqueId, banName = worldData.banName - player.name!!)
                 )
                 //指定玩家的信息也要更新
                 sender.sendMessage(lang("Success"))
@@ -327,7 +326,7 @@ class Commands {
                     sender.sendMessage(lang("PlayerIsOwner"))
                     return@exec
                 }
-                worldData = worldData.copy(banPlayers = worldData.banPlayers + player.uniqueId)
+                worldData = worldData.copy(banPlayers = worldData.banPlayers + player.uniqueId, banName = worldData.banName + player.name!!)
                 PixelWorldPro.databaseApi.setWorldData((sender as Player).uniqueId, worldData)
                 //指定玩家的信息也要更新
                 sender.sendMessage(lang("Success"))
@@ -356,7 +355,7 @@ class Commands {
                 }
                 PixelWorldPro.databaseApi.setWorldData(
                     worldPlayer.uniqueId,
-                    worldData.copy(banPlayers = worldData.banPlayers + player.uniqueId)
+                    worldData.copy(banPlayers = worldData.banPlayers + player.uniqueId, banName = worldData.banName + player.name!!)
                 )
                 //指定玩家的信息也要更新
                 sender.sendMessage(lang("Success"))
@@ -364,6 +363,52 @@ class Commands {
             }
             sender.sendMessage(lang("ArgNotValid"))
             return@exec
+        }
+    }
+    private val setNumber = command<CommandSender>("setnumber") {
+        exec {
+            if(args.size == 0) {
+                sender.sendMessage(lang("ArgNotValid"))
+                return@exec
+            }
+            if (args.size > 2){
+                sender.sendMessage(lang("ArgNotValid"))
+                return@exec
+            }
+            if (args.size == 1){
+                if(sender !is Player){
+                    sender.sendMessage(lang("NeedPlayer"))
+                    return@exec
+                }
+                if (args[0].toIntOrNull() == null || args[0].toInt() < 1){
+                    sender.sendMessage(lang("ArgNotValid"))
+                    return@exec
+                }
+                val player = sender as Player
+                val number = args[0].toInt()
+                submit(async = true) {
+                    var playerData = PixelWorldPro.databaseApi.getPlayerData(player.uniqueId)
+                    playerData =
+                        playerData?.copy(memberNumber = number) ?: PlayerData(mutableListOf(player.uniqueId), number)
+                    PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData)
+                }
+                sender.sendMessage(lang("Success"))
+            }
+            if (args.size ==2){
+                val number = args[0].toIntOrNull()
+                val player = Bukkit.getOfflinePlayer(args[1])
+                if (number == null || number < 1){
+                    sender.sendMessage(lang("ArgNotValid"))
+                    return@exec
+                }
+                submit(async = true) {
+                    var playerData = PixelWorldPro.databaseApi.getPlayerData(player.uniqueId)
+                    playerData =
+                        playerData?.copy(memberNumber = number) ?: PlayerData(mutableListOf(player.uniqueId), number)
+                    PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData!!)
+                }
+                sender.sendMessage(lang("Success"))
+            }
         }
     }
 
@@ -387,6 +432,7 @@ class Commands {
         }
         sub(addMembers)
         sub(removeMembers)
+        sub(setNumber)
     }
 
     private val load = command<CommandSender>("load") {
@@ -744,7 +790,7 @@ class Commands {
     }
 
     private val gui = command<CommandSender>("gui"){
-        //permission = "pixelworldpro.command.gui"
+        permission = "pixelworldpro.command.gui"
         arg(guiArgNode){gui ->
             onlinePlayers(optional = true) { player ->
                 exec {
@@ -850,13 +896,9 @@ class Commands {
     }
 
     val commandRoot = command<CommandSender>("pixelworldpro") {
-        //permission = "pixelworldpro.command"
-        exec {
-        }
+        permission = "pixelworldpro.command"
         sub(create)
-
         sub(tp)
-
         sub(reload)
         sub(mspt)
         sub(delete)

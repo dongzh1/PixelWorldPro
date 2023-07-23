@@ -1,19 +1,14 @@
 package com.dongzh1.pixelworldpro.gui
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
-import com.dongzh1.pixelworldpro.database.WorldData
 import com.dongzh1.pixelworldpro.impl.TeleportImpl
 import com.xbaimiao.easylib.bridge.replacePlaceholder
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
-import com.xbaimiao.easylib.module.item.buildItem
 import com.xbaimiao.easylib.module.utils.colored
 import com.xbaimiao.easylib.xseries.XItemStack
-import com.xbaimiao.easylib.xseries.XMaterial
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import org.bukkit.inventory.meta.ItemMeta
 import java.util.*
-import kotlin.collections.HashMap
 
 class WorldList(val player: Player) {
     //默认配置文件
@@ -65,7 +60,7 @@ class WorldList(val player: Player) {
                 }
                 if (guiData.value.type == "ChangeList") {
                     if (guiData.value.value == "trust") {
-                        fillListMap(player, true, page)
+                        fillListMap(player, true)
                         basic.set(
                             guiData.key,
                             Gui.buildItem(
@@ -74,7 +69,7 @@ class WorldList(val player: Player) {
                             ) ?: continue
                         )
                     } else {
-                        fillListMap(player, false, page)
+                        fillListMap(player, false)
                         basic.set(
                             guiData.key,
                             Gui.buildItem(
@@ -86,7 +81,7 @@ class WorldList(val player: Player) {
                 }
             }
         } else {
-            fillListMap(player, isTrust, page)
+            fillListMap(player, isTrust)
             for (guiData in charMap) {
                 if (guiData.value.type == "ChangeList") {
                     if (isTrust) {
@@ -215,7 +210,7 @@ class WorldList(val player: Player) {
 
     }
 
-    private fun fillListMap(player: Player, isTrust: Boolean, page: Int) {
+    private fun fillListMap(player: Player, isTrust: Boolean) {
         listMap.clear()
         val uuidList = mutableListOf<UUID>()
         if (isTrust) {

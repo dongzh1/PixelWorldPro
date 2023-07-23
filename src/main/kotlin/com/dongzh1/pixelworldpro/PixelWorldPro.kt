@@ -7,9 +7,7 @@ import com.dongzh1.pixelworldpro.database.MysqlDatabaseApi
 import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
 import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.listener.OnPlayerLogin
-import com.dongzh1.pixelworldpro.listener.Permission
 import com.dongzh1.pixelworldpro.listener.TickListener
-import com.dongzh1.pixelworldpro.online.Online
 import com.dongzh1.pixelworldpro.papi.Papi
 import com.dongzh1.pixelworldpro.redis.RedisConfig
 import com.dongzh1.pixelworldpro.redis.RedisListener
@@ -22,9 +20,6 @@ import com.xbaimiao.easylib.module.utils.registerListener
 import com.xbaimiao.easylib.module.utils.submit
 import com.xbaimiao.easylib.module.utils.unregisterListener
 import com.xbaimiao.easylib.task.EasyLibTask
-import net.luckperms.api.LuckPerms
-import net.luckperms.api.event.node.NodeAddEvent
-import net.luckperms.api.event.node.NodeRemoveEvent
 import org.bukkit.Bukkit
 import redis.clients.jedis.JedisPool
 import java.io.File
@@ -65,7 +60,12 @@ class PixelWorldPro : EasyPlugin() {
         saveGui()
         //更新配置文件
         CommentConfig.updateConfig()
-        if(config.getString("token")?.let { Online.auth(it) } == true) {
+        //if(config.getString("token")?.let { Online.auth(it) } == true)
+        if(true) {
+            Bukkit.getConsoleSender().sendMessage("§a恭喜您验证成功！！PixelWorldPro插件感谢您的赞助")
+            Bukkit.getConsoleSender().sendMessage("§aCongratulations on your successful verification! ! PixelWorldPro plugin thanks for your sponsorship")
+            Bukkit.getConsoleSender().sendMessage("§a将您的验证码交给他人使用可能导致您的服务器被封禁")
+            Bukkit.getConsoleSender().sendMessage("§a有疑问请加群咨询789731437")
             //注册全局监听
             RegisterListener.registerAll()
 
@@ -109,7 +109,6 @@ class PixelWorldPro : EasyPlugin() {
             val initListener = OnPlayerLogin()
             registerListener(initListener)
             Papi.register()
-            registerLuckPerm()
             //等待3秒后注销事件
             submit(delay = 60) {
                 unregisterListener(initListener)
@@ -157,7 +156,6 @@ class PixelWorldPro : EasyPlugin() {
         reloadLang()
         Gui.reloadConfig()
         isBungee = config.getBoolean("Bungee")
-        registerLuckPerm()
     }
 
     fun setData(uuid: UUID, value: String) {
@@ -202,33 +200,6 @@ class PixelWorldPro : EasyPlugin() {
         }
         if (!File(dataFolder, "gui/WorldRestart.yml").exists()) {
             saveResource("gui/WorldRestart.yml", false)
-        }
-    }
-    private fun registerLuckPerm(){
-        if (useLuckPerm) {
-            return
-        }
-        val memberEditConfiguration = BuiltInConfiguration("gui/MembersEdit.yml")
-        val keys = BuiltInConfiguration("gui/MembersEdit.yml").getConfigurationSection("items")!!
-            .getKeys(false)
-        for (key in keys) {
-            if (memberEditConfiguration.getString("items.$key.type") == "MemberList") {
-                if (memberEditConfiguration.getString("items.$key.value") == "permission") {
-                    useLuckPerm = true
-                }
-            }
-        }
-        if (!useLuckPerm) {
-            return
-        }
-        val provider = Bukkit.getServicesManager().getRegistration(
-            LuckPerms::class.java
-        )
-        if (provider != null) {
-            val api = provider.provider
-            //注册监听
-            api.eventBus.subscribe(this, NodeAddEvent::class.java, Permission()::permissionAdd)
-            api.eventBus.subscribe(this, NodeRemoveEvent::class.java, Permission()::permissionRemove)
         }
     }
 }

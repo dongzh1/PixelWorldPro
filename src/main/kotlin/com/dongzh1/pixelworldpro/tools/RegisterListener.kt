@@ -2,7 +2,7 @@ package com.dongzh1.pixelworldpro.tools
 
 import com.dongzh1.pixelworldpro.listener.OnPlayerJoin
 import com.dongzh1.pixelworldpro.listener.OnWorldUnload
-import com.dongzh1.pixelworldpro.listener.OnPlayerClick
+import com.dongzh1.pixelworldpro.listener.WorldProtect
 import com.xbaimiao.easylib.module.utils.registerListener
 
 
@@ -10,6 +10,6 @@ object RegisterListener {
     fun registerAll() {
         registerListener(OnPlayerJoin())
         registerListener(OnWorldUnload())
-        registerListener(OnPlayerClick())
+        registerListener(WorldProtect())
     }
 }
