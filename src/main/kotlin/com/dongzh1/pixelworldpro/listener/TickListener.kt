@@ -21,7 +21,6 @@ object TickListener : Listener {
             if (indices >= 600) {
                 //定期存入redis
                 RedisManager.setMspt(Bukkit.getTicksPerMonsterSpawns().toDouble())
-                Bukkit.getConsoleSender().sendMessage(Bukkit.getTicksPerMonsterSpawns().toString())
                 indices = 1
             }
         }
