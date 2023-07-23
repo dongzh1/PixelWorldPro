@@ -3,6 +3,7 @@ package com.dongzh1.pixelworldpro.listener
 import com.destroystokyo.paper.event.server.ServerTickEndEvent
 import com.dongzh1.pixelworldpro.redis.RedisManager
 import com.xbaimiao.easylib.module.utils.submit
+import org.bukkit.Bukkit
 
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -17,23 +18,12 @@ object TickListener : Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     fun event(event: ServerTickEndEvent) {
         submit(async = true) {
-            if (indices >= 1200) {
+            if (indices >= 600) {
                 //定期存入redis
-                RedisManager.setMspt(averages)
-
-
+                RedisManager.setMspt(Bukkit.getTicksPerMonsterSpawns().toDouble())
+                Bukkit.getConsoleSender().sendMessage(Bukkit.getTicksPerMonsterSpawns().toString())
                 indices = 1
             }
-            val duration: Double = event.tickDuration
-            indices++
-
-            durations1m[indices] = duration
-            var total = 0.0
-
-            for (d in durations1m.values) {
-                total += d
-            }
-            averages = total / durations1m.size.toDouble()
         }
     }
     fun getLowestMsptServer(): String{
