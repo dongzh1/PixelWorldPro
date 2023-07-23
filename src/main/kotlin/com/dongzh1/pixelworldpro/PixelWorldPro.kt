@@ -8,6 +8,7 @@ import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
 import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.listener.OnPlayerLogin
 import com.dongzh1.pixelworldpro.listener.TickListener
+import com.dongzh1.pixelworldpro.online.Online
 import com.dongzh1.pixelworldpro.papi.Papi
 import com.dongzh1.pixelworldpro.redis.RedisConfig
 import com.dongzh1.pixelworldpro.redis.RedisListener
@@ -61,7 +62,7 @@ class PixelWorldPro : EasyPlugin() {
         //更新配置文件
         CommentConfig.updateConfig()
         //if(config.getString("token")?.let { Online.auth(it) } == true)
-        if(true) {
+        if(config.getString("token")?.let { Online.auth(it) } == true) {
             Bukkit.getConsoleSender().sendMessage("§a恭喜您验证成功！！PixelWorldPro插件感谢您的赞助")
             Bukkit.getConsoleSender().sendMessage("§aCongratulations on your successful verification! ! PixelWorldPro plugin thanks for your sponsorship")
             Bukkit.getConsoleSender().sendMessage("§a将您的验证码交给他人使用可能导致您的服务器被封禁")

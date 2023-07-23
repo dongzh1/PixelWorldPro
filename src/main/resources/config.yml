@@ -21,6 +21,12 @@ ServerName: "server1"
 #这个服务器是否会用于创建世界，如果为false,则只有指定该服创建才会在该服创建世界
 #Whether this server will be used to create the world, if false, only the specified server will create the world on this server
 buildWorld: true
+#玩家世界多久没有人就从服务器卸载，单位为秒，填-1为不卸载
+#How long the player world has not been unloaded from the server, in seconds, fill in -1 to not unload
+unloadTime: 1800
+#玩家世界多久没有人就从数据库删除，单位为天，填-1为不删除
+#How long the player world has not been deleted from the database, in seconds, fill in -1 to not delete
+deleteTime: -1
 #如果你不知道数据库对应的配置，那么只需要改host,port,database,user,passwd即可
 #If you don't know the configuration corresponding to the database, you only need to change host, port, database, user, passwd
 Mysql:
