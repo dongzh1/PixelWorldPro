@@ -25,6 +25,13 @@ object CommentConfig : YamlConfiguration() {
                         "#Whether to use the worldBorder plugin to generate the world border\n" +
                         "WorldBorder: false\n")
             }
+            2 ->{
+                PixelWorldPro.instance.config.set("version", 3)
+                PixelWorldPro.instance.config.set("WorldSetting.Gamemode.owner","SURVIVAL")
+                PixelWorldPro.instance.config.set("WorldSetting.Gamemode.member","SURVIVAL")
+                PixelWorldPro.instance.config.set("WorldSetting.Gamemode.anyone","ADVENTURE")
+                PixelWorldPro.instance.saveConfig()
+            }
             else ->return
         }
 

@@ -354,6 +354,7 @@ object WorldImpl : WorldApi {
                     setTime(world)
                     setWorldBorder(world, worldData.worldLevel)
                     world.keepSpawnInMemory = false
+                    setGamerule(world)
                     true
                 }
             }
@@ -361,6 +362,7 @@ object WorldImpl : WorldApi {
             return if (Bukkit.getWorld(worldData.worldName) != null) {
                 setTime(Bukkit.getWorld(worldData.worldName)!!)
                 setWorldBorder(Bukkit.getWorld(worldData.worldName)!!, worldData.worldLevel)
+                setGamerule(Bukkit.getWorld(worldData.worldName)!!)
                 true
             } else {
                 val world = Bukkit.createWorld(WorldCreator(worldData.worldName))
@@ -369,6 +371,7 @@ object WorldImpl : WorldApi {
                 } else {
                     setTime(world)
                     setWorldBorder(world, worldData.worldLevel)
+                    setGamerule(world)
                     true
                 }
             }
@@ -387,7 +390,7 @@ object WorldImpl : WorldApi {
         return PixelWorldPro.instance.lang().getStringColored(string)
     }
 
-    private fun setGamerule(world: World) {
+    fun setGamerule(world: World) {
         val gamerulesStringList =
             PixelWorldPro.instance.config.getConfigurationSection("WorldSetting.GameRule")!!.getKeys(false)
         for (gameruleString in gamerulesStringList) {
@@ -397,12 +400,16 @@ object WorldImpl : WorldApi {
                 continue
             }
             if (gamerule.type == Class.forName("java.lang.Boolean")) {
-                val valueBoolean = PixelWorldPro.instance.config.getBoolean("WorldSet.$gameruleString")
+                val valueBoolean = PixelWorldPro.instance.config.getBoolean("WorldSetting.GameRule.$gameruleString")
                 world.setGameRule(gamerule as GameRule<Boolean>, valueBoolean)
+                world.setGameRule(gamerule, valueBoolean)
+                world.save()
             }
             if (gamerule.type == Class.forName("java.lang.Integer")) {
-                val valueInt = PixelWorldPro.instance.config.getInt("WorldSet.$gameruleString")
+                val valueInt = PixelWorldPro.instance.config.getInt("WorldSetting.GameRule.$gameruleString")
                 world.setGameRule(gamerule as GameRule<Int>, valueInt)
+                world.setGameRule(gamerule, valueInt)
+                world.save()
             }
         }
     }

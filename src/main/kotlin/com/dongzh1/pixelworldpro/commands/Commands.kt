@@ -6,13 +6,17 @@ import com.dongzh1.pixelworldpro.api.WorldApi
 import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.impl.WorldImpl
+import com.dongzh1.pixelworldpro.listener.WorldProtect
 import com.dongzh1.pixelworldpro.redis.RedisManager
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.command.ArgNode
 import com.xbaimiao.easylib.module.command.command
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
+import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Entity
+import org.bukkit.entity.HumanEntity
 import org.bukkit.entity.Player
 import java.io.File
 import java.util.UUID
@@ -182,6 +186,9 @@ class Commands {
                             playerData1 =
                                 playerData1.copy(joinedWorld = playerData.joinedWorld + (sender as Player).uniqueId)
                             PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData1)
+                        }
+                        if (player.isOnline.and(Bukkit.getWorld(player.uniqueId)?.name == worldData!!.worldName)){
+                            TeleportApi.Factory.teleportApi?.teleport(WorldProtect.getWorldNameUUID(worldData!!.worldName),player.uniqueId)
                         }
                         sender.sendMessage(lang("Success"))
                     }else{

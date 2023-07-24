@@ -8,6 +8,7 @@ object WorldFile {
     fun isBreak(file: File): String {
         //获取file文件夹下的所有文件
         val files = file.listFiles() ?: return lang("FileNotFound")
+        /*
         //是否包含session.lock和data文件夹，如果有缺失就返回确实的是哪个文件
         if (!files.contains(File(file, "session.lock"))) {
             return lang("FileNeedSession")
@@ -19,6 +20,7 @@ object WorldFile {
         if (files.contains(File(file, "uid.dat"))) {
             return lang("FileCanNotHasUid")
         }
+        */
         return "ok"
 
        }
