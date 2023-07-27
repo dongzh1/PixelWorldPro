@@ -7,16 +7,14 @@ import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.impl.WorldImpl
 import com.dongzh1.pixelworldpro.listener.WorldProtect
+import com.dongzh1.pixelworldpro.migrate.Migrate
 import com.dongzh1.pixelworldpro.redis.RedisManager
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.command.ArgNode
 import com.xbaimiao.easylib.module.command.command
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
-import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Entity
-import org.bukkit.entity.HumanEntity
 import org.bukkit.entity.Player
 import java.io.File
 import java.util.UUID
@@ -672,6 +670,13 @@ class Commands {
         }
     }
 
+    private val migrateppw = command<CommandSender>("migrateppw") {
+        exec{
+            val player = sender as Player
+            Migrate.ppw(player)
+        }
+    }
+
     private val tp = command<CommandSender>("tp") {
         permission = "pixelworldpro.command.tp"
         exec {
@@ -912,6 +917,7 @@ class Commands {
         sub(unload)
         sub(load)
         sub(members)
+        sub(migrateppw)
         sub(blacklist)
         sub(levelup)
         sub(gui)

@@ -2,6 +2,7 @@ package com.dongzh1.pixelworldpro.api
 
 import com.dongzh1.pixelworldpro.impl.WorldImpl
 import org.bukkit.World
+import org.bukkit.entity.Player
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
@@ -61,6 +62,24 @@ interface WorldApi {
      * @param player 指定玩家
      */
     fun loadWorldGroupTp(world: UUID,player: UUID)
+    /**
+     * 加载指定世界的地狱，plsyer用来判断当地狱没创建时玩家是否是世界主人
+     * @param world 玩家uuid对应的世界
+     * @param player 指定玩家
+     */
+    fun loadNether(world: UUID,player: Player): Boolean
+    /**
+     * 加载指定世界的末地
+     * @param world 玩家uuid对应的世界
+     * @param player 指定玩家
+     */
+    fun loadEnd(world: UUID,player: Player): Boolean
+    /**
+     * 加载指定世界的特殊维度
+     * @param world 玩家uuid对应的世界
+     * @param player 指定玩家
+     */
+    fun loadDimension(world: UUID,player: Player,dimension: String): Boolean
 
     object Factory {
         private var instance: WorldApi? = null

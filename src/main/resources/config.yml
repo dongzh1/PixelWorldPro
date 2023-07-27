@@ -1,6 +1,6 @@
 #配置文件版本号,用于更新配置文件，请勿修改
 #Configuration file version number, used to update the configuration file, please do not modify
-version: 3
+version: 4
 #密钥
 token: ""
 #可以在lang文件夹查看已有的语言文件，如果你想要新增语言文件，请联系我
@@ -83,6 +83,23 @@ WorldSetting:
     owner: SURVIVAL
     member: SURVIVAL
     anyone: ADVENTURE
+  Creator:
+    World: "null"
+    Nether: "null"
+    End: "null"
+  Dimension:
+    example:
+      Create:
+        Creator: "null"
+        CreateUse: both
+        CreateMoney: 100.0
+        CreatePoints: 100.0
+        CreatePermission: 'pixelworldpro.worldcreate.create'
+      #是否启用边界？
+      #Enable boundaries?
+      Barrier: true
+
+
 #插件提供papi变量的一些格式
 #Some formats of papi variables provided by the plugin
 Papi:

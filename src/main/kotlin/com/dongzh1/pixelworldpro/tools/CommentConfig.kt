@@ -32,6 +32,13 @@ object CommentConfig : YamlConfiguration() {
                 PixelWorldPro.instance.config.set("WorldSetting.Gamemode.anyone","ADVENTURE")
                 PixelWorldPro.instance.saveConfig()
             }
+            3 ->{
+                PixelWorldPro.instance.config.set("version", 4)
+                PixelWorldPro.instance.config.set("WorldSetting.Creater.World","null")
+                PixelWorldPro.instance.config.set("WorldSetting.Creater.Nether","null")
+                PixelWorldPro.instance.config.set("WorldSetting.Creater.End","null")
+                PixelWorldPro.instance.saveConfig()
+            }
             else ->return
         }
 
