@@ -23,6 +23,12 @@ interface TeleportApi {
      * @param playerUuid 指定玩家的uuid
      */
     fun teleport(uuid: UUID,playerUuid: UUID)
+    /**
+     * 传送玩家到指定玩家的维度,如果维度没加载则加载
+     * @param uuid 玩家的uuid
+     * @param playerUuid 指定玩家的uuid
+     */
+    fun teleportDimension(uuid: UUID,playerUuid: UUID,dimension: String)
 
     object Factory {
         private var instance: TeleportApi? = null

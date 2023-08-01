@@ -4,21 +4,22 @@ package com.dongzh1.pixelworldpro.impl
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.api.MessageApi
-
 import com.dongzh1.pixelworldpro.api.WorldApi
 import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.database.WorldData
 import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.listener.TickListener
 import com.dongzh1.pixelworldpro.redis.RedisManager
-
+import com.dongzh1.pixelworldpro.tools.Config.getWorldDimensionData
+import com.dongzh1.pixelworldpro.tools.Config.setWorldDimensionData
+import com.dongzh1.pixelworldpro.tools.Dimension
 import com.dongzh1.pixelworldpro.tools.WorldFile
+import com.xbaimiao.easylib.bridge.economy.PlayerPoints
+import com.xbaimiao.easylib.bridge.economy.Vault
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.*
-import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
 import java.io.File
-import java.nio.file.Files
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -120,10 +121,9 @@ object WorldImpl : WorldApi {
         }
         //复制模板文件夹到world文件夹
         file.copyRecursively(File(PixelWorldPro.instance.config.getString("WorldPath"), worldName))
-        worldconfig(worldName)
         //加载世界
 
-        val worldcreator = WorldCreator(realWorldName+"/world")
+        val worldcreator = WorldCreator("$realWorldName/world")
         if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.World") != "null") {
             worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.World"))
         }
@@ -146,7 +146,7 @@ object WorldImpl : WorldApi {
             PixelWorldPro.databaseApi.setWorldData(
                 uuid,
                 WorldData(
-                    worldName = world.name,
+                    worldName = "PixelWorldPro/$worldName",
                     worldLevel = PixelWorldPro.instance.config.getConfigurationSection("WorldSetting.WorldLevel")!!
                         .getKeys(false).first(),
                     arrayListOf(uuid),
@@ -161,6 +161,7 @@ object WorldImpl : WorldApi {
                     isCreateEnd = false
                 )
             )
+            getWorldDimensionData("PixelWorldPro/$worldName")
             //存玩家数据
             submit(async = true) {
                 var playerData = PixelWorldPro.databaseApi.getPlayerData(uuid)
@@ -270,7 +271,7 @@ object WorldImpl : WorldApi {
                 return future
             }
         } else {
-            val world = Bukkit.getWorld(worldData.worldName)
+            val world = Bukkit.getWorld(worldData.worldName+"/world")
             return if (world != null) {
                 future.complete(unloadWorld(world))
                 future
@@ -356,6 +357,7 @@ object WorldImpl : WorldApi {
 
     fun loadWorldLocal(uuid: UUID): Boolean {
         val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
+        getWorldDimensionData(worldData.worldName)
         if (PixelWorldPro.instance.isBungee()) {
             return if (RedisManager.isLock(uuid)) {
                 true
@@ -378,19 +380,13 @@ object WorldImpl : WorldApi {
                 }
             }
         } else {
-            val file = File(worldData.worldName)
-            val files = file.listFiles()!!
-            if (files.contains(File(file, "level.dat"))) {
-                val nfile = File(worldData.worldName + "/world")
-                Files.move(file.toPath(), nfile.toPath())
-            }
             return if (Bukkit.getWorld(worldData.worldName) != null) {
                 setTime(Bukkit.getWorld(worldData.worldName)!!)
                 setWorldBorder(Bukkit.getWorld(worldData.worldName)!!, worldData.worldLevel)
                 setGamerule(Bukkit.getWorld(worldData.worldName)!!)
                 true
             } else {
-                val worldcreator = WorldCreator(worldData.worldName)
+                val worldcreator = WorldCreator(worldData.worldName+"/world")
                 if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.World") != "null") {
                     worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.World"))
                 }
@@ -493,104 +489,129 @@ object WorldImpl : WorldApi {
 
     }
 
-    override fun loadNether(world: UUID,player: Player): Boolean{
-        val worldData = PixelWorldPro.databaseApi.getWorldData(world)!!
-        val World = "./PixelWorldPro/${worldData.worldName}/nether"
-        if (Bukkit.getWorld(World) != null) {
-            setTime(Bukkit.getWorld(World)!!)
-            setWorldBorder(Bukkit.getWorld(World)!!, worldData.worldLevel)
-            setGamerule(Bukkit.getWorld(World)!!)
-            return true
-        }else{
-            if (worldData.isCreateEnd) {
-                player.sendMessage("下届未被购买")
-                return false
-            }else{
-                val worldcreator = WorldCreator(World)
-                if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.Nether") != "null") {
-                    worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.Nether"))
-                }
-                val world = Bukkit.createWorld(worldcreator)
-                return if (world == null) {
-                    player.sendMessage("下届加载失败")
-                    false
-                } else {
-                    setTime(world)
-                    setWorldBorder(world, worldData.worldLevel)
-                    setGamerule(world)
-                    true
-                }
-            }
-        }
-    }
-
-    override fun loadEnd(world: UUID,player: Player): Boolean {
-        val worldData = PixelWorldPro.databaseApi.getWorldData(world)!!
-        val World = "./PixelWorldPro/${worldData.worldName}/end"
-        if (Bukkit.getWorld(World) != null) {
-            setTime(Bukkit.getWorld(World)!!)
-            setWorldBorder(Bukkit.getWorld(World)!!, worldData.worldLevel)
-            setGamerule(Bukkit.getWorld(World)!!)
-            return true
-        }else{
-            if (worldData.isCreateEnd) {
-                player.sendMessage("末地未被购买")
-                return false
-            }else{
-                val worldcreator = WorldCreator(World)
-                if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.End") != "null") {
-                    worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.End"))
-                }
-                val world = Bukkit.createWorld(worldcreator)
-                return if (world == null) {
-                    player.sendMessage("末地加载失败")
-                    false
-                } else {
-                    setTime(world)
-                    setWorldBorder(world, worldData.worldLevel)
-                    setGamerule(world)
-                    true
-                }
-            }
-        }
-    }
-
     override fun loadDimension(world: UUID, player: Player, dimension: String): Boolean {
-        val config = PixelWorldPro.instance.config
-        val Dimension_list = config.getList("WorldSetting.Dimension")!!
+        val dimensiondata = Dimension.getDimensionData(dimension)
         val worldData = PixelWorldPro.databaseApi.getWorldData(world)!!
-        val World = "./PixelWorldPro/${worldData.worldName}/$dimension"
-        if (Bukkit.getWorld(World) != null) {
-            setTime(Bukkit.getWorld(World)!!)
-            setWorldBorder(Bukkit.getWorld(World)!!, worldData.worldLevel)
-            setGamerule(Bukkit.getWorld(World)!!)
+        val worldname = "./${worldData.worldName}/$dimension"
+        if (Bukkit.getWorld(worldname) != null) {
+            setTime(Bukkit.getWorld(worldname)!!)
+            setWorldBorder(Bukkit.getWorld(worldname)!!, worldData.worldLevel)
+            setGamerule(Bukkit.getWorld(worldname)!!)
             return true
-        } else {
-            if (dimension in Dimension_list) {
-                if (worldconfig(worldData.worldName).getBoolean(dimension)) {
+         } else {
+            if (dimensiondata != null) {
+                if (dimension in getWorldDimensionData(worldData.worldName).discreatelist) {
                     player.sendMessage("维度未被购买")
                     return false
                 }else{
-                    val worldcreator = WorldCreator(World)
-                    if (PixelWorldPro.instance.config.getString("WorldSetting.Dimension.${dimension}.Create.Creator") != "null") {
-                        worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Dimension.${dimension}.Create.Creator"))
+                    val worldcreator = WorldCreator(worldname)
+                    if (dimensiondata.creator != "auth") {
+                        worldcreator.generator(dimensiondata.creator)
                     }
-                    val world = Bukkit.createWorld(worldcreator)
-                    return if (world == null) {
+                    val worlds = Bukkit.createWorld(worldcreator)
+                    return if (worlds == null) {
                         player.sendMessage("维度加载失败")
                         false
                     } else {
-                        setTime(world)
-                        if (PixelWorldPro.instance.config.getBoolean("WorldSetting.Dimension.${dimension}.Barrier")) {
-                            setWorldBorder(world, worldData.worldLevel)
+                        setTime(worlds)
+                        if (dimensiondata.barrier) {
+                            setWorldBorder(worlds, worldData.worldLevel)
+                        }else{
+                            worlds.worldBorder.center = worlds.spawnLocation
+                            worlds.worldBorder.size = 60000000.0
                         }
-                        setGamerule(world)
+                        setGamerule(worlds)
                         true
                     }
                 }
             } else {
                 player.sendMessage("没有找到对应的维度")
                 return false
+            }
+        }
+    }
+
+    override fun createDimension(world: UUID, player: Player, dimension: String): Boolean {
+        PixelWorldPro.instance.config
+        val dimensiondata = Dimension.getDimensionData(dimension)
+        val worldData = PixelWorldPro.databaseApi.getWorldData(world)!!
+        val worldname = "${worldData.worldName}/$dimension"
+        if (Bukkit.getWorld(worldname) != null) {
+            setTime(Bukkit.getWorld(worldname)!!)
+            setWorldBorder(Bukkit.getWorld(worldname)!!, worldData.worldLevel)
+            setGamerule(Bukkit.getWorld(worldname)!!)
+            return true
+        } else {
+            if (dimensiondata != null) {
+                if (dimension in getWorldDimensionData(worldData.worldName).createlist) {
+                    player.sendMessage("你已经购买了这个维度")
+                    return false
+                }else{
+                    when(dimensiondata.createUse) {
+                        "both" -> {
+                            if (Vault().has(player, dimensiondata.createMoney) &&
+                                PlayerPoints().has(player, dimensiondata.createPoints)
+                            ) {
+                                Vault().take(player, Gui.getMembersEditConfig().getDouble("Money"))
+                                PlayerPoints().take(player, dimensiondata.createPoints)
+                            } else {
+                                player.sendMessage(lang("MoneyNotEnough"))
+                                return false
+                            }
+                        }
+
+                        "money" -> {
+                            if (Vault().has(player, dimensiondata.createMoney)) {
+                                Vault().take(player, dimensiondata.createMoney)
+                            } else {
+                                player.sendMessage(lang("MoneyNotEnough"))
+                                return false
+                            }
+                        }
+
+                        "points" -> {
+                            if (PlayerPoints().has(player, dimensiondata.createPoints)) {
+                                PlayerPoints().take(player, dimensiondata.createPoints)
+                            } else {
+                                player.sendMessage(lang("PointsNotEnough"))
+                                return false
+                            }
+                        }
+                    }
+                    val worldcreator = WorldCreator(worldname)
+                    if (dimensiondata.creator != "auto") {
+                        worldcreator.generator(dimensiondata.creator)
+                    }
+                    val worlds = Bukkit.createWorld(worldcreator)
+                    return if (worlds == null) {
+                        player.sendMessage("维度创建失败")
+                        false
+                    } else {
+                        setTime(worlds)
+                        if (PixelWorldPro.instance.config.getBoolean("WorldSetting.Dimension.${dimension}.Barrier")) {
+                            setWorldBorder(worlds, worldData.worldLevel)
+                        }
+                        setGamerule(worlds)
+                        getWorldDimensionData(worldData.worldName)
+                        setWorldDimensionData(worldData.worldName, dimension, true)
+                        true
+                    }
+                }
+            } else {
+                player.sendMessage("没有找到对应的维度")
+                return false
+            }
+        }
+    }
+
+    override fun unloadDimension(world: UUID){
+        val worldData = PixelWorldPro.databaseApi.getWorldData(world)!!
+        val worldDimensiondata = getWorldDimensionData(worldData.worldName)
+        for (dimension in worldDimensiondata.createlist) {
+            val worlds = Bukkit.getWorld(worldData.worldName + "/" + dimension)
+            if (worlds != null){
+                Bukkit.getConsoleSender().sendMessage("卸载${worldData.worldName}的${dimension}维度")
+                Bukkit.unloadWorld(worlds, true)
             }
         }
     }
@@ -603,38 +624,5 @@ object WorldImpl : WorldApi {
             return RedisManager.isLock(uuid)
         }
         return false
-    }
-
-    /**
-     * 获取/修改/创建 世界配置文件
-     */
-    private fun worldconfig(name: String): YamlConfiguration {
-        val file= File(PixelWorldPro.instance.config.getString("WorldPath") , name)
-        val path = file.path
-        val worldconf = File(path,"world.yml")
-        val data = YamlConfiguration()
-        data.load(worldconf)
-        val Dimension = PixelWorldPro.instance.config.getList("WorldSetting.Dimension")!!
-        try {
-            data.getString("nether")
-        }catch (e:Exception){
-            Bukkit.getConsoleSender().sendMessage(path+"获取下界维度设置失败，初始化该维度设置")
-            data.set("nether",false)
-        }
-        try {
-            data.getString("the_end")
-        }catch (e:Exception){
-            Bukkit.getConsoleSender().sendMessage(path+"获取末地维度设置失败，初始化该维度设置")
-            data.set("the_end",false)
-        }
-        for (dimension in Dimension){
-            try {
-                data.getString(dimension.toString())
-            }catch (e:Exception){
-                Bukkit.getConsoleSender().sendMessage(path+"获取${dimension.toString()}维度设置失败，初始化该维度设置")
-                data.set(dimension.toString(),false)
-            }
-        }
-        return data
     }
 }

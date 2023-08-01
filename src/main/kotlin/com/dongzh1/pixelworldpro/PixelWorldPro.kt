@@ -1,10 +1,12 @@
 package com.dongzh1.pixelworldpro
 
 import com.dongzh1.pixelworldpro.api.DatabaseApi
+import com.dongzh1.pixelworldpro.api.WorldApi
 import com.dongzh1.pixelworldpro.commands.Commands
 import com.dongzh1.pixelworldpro.commands.Server
 import com.dongzh1.pixelworldpro.database.MysqlDatabaseApi
 import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
+import com.dongzh1.pixelworldpro.expansion.ExpansionManager
 import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.listener.OnPlayerLogin
 import com.dongzh1.pixelworldpro.listener.TickListener
@@ -24,6 +26,7 @@ import com.xbaimiao.easylib.task.EasyLibTask
 import org.bukkit.Bukkit
 import redis.clients.jedis.JedisPool
 import java.io.File
+import java.nio.file.Files
 import java.util.*
 
 
@@ -43,6 +46,7 @@ class PixelWorldPro : EasyPlugin() {
     }
 
     private var config = BuiltInConfiguration("config.yml")
+    val dimensionconfig = BuiltInConfiguration("Dimension.yml")
     private var lang = BuiltInConfiguration("lang/${config.getString("lang")}.yml")
     private val dataMap = mutableMapOf<String, String>()
     private var isBungee = false
@@ -114,6 +118,16 @@ class PixelWorldPro : EasyPlugin() {
             submit(delay = 60) {
                 unregisterListener(initListener)
             }
+            val file = File("./PixelWorldPro_old")
+            if (file.exists() && !file.isDirectory) {
+                val files = file.listFiles()!!
+                for (f in files) {
+                    Bukkit.getConsoleSender().sendMessage("更新${f.name}世界格式")
+                    val nfile = File(PixelWorldPro.instance.config.getString("WorldPath"), f.name + "/world")
+                    f.copyRecursively(nfile)
+                }
+            }
+            //ExpansionManager.loadExpansion()
         }else{
             Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro Invalid token")
         }

@@ -11,7 +11,7 @@ import java.util.*
 import java.util.jar.JarFile
 
 
-class ExpansionManager(){
+object ExpansionManager{
 
     private val classes: MutableMap<String, Class<*>>
     private val loaders: MutableMap<Expansion, ExpansionClassLoader>

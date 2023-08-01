@@ -63,14 +63,16 @@ object Online {
     fun verify(token:String): Boolean {
         val mac = getMacByIP()
         val dummyUrl = URL("http://zh_sh1.mcyzj.cn:1030/v1/verify/Pixelworldpro")
-        val data = mapOf<String, String>("token" to token, "macs" to mac)
-        val dummyData = JSONObject(data).toString()
+        val dummyData = "token=$token&macs=$mac"
 
         try {
             val httpUrlConnection: HttpURLConnection = dummyUrl.openConnection() as HttpURLConnection
             httpUrlConnection.requestMethod = "POST"
             httpUrlConnection.doOutput = true
             httpUrlConnection.setRequestProperty("Content-Type", "application/json")
+            httpUrlConnection.setRequestProperty("accept", "application/json")
+            httpUrlConnection.setRequestProperty("charset", "utf-8")
+            httpUrlConnection.setRequestProperty("Content-Length", dummyData.length.toString())
             val dataOutputStream = DataOutputStream(httpUrlConnection.outputStream)
             dataOutputStream.writeBytes(dummyData)
             val inputStream: InputStream = httpUrlConnection.inputStream

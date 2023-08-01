@@ -73,6 +73,10 @@ object RedisManager : Module<EasyPlugin> {
     }
 
     fun setMspt(mspt: Double) {
+        if (PixelWorldPro.instance.config.getBoolean("buildWorld")){
+            val mspt = 10000
+            mspt.toDouble()
+        }
         var value = getMspt()
         if (value != null) {
             var isFound = false

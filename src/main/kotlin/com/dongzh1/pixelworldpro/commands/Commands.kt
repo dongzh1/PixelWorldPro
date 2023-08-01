@@ -9,6 +9,8 @@ import com.dongzh1.pixelworldpro.impl.WorldImpl
 import com.dongzh1.pixelworldpro.listener.WorldProtect
 import com.dongzh1.pixelworldpro.migrate.Migrate
 import com.dongzh1.pixelworldpro.redis.RedisManager
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.command.ArgNode
 import com.xbaimiao.easylib.module.command.command
@@ -17,6 +19,7 @@ import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.io.File
+import java.util.ArrayList
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
@@ -462,7 +465,7 @@ class Commands {
                         sender.sendMessage(lang("WorldNotExist"))
                         return@exec
                     }
-                    val world = Bukkit.getWorld(worldData.worldName)
+                    val world = Bukkit.getWorld(worldData.worldName+"/world")
                     if (world != null) {
                         sender.sendMessage(lang("WorldExist"))
                         return@exec
@@ -498,7 +501,7 @@ class Commands {
                         sender.sendMessage(lang("WorldNotExist"))
                         return@exec
                     }
-                    val world = Bukkit.getWorld(worldData.worldName)
+                    val world = Bukkit.getWorld(worldData.worldName+"/world")
                     if (world != null) {
                         sender.sendMessage(lang("WorldExist"))
                         return@exec
@@ -593,6 +596,12 @@ class Commands {
         permission = "pixelworldpro.command.admin"
         exec {
             PixelWorldPro.instance.reloadConfig()
+            if (sender is Player){
+                val player = sender as Player
+                player.sendMessage("PixelWorldPro重载配置")
+            }else{
+                Bukkit.getConsoleSender().sendMessage("PixelWorldPro重载配置")
+            }
         }
     }
 
@@ -668,6 +677,89 @@ class Commands {
                 }
             }
         }
+    }
+
+    private val dimensioncreate = command<CommandSender>("create") {
+        permission = "pixelworldpro.command.dimension.create"
+        exec {
+            if (args.isNotEmpty()) {
+                if (sender is Player) {
+                    val player = sender as Player
+                    val back = WorldImpl.createDimension(player.uniqueId,player,args[0])
+                    if (!back){
+                        player.sendMessage("创建维度失败")
+                    }
+                }
+            }
+        }
+    }
+
+    private val dimensiontp = command<CommandSender>("tp") {
+        permission = "pixelworldpro.command.dimension.tp"
+        exec {
+            if (args.isNotEmpty()) {
+                if (sender is Player) {
+                    val player = sender as Player
+                    //try {
+                        val config = PixelWorldPro.instance.config
+                        val dimensionlist = config.getList("WorldSetting.Dimension")!!
+                        val dimensionList = ArrayList<String>()
+                        for (d in dimensionlist){
+                            val g = Gson()
+                            val json: JsonObject = g.fromJson(d.toString(), JsonObject::class.java)
+                            val name = json.get("name").asString
+                            dimensionList.add(name)
+                        }
+                        dimensionList.add("world")
+                        var name = player.world.name
+                        Bukkit.getConsoleSender().sendMessage(name)
+                        if (name.startsWith("Pixelworldpro/")) {
+                            name = name.replace("Pixelworldpro/","")
+                            for (d in dimensionList){
+                                if (name.contains(d)) {
+                                    name = name.substring(0, name.length - d.length)
+                                    name = name.substring(0, name.length - 21)
+                                    Bukkit.getConsoleSender().sendMessage(name)
+                                    break
+                                }
+                            }
+                            val uuid = UUID.fromString(name)
+                            val world = PixelWorldPro.databaseApi.getWorldData(uuid)
+                            if (world != null) {
+                                TeleportApi.Factory.teleportApi?.teleportDimension(uuid, player.uniqueId, args[0])
+                            }
+                        }
+                    //}catch (e:Exception){
+
+                    //}
+                }
+            }
+        }
+    }
+
+    private val dimensionload = command<CommandSender>("load") {
+        permission = "pixelworldpro.command.dimension.load"
+        exec {
+            if (args.isNotEmpty()) {
+                if (sender is Player) {
+                    val player = sender as Player
+                    val back = WorldImpl.loadDimension(player.uniqueId,player,args[0])
+                    if (!back){
+                        player.sendMessage("加载维度失败")
+                    }
+                }
+            }
+        }
+    }
+
+    private val dimension = command<CommandSender>("dimension") {
+        permission = "pixelworldpro.command.dimension"
+        exec {
+            return@exec
+        }
+        sub(dimensioncreate)
+        sub(dimensionload)
+        sub(dimensiontp)
     }
 
     private val migrateppw = command<CommandSender>("migrateppw") {
@@ -907,9 +999,10 @@ class Commands {
         return PixelWorldPro.instance.lang().getStringColored(string)
     }
 
-    val commandRoot = command<CommandSender>("pixelworldpro") {
+    val commandRoot = command<CommandSender>("pwp") {
         permission = "pixelworldpro.command"
         sub(create)
+        sub(dimension)
         sub(tp)
         sub(reload)
         sub(mspt)

@@ -60,9 +60,9 @@ class TeleportImpl: TeleportApi {
             }else{
                 //如果是本地模式则直接传送
                 val player = Bukkit.getPlayer(uuid) ?: return@submit
-                var world = Bukkit.getWorld(worldData.worldName)
+                var world = Bukkit.getWorld(worldData.worldName+"/world")
                 if (world == null) {
-                    world = Bukkit.createWorld(WorldCreator(worldData.worldName))
+                    world = Bukkit.createWorld(WorldCreator(worldData.worldName+"/world"))
                     if (world == null) {
                         return@submit
                     }else{
@@ -74,6 +74,34 @@ class TeleportImpl: TeleportApi {
                     return@submit
                 }
             }
+        }
+    }
+
+    override fun teleportDimension(uuid: UUID, playerUuid: UUID, dimension: String) {
+        submit {
+            val worldData = PixelWorldPro.databaseApi.getWorldData(playerUuid) ?: return@submit
+            //如果是本地模式则直接传送
+            val player = Bukkit.getPlayer(uuid) ?: return@submit
+            var world = Bukkit.getWorld("./${worldData.worldName}/$dimension")
+            if (world == null) {
+                val back = WorldImpl.loadDimension(uuid, Bukkit.getPlayer(playerUuid)!!, dimension)
+                if (back) {
+                    world = Bukkit.getWorld("./${worldData.worldName}/$dimension")
+                    if (world == null) {
+                        return@submit
+                    } else {
+                        player.sendMessage("传送维度")
+                        player.teleport(world.spawnLocation)
+                        return@submit
+                    }
+                } else {
+                    player.sendMessage("此世界的${dimension}维度尚未购买/加载失败/没有该维度")
+                }
+            } else {
+                player.teleport(world.spawnLocation)
+                return@submit
+            }
+
         }
     }
     fun connect(player: Player, server: String) {

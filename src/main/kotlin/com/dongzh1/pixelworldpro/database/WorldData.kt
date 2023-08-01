@@ -21,3 +21,15 @@ data class PlayerData (
     val joinedWorld: List<UUID>,
     val memberNumber: Int
 )
+data class DimensionData (
+    val name: String,
+    val creator: String,
+    val createUse: String,
+    val createMoney: Double,
+    val createPoints: Double,
+    val barrier: Boolean
+)
+data class WorldDimensionData (
+    val createlist: List<String>,
+    val discreatelist: List<String>
+)
