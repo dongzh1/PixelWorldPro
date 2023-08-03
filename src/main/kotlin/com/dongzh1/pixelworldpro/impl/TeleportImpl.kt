@@ -52,7 +52,7 @@ class TeleportImpl: TeleportApi {
                 //如果是bungee模式则发送消息到bungee
                 if (RedisManager.isLock(playerUuid)){
                     //世界已经加载，告诉其他服,uuid要传送到有playeruuid世界的服务器，
-                    RedisManager.push("teleportWorld|,|${uuid}|,|${worldData.worldName}")
+                    RedisManager.push("teleportWorld|,|${uuid}|,|${worldData.worldName}/world")
                 }else{
                     //加载世界再传送玩家
                     WorldImpl.loadWorldGroupTp(playerUuid,uuid)

@@ -8,73 +8,43 @@ import java.net.URL
 import java.net.URLClassLoader
 import java.util.*
 
-/**
- * Loads addons and sets up permissions
- * @author Tastybento, ComminQ
- */
-class ExpansionClassLoader : URLClassLoader {
+class ExpansionClassLoader//try {
+//} catch (e: ClassCastException) {
+//    throw java.lang.Exception("主类没有扩展")
+//}
+    (addonsManager: ExpansionManager, data: YamlConfiguration, jarFile: File, parent: ClassLoader?, name: String) : URLClassLoader(
+    arrayOf<URL>(jarFile.toURI().toURL()), parent
+) {
     private val classes: MutableMap<String, Class<*>?> = HashMap()
 
-    /**
-     * @return the addon
-     */
     @JvmField
     val expansion: Expansion
-    private val loader: ExpansionManager
+    private val loader: ExpansionManager = addonsManager
 
-    /**
-     * For testing only
-     * @param addon addon
-     * @param loader Addons Manager
-     * @param jarFile Jar File
-     * @throws MalformedURLException exception
-     */
-    constructor(expansion: Expansion, loader: ExpansionManager, jarFile: File) : super(arrayOf<URL>(jarFile.toURI().toURL())) {
-        this.expansion = expansion
-        this.loader = loader
-    }
-
-    constructor(addonsManager: ExpansionManager, data: YamlConfiguration, jarFile: File, parent: ClassLoader?) : super(
-            arrayOf<URL>(jarFile.toURI().toURL()), parent
-    ) {
-        loader = addonsManager
+    init {
         val javaClass: Class<*>
         try {
             val mainClass =
-                    data.getString("main") ?: throw java.lang.Exception("§4PixelPlayerWorld expansion.yml 没有设置一个主类！")
+                    data.getString("main") ?: throw java.lang.Exception("§4PixelWorldPro expansion.yml 没有设置一个主类！")
             javaClass = Class.forName(mainClass, true, this)
-            if (mainClass.startsWith("com.xbaimiao.template")) {
-                throw java.lang.Exception("§4PixelPlayerWorld 扩展的主类不能是 'com.xbaimiao.template'")
+            if (mainClass.startsWith("com.dongzh1.pixelworldpro")) {
+                throw java.lang.Exception("§4PixelWorldPro 扩展的主类不能是 'com.dongzh1.pixelworldpro'")
             }
         } catch (e: Exception) {
-            throw InvalidDescriptionException("无法加载 '" + jarFile.name + "' 在文件夹中 '" + jarFile.parent + "' - " + e.message)
+            throw InvalidDescriptionException("§4PixelWorldPro 无法加载扩展$name")
         }
-        val expansionClass: Class<out Expansion>
-        expansionClass = //try {
-            javaClass.asSubclass(Expansion::class.java)
-        //} catch (e: ClassCastException) {
-        //    throw java.lang.Exception("主类没有扩展")
-        //}
+        val expansionClass: Class<out Expansion> = javaClass.asSubclass(Expansion::class.java)
         expansion = expansionClass.getDeclaredConstructor().newInstance()
-        Bukkit.getConsoleSender().sendMessage("§aPixelPlayerWorld加载扩展$jarFile")
+        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载扩展$name")
         expansion.onEnable()
     }
 
-    /* (non-Javadoc)
-     * @see java.net.URLClassLoader#findClass(java.lang.String)
-     */
     public override fun findClass(name: String): Class<*>? {
         return findClass(name, true)
     }
 
-    /**
-     * This is a custom findClass that enables classes in other addons to be found
-     * @param name - class name
-     * @param checkGlobal - check globally or not when searching
-     * @return Class - class if found
-     */
     fun findClass(name: String, checkGlobal: Boolean): Class<*>? {
-        if (name.startsWith("world.bentobox.bentobox")) {
+        if (name.startsWith("com.dongzh1.pixelworldpro")) {
             return null
         }
         var result = classes[name]
@@ -87,7 +57,7 @@ class ExpansionClassLoader : URLClassLoader {
                     result = super.findClass(name)
                 } catch (e: ClassNotFoundException) {
                     // Do nothing.
-                } catch (e: NoClassDefFoundError) {
+                } catch (_: NoClassDefFoundError) {
                 }
                 if (result != null) {
                     loader.setClass(name, result)
@@ -96,12 +66,5 @@ class ExpansionClassLoader : URLClassLoader {
             classes[name] = result
         }
         return result
-    }
-
-    /**
-     * @return class list
-     */
-    fun getClasses(): Set<String> {
-        return classes.keys
     }
 }

@@ -23,6 +23,7 @@ repositories {
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     maven("https://repo.codemc.org/repository/maven-public/")
     maven("https://maven.xbaimiao.com/repository/releases/")
+    maven("https://repo1.maven.org/maven2/")
     maven {
         url = uri("https://maven.xbaimiao.com/repository/maven-private/")
         credentials {
@@ -43,6 +44,7 @@ dependencies {
     implementation ("com.zaxxer:HikariCP:4.0.3")
     implementation ("redis.clients:jedis:3.7.0")
     implementation ("com.google.code.gson:gson:2.10")
+    implementation ("org.bouncycastle:bcprov-lts8on:2.73.3")
     compileOnly(fileTree("libs"))
     compileOnly(dependencyNotation = "org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
 

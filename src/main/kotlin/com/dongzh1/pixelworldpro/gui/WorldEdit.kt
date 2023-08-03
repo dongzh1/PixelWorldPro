@@ -2,7 +2,7 @@ package com.dongzh1.pixelworldpro.gui
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.impl.WorldImpl
-import com.dongzh1.pixelworldpro.online.Online
+import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.redis.RedisManager
 import com.xbaimiao.easylib.bridge.economy.PlayerPoints
 import com.xbaimiao.easylib.bridge.economy.Vault
@@ -15,7 +15,7 @@ class WorldEdit(val player: Player) {
 
     }
     fun open(gui: String = "WorldEdit.yml"){
-        if(PixelWorldPro.instance.config.getString("token")?.let { Online.verify(it) } == true) {
+        if(PixelWorldPro.instance.config.getString("token")?.let { V2.verify(it) } == true) {
             val basicCharMap = build()
             val basic = basicCharMap.basic
             val charMap = basicCharMap.charMap

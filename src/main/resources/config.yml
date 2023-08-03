@@ -18,7 +18,7 @@ Bungee: false
 #填写此服在bungee配置中的名称，如果不是bungee群组，那么此项可以不管
 #Fill in the name of this server in the bungee configuration. If it is not a bungee group, this item can be ignored
 ServerName: "server1"
-#这个服务器是否会用于创建世界，如果为false,则只有指定该服创建才会在该服创建世界
+#这个服务器是否会用于创建世界，如果为false,则只有指定该服创建才会在该服创建世界，仅bungee下有效
 #Whether this server will be used to create the world, if false, only the specified server will create the world on this server
 buildWorld: true
 #玩家世界多久没有人就从服务器卸载，单位为秒，填-1为不卸载
@@ -84,28 +84,7 @@ WorldSetting:
     member: SURVIVAL
     anyone: ADVENTURE
   Creator:
-    World: "null"
-    Nether: "null"
-    End: "null"
-  Dimension:
-    - name: nether
-      Create:
-        Creator: "auth"
-        CreateUse: both
-        CreateMoney: 100
-        CreatePoints: 100
-      #是否启用边界？
-      #Enable boundaries?
-      Barrier: true
-    - name: the_end
-      Create:
-        Creator: "auth"
-        CreateUse: both
-        CreateMoney: 100
-        CreatePoints: 100
-      #是否启用边界？
-      #Enable boundaries?
-      Barrier: true
+    World: "auto"
 
 
 #插件提供papi变量的一些格式
@@ -133,5 +112,7 @@ Papi:
     anyone: '&a开放'
     member: '&a成员'
     owner: '&a不开放'
+#PWP默认大厅服务器，仅bungee下有效
+lobby: "lobby"
 
 

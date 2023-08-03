@@ -10,6 +10,7 @@ import com.dongzh1.pixelworldpro.database.WorldData
 import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.listener.TickListener
 import com.dongzh1.pixelworldpro.redis.RedisManager
+import com.dongzh1.pixelworldpro.tools.Bungee
 import com.dongzh1.pixelworldpro.tools.Config.getWorldDimensionData
 import com.dongzh1.pixelworldpro.tools.Config.setWorldDimensionData
 import com.dongzh1.pixelworldpro.tools.Dimension
@@ -19,10 +20,12 @@ import com.xbaimiao.easylib.bridge.economy.Vault
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.*
 import org.bukkit.entity.Player
+import sun.audio.AudioPlayer.player
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CompletableFuture
+
 
 object WorldImpl : WorldApi {
     private val unloadWorldList: MutableList<UUID> = mutableListOf()
@@ -124,7 +127,7 @@ object WorldImpl : WorldApi {
         //加载世界
 
         val worldcreator = WorldCreator("$realWorldName/world")
-        if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.World") != "null") {
+        if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.World") != "auto") {
             worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.World"))
         }
         val world = Bukkit.createWorld(worldcreator)
@@ -186,7 +189,7 @@ object WorldImpl : WorldApi {
             if (it) {
                 val file = File(PixelWorldPro.instance.config.getString("WorldTemplatePath"), templateName)
                 val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
-                file.copyRecursively(File(worldPath(), worldData.worldName))
+                file.copyRecursively(File(worldData.worldName))
                 val worldcreator = WorldCreator(worldData.worldName+"/world")
                 if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.World") != "null") {
                     worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.World"))
@@ -228,6 +231,11 @@ object WorldImpl : WorldApi {
      */
     override fun unloadWorld(world: World): Boolean {
         //清空世界玩家
+        if (PixelWorldPro.instance.config.getBoolean("Bungee")) {
+            for(player in world.players) {
+                Bungee.connect(player, PixelWorldPro.instance.config.getString("lobby")!!)
+            }
+        }
         world.players.forEach {
             it.teleport(Bukkit.getWorlds()[0].spawnLocation)
         }
@@ -236,6 +244,7 @@ object WorldImpl : WorldApi {
     }
 
     override fun unloadWorld(uuid: UUID): CompletableFuture<Boolean> {
+        unloadDimension(uuid)
         val future = CompletableFuture<Boolean>()
         val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
         if (PixelWorldPro.instance.isBungee()) {
@@ -364,7 +373,7 @@ object WorldImpl : WorldApi {
             } else {
                 RedisManager.setLock(uuid)
                 val worldcreator = WorldCreator(worldData.worldName + "/world")
-                if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.World") != "null") {
+                if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.World") != "auto") {
                     worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.World"))
                 }
                 val world = Bukkit.createWorld(worldcreator)
@@ -505,7 +514,7 @@ object WorldImpl : WorldApi {
                     return false
                 }else{
                     val worldcreator = WorldCreator(worldname)
-                    if (dimensiondata.creator != "auth") {
+                    if (dimensiondata.creator != "auto") {
                         worldcreator.generator(dimensiondata.creator)
                     }
                     val worlds = Bukkit.createWorld(worldcreator)
@@ -579,6 +588,18 @@ object WorldImpl : WorldApi {
                         }
                     }
                     val worldcreator = WorldCreator(worldname)
+                    when (dimension){
+                        "nether" ->{
+                            worldcreator.environment(World.Environment.NETHER)
+                            worldcreator.type(WorldType.NORMAL)
+                            worldcreator.generateStructures(true)
+                        }
+                        "the_end" ->{
+                            worldcreator.environment(World.Environment.THE_END)
+                            worldcreator.type(WorldType.AMPLIFIED)
+                            worldcreator.generateStructures(true)
+                        }
+                    }
                     if (dimensiondata.creator != "auto") {
                         worldcreator.generator(dimensiondata.creator)
                     }
@@ -608,10 +629,12 @@ object WorldImpl : WorldApi {
         val worldData = PixelWorldPro.databaseApi.getWorldData(world)!!
         val worldDimensiondata = getWorldDimensionData(worldData.worldName)
         for (dimension in worldDimensiondata.createlist) {
-            val worlds = Bukkit.getWorld(worldData.worldName + "/" + dimension)
-            if (worlds != null){
-                Bukkit.getConsoleSender().sendMessage("卸载${worldData.worldName}的${dimension}维度")
-                Bukkit.unloadWorld(worlds, true)
+            if (dimension != "world") {
+                val worlds = Bukkit.getWorld(worldData.worldName + "/" + dimension)
+                if (worlds != null) {
+                    Bukkit.getConsoleSender().sendMessage("卸载${worldData.worldName}的${dimension}维度")
+                    Bukkit.unloadWorld(worlds, true)
+                }
             }
         }
     }

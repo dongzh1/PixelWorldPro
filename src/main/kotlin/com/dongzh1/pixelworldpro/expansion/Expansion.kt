@@ -4,5 +4,5 @@ abstract class Expansion protected constructor() {
 
     abstract fun onEnable()
 
-    //abstract fun onDisable()
+    abstract fun onDisable()
 }

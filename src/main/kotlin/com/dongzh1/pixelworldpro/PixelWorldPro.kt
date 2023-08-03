@@ -1,16 +1,16 @@
 package com.dongzh1.pixelworldpro
 
 import com.dongzh1.pixelworldpro.api.DatabaseApi
-import com.dongzh1.pixelworldpro.api.WorldApi
 import com.dongzh1.pixelworldpro.commands.Commands
 import com.dongzh1.pixelworldpro.commands.Server
 import com.dongzh1.pixelworldpro.database.MysqlDatabaseApi
 import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
-import com.dongzh1.pixelworldpro.expansion.ExpansionManager
+import com.dongzh1.pixelworldpro.expansion.Expansion
+import com.dongzh1.pixelworldpro.expansion.ExpansionManager.loadExpansion
 import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.listener.OnPlayerLogin
 import com.dongzh1.pixelworldpro.listener.TickListener
-import com.dongzh1.pixelworldpro.online.Online
+import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.papi.Papi
 import com.dongzh1.pixelworldpro.redis.RedisConfig
 import com.dongzh1.pixelworldpro.redis.RedisListener
@@ -26,7 +26,6 @@ import com.xbaimiao.easylib.task.EasyLibTask
 import org.bukkit.Bukkit
 import redis.clients.jedis.JedisPool
 import java.io.File
-import java.nio.file.Files
 import java.util.*
 
 
@@ -36,6 +35,7 @@ class PixelWorldPro : EasyPlugin() {
     companion object {
 
         lateinit var databaseApi: DatabaseApi
+        lateinit var expansion: Expansion
         lateinit var instance: PixelWorldPro
         lateinit var jedisPool: JedisPool
         lateinit var subscribeTask: EasyLibTask
@@ -45,8 +45,10 @@ class PixelWorldPro : EasyPlugin() {
         useUIModule()
     }
 
+
     private var config = BuiltInConfiguration("config.yml")
     val dimensionconfig = BuiltInConfiguration("Dimension.yml")
+    val expansionconfig = BuiltInConfiguration("Expansion.yml")
     private var lang = BuiltInConfiguration("lang/${config.getString("lang")}.yml")
     private val dataMap = mutableMapOf<String, String>()
     private var isBungee = false
@@ -66,11 +68,12 @@ class PixelWorldPro : EasyPlugin() {
         //更新配置文件
         CommentConfig.updateConfig()
         //if(config.getString("token")?.let { Online.auth(it) } == true)
-        if(config.getString("token")?.let { Online.auth(it) } == true) {
+        if(config.getString("token")?.let { V2.auth(it) } == true) {
             Bukkit.getConsoleSender().sendMessage("§a恭喜您验证成功！！PixelWorldPro插件感谢您的赞助")
             Bukkit.getConsoleSender().sendMessage("§aCongratulations on your successful verification! ! PixelWorldPro plugin thanks for your sponsorship")
             Bukkit.getConsoleSender().sendMessage("§a将您的验证码交给他人使用可能导致您的服务器被封禁")
             Bukkit.getConsoleSender().sendMessage("§a有疑问请加群咨询789731437")
+            loadExpansion()
             //注册全局监听
             RegisterListener.registerAll()
 
@@ -133,6 +136,8 @@ class PixelWorldPro : EasyPlugin() {
         }
     }
     override fun disable() {
+        //卸载扩展
+        expansion.onDisable()
 
         //关闭redis
         if (config.getBoolean("Bungee")) {

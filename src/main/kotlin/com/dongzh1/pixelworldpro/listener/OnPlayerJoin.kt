@@ -13,8 +13,6 @@ import org.spigotmc.event.player.PlayerSpawnLocationEvent
 import java.util.UUID
 
 class OnPlayerJoin : Listener {
-
-
     @EventHandler
     fun on(event: PlayerSpawnLocationEvent) {
         if (map.containsKey(event.player.uniqueId)) {

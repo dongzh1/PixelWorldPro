@@ -9,6 +9,7 @@ import com.dongzh1.pixelworldpro.impl.WorldImpl
 import com.dongzh1.pixelworldpro.listener.WorldProtect
 import com.dongzh1.pixelworldpro.migrate.Migrate
 import com.dongzh1.pixelworldpro.redis.RedisManager
+import com.dongzh1.pixelworldpro.tools.Config
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
@@ -845,12 +846,16 @@ class Commands {
                 PixelWorldPro.databaseApi.setWorldData(uuid, worldDataNew)
                 if (PixelWorldPro.instance.isBungee()){
                     RedisManager.push("updateWorldLevel|,|$uuid|,|$nextLevel")
-                }else{
+                }else {
                     //获取世界是否加载
-                    val world = Bukkit.getWorld(worldData.worldName)
-                    if (world != null) {
-                        //世界边界更新
-                        WorldImpl.setWorldBorder(world, nextLevel)
+                    val dimensionData = Config.getWorldDimensionData(worldData.worldName)
+                    val dimensionlist = dimensionData.createlist
+                    for (dimension in dimensionlist) {
+                        val world = Bukkit.getWorld(worldData.worldName + "/" + dimension)
+                        if (world != null) {
+                            //世界边界更新
+                            WorldImpl.setWorldBorder(world, nextLevel)
+                        }
                     }
                 }
                 sender.sendMessage(lang("LevelUp"))
@@ -882,10 +887,14 @@ class Commands {
                     RedisManager.push("updateWorldLevel|,|$uuid|,|$nextLevel")
                 }else{
                     //获取世界是否加载
-                    val world = Bukkit.getWorld(worldData.worldName)
-                    if (world != null) {
-                        //世界边界更新
-                        WorldImpl.setWorldBorder(world, nextLevel)
+                    val dimensionData = Config.getWorldDimensionData(worldData.worldName)
+                    val dimensionlist = dimensionData.createlist
+                    for (dimension in dimensionlist) {
+                        val world = Bukkit.getWorld(worldData.worldName + "/" + dimension)
+                        if (world != null) {
+                            //世界边界更新
+                            WorldImpl.setWorldBorder(world, nextLevel)
+                        }
                     }
                 }
                 sender.sendMessage(lang("LevelUp"))

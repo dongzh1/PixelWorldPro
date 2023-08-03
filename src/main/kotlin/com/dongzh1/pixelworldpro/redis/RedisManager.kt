@@ -73,30 +73,27 @@ object RedisManager : Module<EasyPlugin> {
     }
 
     fun setMspt(mspt: Double) {
-        if (PixelWorldPro.instance.config.getBoolean("buildWorld")){
-            val mspt = 10000
-            mspt.toDouble()
-        }
-        var value = getMspt()
-        if (value != null) {
-            var isFound = false
-            for (server in value!!.split(",")) {
-                if (server.split(":")[0] == PixelWorldPro.instance.config.getString("ServerName")) {
-                    value = value.replace(server, "${PixelWorldPro.instance.config.getString("ServerName")}:$mspt")
-                    isFound = true
-                    break
+        if (PixelWorldPro.instance.config.getBoolean("buildWorld")) {
+            var value = getMspt()
+            if (value != null) {
+                var isFound = false
+                for (server in value!!.split(",")) {
+                    if (server.split(":")[0] == PixelWorldPro.instance.config.getString("ServerName")) {
+                        value = value.replace(server, "${PixelWorldPro.instance.config.getString("ServerName")}:$mspt")
+                        isFound = true
+                        break
+                    }
                 }
+                if (!isFound) {
+                    value += "${PixelWorldPro.instance.config.getString("ServerName")}:$mspt,"
+                }
+            } else {
+                value = "${PixelWorldPro.instance.config.getString("ServerName")}:$mspt,"
             }
-            if (!isFound) {
-                value += "${PixelWorldPro.instance.config.getString("ServerName")}:$mspt,"
+            jedisPool.resource.also {
+                it.set("PixelWorldPromspt", value)
+                it.close()
             }
-        } else {
-            value = "${PixelWorldPro.instance.config.getString("ServerName")}:$mspt,"
-        }
-
-        jedisPool.resource.also {
-            it.set("PixelWorldPromspt", value)
-            it.close()
         }
     }
 
