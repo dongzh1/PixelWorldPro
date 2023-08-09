@@ -8,15 +8,13 @@ import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
 import com.dongzh1.pixelworldpro.expansion.Expansion
 import com.dongzh1.pixelworldpro.expansion.ExpansionManager.loadExpansion
 import com.dongzh1.pixelworldpro.gui.Gui
-import com.dongzh1.pixelworldpro.listener.OnPlayerLogin
-import com.dongzh1.pixelworldpro.listener.TickListener
+import com.dongzh1.pixelworldpro.listener.*
 import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.papi.Papi
 import com.dongzh1.pixelworldpro.redis.RedisConfig
 import com.dongzh1.pixelworldpro.redis.RedisListener
 import com.dongzh1.pixelworldpro.redis.RedisManager
 import com.dongzh1.pixelworldpro.tools.CommentConfig
-import com.dongzh1.pixelworldpro.tools.RegisterListener
 import com.xbaimiao.easylib.EasyPlugin
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.utils.registerListener
@@ -24,6 +22,7 @@ import com.xbaimiao.easylib.module.utils.submit
 import com.xbaimiao.easylib.module.utils.unregisterListener
 import com.xbaimiao.easylib.task.EasyLibTask
 import org.bukkit.Bukkit
+import org.bukkit.plugin.PluginManager
 import redis.clients.jedis.JedisPool
 import java.io.File
 import java.util.*
@@ -47,13 +46,15 @@ class PixelWorldPro : EasyPlugin() {
 
 
     private var config = BuiltInConfiguration("config.yml")
-    val dimensionconfig = BuiltInConfiguration("Dimension.yml")
-    val expansionconfig = BuiltInConfiguration("Expansion.yml")
     private var lang = BuiltInConfiguration("lang/${config.getString("lang")}.yml")
     private val dataMap = mutableMapOf<String, String>()
     private var isBungee = false
     private var redisListener: RedisListener? = null
     private var useLuckPerm = false
+
+    val dimensionconfig = BuiltInConfiguration("Dimension.yml")
+    val expansionconfig = BuiltInConfiguration("Expansion.yml")
+    val worldBorder = BuiltInConfiguration("WorldBorder.yml")
 
 
     override fun enable() {
@@ -67,7 +68,6 @@ class PixelWorldPro : EasyPlugin() {
         saveGui()
         //更新配置文件
         CommentConfig.updateConfig()
-        //if(config.getString("token")?.let { Online.auth(it) } == true)
         if(config.getString("token")?.let { V2.auth(it) } == true) {
             Bukkit.getConsoleSender().sendMessage("§a恭喜您验证成功！！PixelWorldPro插件感谢您的赞助")
             Bukkit.getConsoleSender().sendMessage("§aCongratulations on your successful verification! ! PixelWorldPro plugin thanks for your sponsorship")
@@ -75,7 +75,9 @@ class PixelWorldPro : EasyPlugin() {
             Bukkit.getConsoleSender().sendMessage("§a有疑问请加群咨询789731437")
             loadExpansion()
             //注册全局监听
-            RegisterListener.registerAll()
+            Bukkit.getPluginManager().registerEvents( OnPlayerJoin(), this)
+            Bukkit.getPluginManager().registerEvents(OnWorldUnload(), this)
+            Bukkit.getPluginManager().registerEvents(WorldProtect(), this)
 
             //加载redis
             if (config.getBoolean("Bungee")) {
@@ -94,7 +96,7 @@ class PixelWorldPro : EasyPlugin() {
                         jedis.subscribe(redisListener, channel)
                     }
                 }
-                RedisManager.setMspt(100.0)
+                RedisManager.setMspt(Bukkit.getTicksPerMonsterSpawns().toDouble())
                 if (config.getBoolean("buildWorld")) {
                     registerListener(TickListener)
                 }
@@ -130,7 +132,9 @@ class PixelWorldPro : EasyPlugin() {
                     f.copyRecursively(nfile)
                 }
             }
-            //ExpansionManager.loadExpansion()
+            if(Bukkit.getPluginManager().isPluginEnabled("jiangfriends")){
+                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测到JiangFriends，自动挂勾")
+            }
         }else{
             Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro Invalid token")
         }
@@ -141,10 +145,14 @@ class PixelWorldPro : EasyPlugin() {
 
         //关闭redis
         if (config.getBoolean("Bungee")) {
-            redisListener!!.stop()
-            RedisManager.closeServer()
-            jedisPool.close()
-            subscribeTask.cancel()
+            try {
+                redisListener!!.stop()
+                RedisManager.closeServer()
+                jedisPool.close()
+                subscribeTask.cancel()
+            }catch (_:Exception){
+
+            }
         }
     }
 

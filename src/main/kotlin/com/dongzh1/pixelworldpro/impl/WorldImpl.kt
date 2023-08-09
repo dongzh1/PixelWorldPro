@@ -15,12 +15,12 @@ import com.dongzh1.pixelworldpro.tools.Config.getWorldDimensionData
 import com.dongzh1.pixelworldpro.tools.Config.setWorldDimensionData
 import com.dongzh1.pixelworldpro.tools.Dimension
 import com.dongzh1.pixelworldpro.tools.WorldFile
+import com.wimbli.WorldBorder.Config
 import com.xbaimiao.easylib.bridge.economy.PlayerPoints
 import com.xbaimiao.easylib.bridge.economy.Vault
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.*
 import org.bukkit.entity.Player
-import sun.audio.AudioPlayer.player
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -425,26 +425,30 @@ object WorldImpl : WorldApi {
     }
 
     fun setGamerule(world: World) {
-        val gamerulesStringList =
-            PixelWorldPro.instance.config.getConfigurationSection("WorldSetting.GameRule")!!.getKeys(false)
-        for (gameruleString in gamerulesStringList) {
-            val gamerule = GameRule.getByName(gameruleString)
-            if (gamerule == null) {
-                Bukkit.getConsoleSender().sendMessage("§4$gameruleString ${lang("NotValidGameRule")}")
-                continue
+        try {
+            val gamerulesStringList =
+                PixelWorldPro.instance.config.getConfigurationSection("WorldSetting.GameRule")!!.getKeys(false)
+            for (gameruleString in gamerulesStringList) {
+                val gamerule = GameRule.getByName(gameruleString)
+                if (gamerule == null) {
+                    Bukkit.getConsoleSender().sendMessage("§4$gameruleString ${lang("NotValidGameRule")}")
+                    continue
+                }
+                if (gamerule.type == Class.forName("java.lang.Boolean")) {
+                    val valueBoolean = PixelWorldPro.instance.config.getBoolean("WorldSetting.GameRule.$gameruleString")
+                    world.setGameRule(gamerule as GameRule<Boolean>, valueBoolean)
+                    world.setGameRule(gamerule, valueBoolean)
+                    world.save()
+                }
+                if (gamerule.type == Class.forName("java.lang.Integer")) {
+                    val valueInt = PixelWorldPro.instance.config.getInt("WorldSetting.GameRule.$gameruleString")
+                    world.setGameRule(gamerule as GameRule<Int>, valueInt)
+                    world.setGameRule(gamerule, valueInt)
+                    world.save()
+                }
             }
-            if (gamerule.type == Class.forName("java.lang.Boolean")) {
-                val valueBoolean = PixelWorldPro.instance.config.getBoolean("WorldSetting.GameRule.$gameruleString")
-                world.setGameRule(gamerule as GameRule<Boolean>, valueBoolean)
-                world.setGameRule(gamerule, valueBoolean)
-                world.save()
-            }
-            if (gamerule.type == Class.forName("java.lang.Integer")) {
-                val valueInt = PixelWorldPro.instance.config.getInt("WorldSetting.GameRule.$gameruleString")
-                world.setGameRule(gamerule as GameRule<Int>, valueInt)
-                world.setGameRule(gamerule, valueInt)
-                world.save()
-            }
+        }catch (e:Exception){
+            Bukkit.getConsoleSender().sendMessage("设置世界规则失败，可能当前服务端版本低于1.13")
         }
     }
 
@@ -478,24 +482,66 @@ object WorldImpl : WorldApi {
     }
 
     fun setWorldBorder(world: World, level: String?) {
-        var realLevel =
-            PixelWorldPro.instance.config.getConfigurationSection("WorldSetting.WorldLevel")!!.getKeys(false).first()
-        if (level != null) {
-            realLevel = level
-        }
-        val borderRange = PixelWorldPro.instance.config.getInt("WorldSetting.WorldLevel.$realLevel")
-        if (borderRange == -1) {
-            submit {
-                world.worldBorder.center = world.spawnLocation
-                world.worldBorder.size = 60000000.0
+        when(PixelWorldPro.instance.worldBorder.getString("enable")) {
+            "McBorder" ->{
+                var realLevel =
+                    PixelWorldPro.instance.config.getConfigurationSection("WorldSetting.WorldLevel")!!.getKeys(false)
+                        .first()
+                if (level != null) {
+                    realLevel = level
+                }
+                val borderRange = PixelWorldPro.instance.config.getInt("WorldSetting.WorldLevel.$realLevel")
+                if (borderRange == -1) {
+                    submit {
+                        world.worldBorder.center = world.spawnLocation
+                        world.worldBorder.size = 60000000.0
+                    }
+                } else {
+                    submit {
+                        world.worldBorder.center = world.spawnLocation
+                        world.worldBorder.size = borderRange.toDouble()
+                    }
+                }
             }
-        } else {
-            submit {
-                world.worldBorder.center = world.spawnLocation
-                world.worldBorder.size = borderRange.toDouble()
+            "WorldBorder" ->{
+                var realLevel =
+                    PixelWorldPro.instance.config.getConfigurationSection("WorldSetting.WorldLevel")!!.getKeys(false)
+                        .first()
+                if (level != null) {
+                    realLevel = level
+                }
+                val borderRange = PixelWorldPro.instance.config.getInt("WorldSetting.WorldLevel.$realLevel")
+                if (borderRange == -1) {
+                    submit {
+                        Config.setBorder(world.name, 60000000, 60000000, world.spawnLocation.x, world.spawnLocation.z)
+                    }
+                } else {
+                    submit {
+                        Config.setBorder(world.name, borderRange, borderRange, world.spawnLocation.x, world.spawnLocation.z)
+                    }
+                }
+            }
+            else ->{
+                var realLevel =
+                    PixelWorldPro.instance.config.getConfigurationSection("WorldSetting.WorldLevel")!!.getKeys(false)
+                        .first()
+                if (level != null) {
+                    realLevel = level
+                }
+                val borderRange = PixelWorldPro.instance.config.getInt("WorldSetting.WorldLevel.$realLevel")
+                if (borderRange == -1) {
+                    submit {
+                        world.worldBorder.center = world.spawnLocation
+                        world.worldBorder.size = 60000000.0
+                    }
+                } else {
+                    submit {
+                        world.worldBorder.center = world.spawnLocation
+                        world.worldBorder.size = borderRange.toDouble()
+                    }
+                }
             }
         }
-
     }
 
     override fun loadDimension(world: UUID, player: Player, dimension: String): Boolean {

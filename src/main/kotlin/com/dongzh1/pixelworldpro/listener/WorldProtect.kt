@@ -24,9 +24,9 @@ class WorldProtect : Listener {
         //获取事件发生的世界名
         val worldName = e.entity.world.name
         //如果不是玩家世界则返回
-        if(!isPlayerWorld(worldName))
+        if(!isPlayerWorld(worldName, UUID.fromString("00000000-0000-0000-0000-000000000000")))
             return
-        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)!!
+        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)?: return
         //如果目标是玩家且不是成员，则取消事件
         if (e.target is Player) {
             val target = e.target as Player
@@ -41,9 +41,9 @@ class WorldProtect : Listener {
     fun damage(e: EntityDamageByEntityEvent) {
         val worldName = e.entity.world.name
         //如果不是玩家世界则返回
-        if(!isPlayerWorld(worldName))
+        if(!isPlayerWorld(worldName, UUID.fromString("00000000-0000-0000-0000-000000000000")))
             return
-        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)!!
+        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)?: return
         //如果攻击者是玩家且不是成员，则取消事件
         if (e.damager is Player) {
             val damager = e.damager as Player
@@ -68,12 +68,13 @@ class WorldProtect : Listener {
             return
         val worldName = e.player.world.name
         //如果不是玩家世界则返回
-        if(!isPlayerWorld(worldName))
+        if(isPlayerWorld(worldName, e.player.uniqueId))
             return
-        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)!!
+        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)?: return
         //如果玩家不是成员，则取消事件
-        if (!worldData.members.contains(e.player.uniqueId))
-            e.isCancelled = true
+        if (worldData.members.contains(e.player.uniqueId))
+            return
+        e.isCancelled = true
     }
 
     @EventHandler
@@ -82,12 +83,13 @@ class WorldProtect : Listener {
             return
         val worldName = e.player.world.name
         //如果不是玩家世界则返回
-        if(!isPlayerWorld(worldName))
+        if(isPlayerWorld(worldName, e.player.uniqueId))
             return
-        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)!!
+        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)?: return
         //如果玩家不是成员，则取消事件
-        if (!worldData.members.contains(e.player.uniqueId))
-            e.isCancelled = true
+        if (worldData.members.contains(e.player.uniqueId))
+            return
+        e.isCancelled = true
     }
 
     @EventHandler
@@ -98,7 +100,7 @@ class WorldProtect : Listener {
         }
         val worldName = e.player.world.name
         //如果不是玩家世界则返回
-        if(!isPlayerWorld(worldName)) {
+        if(!isPlayerWorld(worldName, e.player.uniqueId)) {
             when(PixelWorldPro.instance.config.getString("WorldSetting.Gamemode.owner")){
                 "ADVENTURE" -> {
                     e.player.gameMode = GameMode.ADVENTURE
@@ -122,7 +124,7 @@ class WorldProtect : Listener {
             }
 
         }
-        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)!!
+        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)?: return
         if (e.player.uniqueId in worldData.members){
             when(PixelWorldPro.instance.config.getString("WorldSetting.Gamemode.member")){
                 "ADVENTURE" -> {
@@ -145,7 +147,6 @@ class WorldProtect : Listener {
         }
         //如果玩家是黑名单,则传送回原来的世界
         if (worldData.banPlayers.contains(e.player.uniqueId)) {
-            e.player.teleport(e.from.spawnLocation)
             return
         }
         when(PixelWorldPro.instance.config.getString("WorldSetting.Gamemode.anyone")){
@@ -175,15 +176,15 @@ class WorldProtect : Listener {
             return
         val worldName = e.to.world.name
         //如果不是玩家世界则返回
-        if(!isPlayerWorld(worldName))
+        if(isPlayerWorld(worldName, e.player.uniqueId))
             return
-        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)!!
+        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)?: return
         //如果玩家是黑名单，则取消
         Bukkit.getConsoleSender().sendMessage(worldData.state)
 
         if (worldData.banPlayers.contains(e.player.uniqueId)) {
-            e.isCancelled = true
             e.player.sendMessage("你在此世界的黑名单中")
+            e.isCancelled = true
         }
         when (worldData.state) {
             "owner" -> {
@@ -211,21 +212,31 @@ class WorldProtect : Listener {
     fun worldUnload(e: WorldUnloadEvent) {
         val worldName =e.world.name
         //如果不是玩家世界则返回
-        if(!isPlayerWorld(worldName))
+        if(!isPlayerWorld(worldName, UUID.fromString("00000000-0000-0000-0000-000000000000")))
             return
-        RedisManager.removeLock(getWorldNameUUID(worldName))
+        if (PixelWorldPro.instance.config.getBoolean("Bungee")) {
+            getWorldNameUUID(worldName)?.let { RedisManager.removeLock(it) }
+        }
     }
 
     //判断是否为玩家世界
-    private fun isPlayerWorld(worldName:String):Boolean{
-        val worldNameReal = worldName.split("/").last()
-        return worldNameReal.matches(Regex("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-z]{12}_[0-9]{4}_[0-9]{2}_[0-9]{2}_[0-9]{2}_[0-9]{2}_[0-9]{2}"))
+    private fun isPlayerWorld(worldName:String,player:UUID):Boolean{
+        val worldNameReal = getWorldNameUUID(worldName)
+        return worldNameReal == player
     }
-    private fun getWorldNameUUID(worldName: String): UUID {
-        val realName = worldName.split("/").last()
+    private fun getWorldNameUUID(worldName: String): UUID? {
+        val realNamelist = worldName.split("/").size
+        if (realNamelist < 2) {
+            return null
+        }
+        val realName = worldName.split("/")[realNamelist - 2]
         val uuidString: String? = Regex(pattern = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-z]{12}")
             .find(realName)?.value
-        return UUID.fromString(uuidString)
+        return try{
+            UUID.fromString(uuidString)
+        }catch (_:Exception){
+            null
+        }
     }
 
     companion object {

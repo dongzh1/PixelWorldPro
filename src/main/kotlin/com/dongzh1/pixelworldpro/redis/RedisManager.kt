@@ -231,24 +231,26 @@ object RedisManager : Module<EasyPlugin> {
     fun closeServer(){
         closeServer(PixelWorldPro.instance.config.getString("ServerName")!!)
     }
-    fun closeServer(serverName:String){
+    fun closeServer(serverName:String) {
         //删除本服mspt
-        var msptValue = getMspt()
-        if (msptValue != null){
-            for (server in msptValue!!.split(",")){
-                if (server.contains(":")){
-                    if (server.split(":")[0] == serverName){
-                        msptValue = msptValue.replace("$server,","")
-                        break
+        if (PixelWorldPro.instance.config.getBoolean("buildWorld")) {
+            var msptValue = getMspt()
+            if (msptValue != null) {
+                for (server in msptValue!!.split(",")) {
+                    if (server.contains(":")) {
+                        if (server.split(":")[0] == serverName) {
+                            msptValue = msptValue.replace("$server,", "")
+                            break
+                        }
                     }
                 }
+                jedisPool.resource.also {
+                    it.set("PixelWorldPromspt", msptValue)
+                    it.close()
+                }
             }
-            jedisPool.resource.also {
-                it.set("PixelWorldPromspt", msptValue)
-                it.close()
-            }
+            //删除本服所有加载的世界lock
+            removeLock(serverName)
         }
-        //删除本服所有加载的世界lock
-        removeLock(serverName)
     }
 }

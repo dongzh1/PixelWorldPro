@@ -2,6 +2,19 @@ name: ${name}
 main: ${main}
 version: '${version}'
 author: dong&mcyzj
-softdepend: [ Vault, PlaceholderAPI, PlayerPoints, PixelPlayerWorld ]
+softdepend: [ Vault, PlaceholderAPI, PlayerPoints, PixelPlayerWorld, jiangfriends]
 api-version: 1.13
 folia-supported: true
+
+permissions:
+  pixelworldpro.command.*:
+    description: Grants all PixelWorldPro permissions
+    children:
+      pixelworldpro.command.gui: true
+      pixelworldpro.command.dimension: true
+  pixelworldpro.command.gui:
+    description: Can open PixelWorldPro menu
+    default: not op
+  pixelworldpro.command.dimension:
+    description: Can Use PixelWorldPro dimension
+    default: not op

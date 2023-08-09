@@ -44,7 +44,7 @@ object V2 {
     }
     fun auth(token:String): Boolean {
         val mac = getMacByIP()
-        val dummyUrl = URL("http://sh1.plugin.mcyzj.cn:1030/v1/auth/Pixelworldpro")
+        val dummyUrl = URL("https://sh1.plugin.mcyzj.cn:1031/v1/auth/Pixelworldpro")
         val data = mapOf("token" to token, "macs" to mac)
         val dummyData = JSONObject(data).toString()
 
@@ -73,7 +73,7 @@ object V2 {
 
     fun verify(token:String): Boolean {
         val mac = getMacByIP()
-        val dummyUrl = URL("http://sh1.plugin.mcyzj.cn:1030/v1/verify/Pixelworldpro")
+        val dummyUrl = URL("https://sh1.plugin.mcyzj.cn:1031/v1/verify/Pixelworldpro")
         val data = mapOf("token" to token, "macs" to mac)
         val dummyData = JSONObject(data).toString()
 

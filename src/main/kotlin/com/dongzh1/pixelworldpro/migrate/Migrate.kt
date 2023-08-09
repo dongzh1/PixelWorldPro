@@ -16,15 +16,22 @@ import java.util.*
 
 object Migrate {
     fun ppw(player: Player) {
-        val database = PixelPlayerWorld.database
-        val databaseApi = PixelWorldPro.databaseApi
-        player.sendMessage("发起ppw数据迁移")
-        Bukkit.getConsoleSender().sendMessage("${player.name}发起了PPW数据迁移")
-        var n = 0
-        while (true) {
-            val wordlist = event.INSTANCE.getWorldList(10, n, player)
-            if (wordlist.isNullOrEmpty()) {
-                break
+        Thread {
+            val database = PixelPlayerWorld.database
+            val databaseApi = PixelWorldPro.databaseApi
+            player.sendMessage("发起ppw数据迁移")
+            Bukkit.getConsoleSender().sendMessage("${player.name}发起了PPW数据迁移")
+            var n = 0
+            val wordlist = ArrayList<com.xbaimiao.template.database.dao.WorldData>()
+            while (true) {
+                val oldlist = event.INSTANCE.getWorldList(10, n, player)
+                if (wordlist.isNullOrEmpty()) {
+                    break
+                }
+                for (worlddata in oldlist) {
+                    wordlist.add(worlddata)
+                }
+                n += 10
             }
             for (worlddata in wordlist) {
                 try {
@@ -94,8 +101,7 @@ object Migrate {
                     Bukkit.getConsoleSender().sendMessage(e.toString())
                 }
             }
-            n += 10
-        }
+        }.start()
     }
 
     private fun moveworld(oldworldname: String, newworldname: String, worldData: WorldData, player: Player, type: String){

@@ -122,9 +122,14 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
 
     override fun getWorldData(name: String): WorldData? {
         //从redis或内存中获取
-        val realName = name.split("/").last()
+        val realNamelist = name.split("/").size
+        if (realNamelist < 2) {
+            return null
+        }
+        val realName = name.split("/")[realNamelist - 2]
         val uuidString :String? = Regex(pattern = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-z]{12}")
             .find(realName)?.value
+        uuidString?.let { Bukkit.getConsoleSender().sendMessage(it) }
         val uuid = UUID.fromString(uuidString)
         val data = if (PixelWorldPro.instance.isBungee()) {
             RedisManager[uuid]
