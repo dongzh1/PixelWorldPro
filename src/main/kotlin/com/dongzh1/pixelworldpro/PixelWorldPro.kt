@@ -40,10 +40,6 @@ class PixelWorldPro : EasyPlugin() {
         lateinit var subscribeTask: EasyLibTask
         const val channel = "PixelWorldPro"
     }
-    init {
-        useUIModule()
-    }
-
 
     private var config = BuiltInConfiguration("config.yml")
     private var lang = BuiltInConfiguration("lang/${config.getString("lang")}.yml")
