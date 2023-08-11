@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "com.dongzh1.pixelworldpro"
-version = "1.1.3"
+version = "1.1.4"
 
 repositories {
     mavenCentral()
@@ -36,7 +36,7 @@ repositories {
 
 dependencies {
     compileOnly ("com.destroystokyo.paper:paper-api:1.14.1-R0.1-SNAPSHOT")
-    implementation("com.xbaimiao:EasyLib:2.2.4")
+    implementation("com.xbaimiao:EasyLib:2.2.2")
     implementation(kotlin("stdlib-jdk8"))
 //    implementation ("de.tr7zw:item-nbt-api:2.11.2")
     implementation ("com.j256.ormlite:ormlite-core:6.1")

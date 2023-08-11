@@ -1,23 +1,30 @@
 package com.dongzh1.pixelworldpro.listener
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
+import com.dongzh1.pixelworldpro.database.RedStone
 import com.dongzh1.pixelworldpro.impl.WorldImpl
 import com.dongzh1.pixelworldpro.redis.RedisManager
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
+import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.block.BlockRedstoneEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.EntitySpawnEvent
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent
 import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.event.world.WorldUnloadEvent
+import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.HashMap
 
 class WorldProtect : Listener {
+    private val redStone = HashMap<String, RedStone>()
     @EventHandler
     //阻止玩家被实体锁定目标
     fun target(e: EntityTargetLivingEntityEvent) {
@@ -219,10 +226,79 @@ class WorldProtect : Listener {
         }
     }
 
+    //监听红石信号
+    @EventHandler
+    fun redStone(e: BlockRedstoneEvent){
+        if(PixelWorldPro.instance.advancedWorldSettings.getBoolean("redStone.LimitHighFrequency")) {
+            val data = redStone[e.block.world.name]
+            val time = intTime()
+            if (data == null) {
+                val timeint = time + 1
+                val datas = RedStone(
+                    1,
+                    timeint
+                )
+                redStone[e.block.world.name] = datas
+                return
+            } else {
+                data.frequency += 1
+            }
+            if (data.time <= time) {
+                if (data.frequency > PixelWorldPro.instance.advancedWorldSettings.getInt("redStone.frequency")){
+                    redStone.remove(e.block.world.name)
+                    e.block.type = Material.AIR
+                    Bukkit.getConsoleSender().sendMessage(e.block.breakNaturally().toString())
+                }else{
+                    redStone.remove(e.block.world.name)
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    fun entitySpawn(e: EntitySpawnEvent) {
+        if(getWorldNameUUID(e.entity.world.name) == null){
+            return
+        }
+        val max = PixelWorldPro.instance.advancedWorldSettings.getInt("organism.max")
+        if(max != -1){
+            if(e.entity.world.entities.size >= max){
+                e.isCancelled = true
+                return
+            }
+        }
+        val list = PixelWorldPro.instance.advancedWorldSettings.getList("organism.list")
+        Bukkit.getConsoleSender().sendMessage(e.entity.type.name)
+        if (list != null) {
+            when (PixelWorldPro.instance.advancedWorldSettings.getString("organism.type")) {
+                "ban" -> {
+                    if (e.entity.type.name in list) {
+                        e.isCancelled = true
+                        return
+                    }
+                }
+                "allow" -> {
+                    if (e.entity.type.name !in list) {
+                        e.isCancelled = true
+                        return
+                    }
+                }
+            }
+        }
+    }
+
+
     //判断是否为玩家世界
     private fun isPlayerWorld(worldName:String,player:UUID):Boolean{
         val worldNameReal = getWorldNameUUID(worldName)
         return worldNameReal == player
+    }
+    private fun intTime():Int{
+        val sdf = SimpleDateFormat() // 格式化时间
+        sdf.applyPattern("HHmmss")
+        val date = Date() // 获取当前时间
+        val time = sdf.format(date)
+        return Integer.parseInt(time.trim())
     }
     private fun getWorldNameUUID(worldName: String): UUID? {
         val realNamelist = worldName.split("/").size
@@ -240,11 +316,19 @@ class WorldProtect : Listener {
     }
 
     companion object {
-        fun getWorldNameUUID(worldName: String): UUID {
-            val realName = worldName.split("/").last()
+        fun getWorldNameUUID(worldName: String): UUID? {
+            val realNamelist = worldName.split("/").size
+            if (realNamelist < 2) {
+                return null
+            }
+            val realName = worldName.split("/")[realNamelist - 2]
             val uuidString: String? = Regex(pattern = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-z]{12}")
                 .find(realName)?.value
-            return UUID.fromString(uuidString)
+            return try{
+                UUID.fromString(uuidString)
+            }catch (_:Exception){
+                null
+            }
         }
     }
 }

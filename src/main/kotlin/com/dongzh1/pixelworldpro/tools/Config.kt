@@ -13,7 +13,19 @@ object Config {
             config.createNewFile()
         }
         data.load(config)
-        data.set("version", 1)
+        when(data.getInt("version")){
+            1 ->{
+                data.set("version",2)
+                data.set("seed", "0")
+            }
+            2 ->{
+
+            }
+            else ->{
+                data.set("version", 2)
+                data.set("seed", "0")
+            }
+        }
         val dimensionlist = getDimensionList()
         for (dimension in dimensionlist) {
             if(!data.isSet(dimension)){
@@ -39,7 +51,8 @@ object Config {
         createlist.add("world")
         return WorldDimensionData(
             createlist,
-            discreatelist
+            discreatelist,
+            data.getString("seed") ?:"0"
         )
     }
 

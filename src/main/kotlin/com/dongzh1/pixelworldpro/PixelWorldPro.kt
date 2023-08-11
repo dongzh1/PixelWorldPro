@@ -1,6 +1,7 @@
 package com.dongzh1.pixelworldpro
 
 import com.dongzh1.pixelworldpro.api.DatabaseApi
+import com.dongzh1.pixelworldpro.api.WorldApi
 import com.dongzh1.pixelworldpro.commands.Commands
 import com.dongzh1.pixelworldpro.commands.Server
 import com.dongzh1.pixelworldpro.database.MysqlDatabaseApi
@@ -8,6 +9,7 @@ import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
 import com.dongzh1.pixelworldpro.expansion.Expansion
 import com.dongzh1.pixelworldpro.expansion.ExpansionManager.loadExpansion
 import com.dongzh1.pixelworldpro.gui.Gui
+import com.dongzh1.pixelworldpro.impl.WorldImpl
 import com.dongzh1.pixelworldpro.listener.*
 import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.papi.Papi
@@ -51,6 +53,7 @@ class PixelWorldPro : EasyPlugin() {
     val dimensionconfig = BuiltInConfiguration("Dimension.yml")
     val expansionconfig = BuiltInConfiguration("Expansion.yml")
     val worldBorder = BuiltInConfiguration("WorldBorder.yml")
+    val advancedWorldSettings = BuiltInConfiguration("AdvancedWorldSettings.yml")
 
 
     override fun enable() {
@@ -131,13 +134,22 @@ class PixelWorldPro : EasyPlugin() {
             if(Bukkit.getPluginManager().isPluginEnabled("jiangfriends")){
                 Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测到JiangFriends，自动挂勾")
             }
+            //Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 启用清理闲置世界")
+            //Thread {
+            //    Thread.sleep((config.getLong("WorldSetting.unloadTime") * 60 * 1000))
+            //    WorldImpl.unloadtimeoutworld()
+            //}.start()
         }else{
             Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro Invalid token")
         }
     }
     override fun disable() {
         //卸载扩展
-        expansion.onDisable()
+        try {
+            expansion.onDisable()
+        }catch (_:Exception){
+
+        }
 
         //关闭redis
         if (config.getBoolean("Bungee")) {

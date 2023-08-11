@@ -199,7 +199,7 @@ class Commands {
                         }
                         if (player.isOnline.and(Bukkit.getWorld(player.uniqueId)?.name == worldData!!.worldName)) {
                             TeleportApi.Factory.teleportApi?.teleport(
-                                WorldProtect.getWorldNameUUID(worldData!!.worldName),
+                                WorldProtect.getWorldNameUUID(worldData!!.worldName)!!,
                                 player.uniqueId
                             )
                         }
@@ -994,7 +994,7 @@ class Commands {
         permission = "pixelworldpro.command.mode"
         arg(modeArgNode) {
             exec {
-                if (args.size == 0) {
+                if (args.size == 1) {
                     if (sender !is Player) {
                         sender.sendMessage(lang("NeedPlayer"))
                         return@exec
@@ -1012,7 +1012,7 @@ class Commands {
                     PixelWorldPro.databaseApi.setWorldData(uuid, worldDataNew)
                     sender.sendMessage(lang("ModeChange"))
                 }
-                if (args.size == 1) {
+                if (args.size == 2) {
                     if (!sender.hasPermission("pixelworldpro.command.admin")) {
                         sender.sendMessage(lang("NoPermission"))
                         return@exec
@@ -1034,6 +1034,55 @@ class Commands {
         }
     }
 
+    private val seed = command<CommandSender>("seed") {
+        permission = "pixelworldpro.command.seed"
+        exec{
+            if (args.size == 1) {
+                if (sender !is Player) {
+                    sender.sendMessage(lang("NeedPlayer"))
+                    return@exec
+                }
+                val worldData = PixelWorldPro.databaseApi.getWorldData((sender as Player).uniqueId)
+                if(worldData == null){
+                    if(PixelWorldPro.instance.isBungee()){
+                        RedisManager.setSeed((sender as Player).uniqueId, args[0])
+                        sender.sendMessage("设置成功")
+                    }else{
+                        WorldImpl.setSeed((sender as Player).uniqueId, args[0])
+                        sender.sendMessage("设置成功")
+                    }
+                }else{
+                    Config.setWorldDimensionData(worldData.worldName, "seed", args[0])
+                    sender.sendMessage("设置成功")
+                }
+            }
+            if (args.size == 2) {
+                if (!sender.hasPermission("pixelworldpro.command.admin")) {
+                    sender.sendMessage(lang("NoPermission"))
+                    return@exec
+                }
+                val player = Bukkit.getOfflinePlayer(args[1])
+                if (player.name == null) {
+                    sender.sendMessage(lang("PlayerNotFound"))
+                    return@exec
+                }
+                val worldData = PixelWorldPro.databaseApi.getWorldData(player.uniqueId)
+                if(worldData == null){
+                    if(PixelWorldPro.instance.isBungee()){
+                        RedisManager.setSeed(player.uniqueId, args[0])
+                        sender.sendMessage("设置成功")
+                    }else{
+                        WorldImpl.setSeed(player.uniqueId, args[0])
+                        sender.sendMessage("设置成功")
+                    }
+                }else{
+                    Config.setWorldDimensionData(worldData.worldName, "seed", args[0])
+                    sender.sendMessage("设置成功")
+                }
+            }
+        }
+    }
+
     private fun lang(string: String): String {
         return PixelWorldPro.instance.lang().getStringColored(string)
     }
@@ -1046,6 +1095,7 @@ class Commands {
         sub(reload)
         sub(mspt)
         sub(delete)
+        sub(seed)
         sub(unload)
         sub(load)
         sub(members)

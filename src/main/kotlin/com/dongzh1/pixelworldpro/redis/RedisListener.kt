@@ -211,6 +211,11 @@ class RedisListener : JedisPubSub() {
                         WorldImpl.removeUnloadWorldList(uuid)
                     }
                 }
+                "setSeed" ->{
+                    val uuid = UUID.fromString(message.split("|,|")[1])
+                    val seed = message.split("|,|")[2]
+                    WorldImpl.setSeed(uuid, seed)
+                }
                 else ->{
                     Bukkit.getLogger().warning("未知的redis消息类型")
                 }

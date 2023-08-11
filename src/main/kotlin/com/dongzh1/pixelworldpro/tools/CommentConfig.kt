@@ -1,6 +1,7 @@
 package com.dongzh1.pixelworldpro.tools
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
+import org.bukkit.Bukkit
 
 import org.bukkit.configuration.file.YamlConfiguration
 
@@ -36,6 +37,12 @@ object CommentConfig : YamlConfiguration() {
                 PixelWorldPro.instance.config.set("version", 4)
                 PixelWorldPro.instance.config.set("WorldSetting.Creater.World","auto")
                 PixelWorldPro.instance.config.set("lobby","lobby")
+                PixelWorldPro.instance.saveConfig()
+            }
+            4 ->{
+                Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 跟新配置文件")
+                PixelWorldPro.instance.config.set("version", 5)
+                PixelWorldPro.instance.config.set("WorldSetting.unloadTime",30)
                 PixelWorldPro.instance.saveConfig()
             }
             else ->return

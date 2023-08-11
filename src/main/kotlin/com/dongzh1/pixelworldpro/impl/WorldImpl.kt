@@ -9,6 +9,7 @@ import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.database.WorldData
 import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.listener.TickListener
+import com.dongzh1.pixelworldpro.listener.WorldProtect.Companion.getWorldNameUUID
 import com.dongzh1.pixelworldpro.redis.RedisManager
 import com.dongzh1.pixelworldpro.tools.Bungee
 import com.dongzh1.pixelworldpro.tools.Config.getWorldDimensionData
@@ -21,16 +22,21 @@ import com.xbaimiao.easylib.bridge.economy.Vault
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.*
 import org.bukkit.entity.Player
+import org.bukkit.event.HandlerList
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CompletableFuture
+import kotlin.collections.HashMap
 
 
 object WorldImpl : WorldApi {
     private val unloadWorldList: MutableList<UUID> = mutableListOf()
     private val createWorldList: MutableList<UUID> = mutableListOf()
     private val loadWorldList: MutableList<UUID> = mutableListOf()
+    private val timeOutWorldList: MutableList<String> = mutableListOf()
+    private val seedMap = mutableMapOf<UUID, String>()
+
 
     /**
      * 根据模板文件夹名新建世界,如果玩家在线则传送
@@ -127,6 +133,11 @@ object WorldImpl : WorldApi {
         //加载世界
 
         val worldcreator = WorldCreator("$realWorldName/world")
+        val seed = seedMap[uuid]
+        if (seed != null){
+            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 设置世界种子${seed.toLong()}")
+            worldcreator.seed(seed.toLong())
+        }
         if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.World") != "auto") {
             worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.World"))
         }
@@ -165,6 +176,9 @@ object WorldImpl : WorldApi {
                 )
             )
             getWorldDimensionData("PixelWorldPro/$worldName")
+            if (seed != null){
+                setWorldDimensionData("PixelWorldPro/$worldName", "seed", seed)
+            }
             //存玩家数据
             submit(async = true) {
                 var playerData = PixelWorldPro.databaseApi.getPlayerData(uuid)
@@ -180,6 +194,7 @@ object WorldImpl : WorldApi {
                 }
             }
         }
+        loadWorldList.add(uuid)
         return true
     }
 
@@ -239,7 +254,6 @@ object WorldImpl : WorldApi {
         world.players.forEach {
             it.teleport(Bukkit.getWorlds()[0].spawnLocation)
         }
-        world.save()
         return Bukkit.unloadWorld(world, true)
     }
 
@@ -329,7 +343,6 @@ object WorldImpl : WorldApi {
                     future.complete(true)
                     return future
                 } else {
-                    loadWorldList.add(uuid)
                     var i = 0
                     submit(period = 2L, maxRunningNum = 100) {
                         if (i == 0) {
@@ -366,15 +379,19 @@ object WorldImpl : WorldApi {
 
     fun loadWorldLocal(uuid: UUID): Boolean {
         val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
-        getWorldDimensionData(worldData.worldName)
+        val dimensionData = getWorldDimensionData(worldData.worldName)
         if (PixelWorldPro.instance.isBungee()) {
             return if (RedisManager.isLock(uuid)) {
                 true
             } else {
                 RedisManager.setLock(uuid)
-                val worldcreator = WorldCreator(worldData.worldName + "/world")
+                var worldcreator = WorldCreator(worldData.worldName + "/world")
+                if (dimensionData.seed != "0"){
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 设置世界种子${dimensionData.seed.toLong()}")
+                    worldcreator = worldcreator.seed(dimensionData.seed.toLong())
+                }
                 if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.World") != "auto") {
-                    worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.World"))
+                    worldcreator = worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.World"))
                 }
                 val world = Bukkit.createWorld(worldcreator)
                 if (world == null) {
@@ -385,6 +402,7 @@ object WorldImpl : WorldApi {
                     setWorldBorder(world, worldData.worldLevel)
                     world.keepSpawnInMemory = false
                     setGamerule(world)
+                    loadWorldList.add(uuid)
                     true
                 }
             }
@@ -395,17 +413,24 @@ object WorldImpl : WorldApi {
                 setGamerule(Bukkit.getWorld(worldData.worldName)!!)
                 true
             } else {
-                val worldcreator = WorldCreator(worldData.worldName+"/world")
+                var worldcreator = WorldCreator(worldData.worldName+"/world")
+                if (dimensionData.seed != "0"){
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 设置世界种子${dimensionData.seed.toLong()}")
+                    worldcreator = worldcreator.seed(dimensionData.seed.toLong())
+                    Bukkit.getConsoleSender().sendMessage(worldcreator.seed().toString())
+                }
                 if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.World") != "null") {
-                    worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.World"))
+                    worldcreator = worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.World"))
                 }
                 val world = Bukkit.createWorld(worldcreator)
                 if (world == null) {
                     false
                 } else {
+                    Bukkit.getConsoleSender().sendMessage(world.seed.toString())
                     setTime(world)
                     setWorldBorder(world, worldData.worldLevel)
                     setGamerule(world)
+                    loadWorldList.add(uuid)
                     true
                 }
             }
@@ -685,6 +710,42 @@ object WorldImpl : WorldApi {
         }
     }
 
+    override fun unloadtimeoutworld() {
+        Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 清理闲置世界")
+        Bukkit.getConsoleSender().sendMessage(loadWorldList.toString())
+        for(uuid in loadWorldList){
+            Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 查询世界$uuid")
+            val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
+            if(worldData != null) {
+                Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 监测世界$uuid")
+                val dimensionData = getWorldDimensionData(worldData.worldName)
+                var numbers = 0
+                for(dimension in dimensionData.createlist){
+                    val world = Bukkit.getWorld("${worldData.worldName}/$dimension")
+                    if(world != null){
+                        numbers =+ world.players.size
+                        Bukkit.getConsoleSender().sendMessage(numbers.toString())
+                    }
+                }
+                if(numbers == 0){
+                    if(worldData.worldName in timeOutWorldList){
+                        WorldApi.Factory.worldApi?.unloadWorld(getWorldNameUUID(worldData.worldName+"/unload")!!)
+                        timeOutWorldList.remove(worldData.worldName)
+                        Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 将${worldData.worldName}卸载")
+                    }else{
+                        timeOutWorldList.add(worldData.worldName)
+                        Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 将${worldData.worldName}移入待回收列表")
+                    }
+                }else{
+                    if(worldData.worldName in timeOutWorldList){
+                        timeOutWorldList.remove(worldData.worldName)
+                        Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 将${worldData.worldName}移除待回收列表")
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * 检查世界是否已被加载，如果已被加载则返回true
      */
@@ -693,5 +754,9 @@ object WorldImpl : WorldApi {
             return RedisManager.isLock(uuid)
         }
         return false
+    }
+
+    fun setSeed(uuid: UUID, seed: String){
+        seedMap[uuid] = seed
     }
 }

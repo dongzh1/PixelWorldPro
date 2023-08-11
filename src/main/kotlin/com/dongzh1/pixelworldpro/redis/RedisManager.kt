@@ -97,6 +97,10 @@ object RedisManager : Module<EasyPlugin> {
         }
     }
 
+    fun setSeed(uuid: UUID, seed:String){
+        push("setSeed|,|${uuid}|,|${seed}")
+    }
+
     fun getMspt(): String? {
         jedisPool.resource.also {
             val value = it.get("PixelWorldPromspt")

@@ -31,5 +31,10 @@ data class DimensionData (
 )
 data class WorldDimensionData (
     val createlist: List<String>,
-    val discreatelist: List<String>
+    val discreatelist: List<String>,
+    val seed: String
+)
+data class RedStone (
+    var frequency: Int,
+    val time: Int
 )

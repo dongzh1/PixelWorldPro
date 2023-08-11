@@ -2,7 +2,6 @@ package com.dongzh1.pixelworldpro.listener
 
 import org.bukkit.event.EventHandler
 import org.bukkit.event.player.PlayerLoginEvent
-import javax.xml.bind.Unmarshaller.Listener
 
 class OnPlayerLogin:org.bukkit.event.Listener {
     @EventHandler

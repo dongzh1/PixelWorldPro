@@ -62,7 +62,8 @@ class TeleportImpl: TeleportApi {
                 val player = Bukkit.getPlayer(uuid) ?: return@submit
                 var world = Bukkit.getWorld(worldData.worldName+"/world")
                 if (world == null) {
-                    world = Bukkit.createWorld(WorldCreator(worldData.worldName+"/world"))
+                    WorldImpl.loadWorldLocal(uuid)
+                    world = Bukkit.getWorld(worldData.worldName+"/world")
                     if (world == null) {
                         return@submit
                     }else{

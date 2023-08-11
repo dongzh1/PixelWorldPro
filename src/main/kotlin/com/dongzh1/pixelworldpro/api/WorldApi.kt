@@ -75,6 +75,7 @@ interface WorldApi {
      */
     fun createDimension(world: UUID,player: Player,dimension: String): Boolean
     fun unloadDimension(world: UUID)
+    fun unloadtimeoutworld()
 
     object Factory {
         private var instance: WorldApi? = null
