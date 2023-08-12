@@ -73,7 +73,8 @@ object Migrate {
                         createTime.toLong(),
                         0,
                         database.getisCreateNether(players),
-                        database.getisCreateEnd(players)
+                        database.getisCreateEnd(players),
+                        arrayListOf()
                     )
                     val p = ArrayList<UUID>()
                     p.add(players)

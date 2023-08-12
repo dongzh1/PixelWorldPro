@@ -1,7 +1,6 @@
 package com.dongzh1.pixelworldpro
 
 import com.dongzh1.pixelworldpro.api.DatabaseApi
-import com.dongzh1.pixelworldpro.api.WorldApi
 import com.dongzh1.pixelworldpro.commands.Commands
 import com.dongzh1.pixelworldpro.commands.Server
 import com.dongzh1.pixelworldpro.database.MysqlDatabaseApi
@@ -9,7 +8,6 @@ import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
 import com.dongzh1.pixelworldpro.expansion.Expansion
 import com.dongzh1.pixelworldpro.expansion.ExpansionManager.loadExpansion
 import com.dongzh1.pixelworldpro.gui.Gui
-import com.dongzh1.pixelworldpro.impl.WorldImpl
 import com.dongzh1.pixelworldpro.listener.*
 import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.papi.Papi
@@ -24,7 +22,6 @@ import com.xbaimiao.easylib.module.utils.submit
 import com.xbaimiao.easylib.module.utils.unregisterListener
 import com.xbaimiao.easylib.task.EasyLibTask
 import org.bukkit.Bukkit
-import org.bukkit.plugin.PluginManager
 import redis.clients.jedis.JedisPool
 import java.io.File
 import java.util.*
@@ -49,6 +46,7 @@ class PixelWorldPro : EasyPlugin() {
     private var isBungee = false
     private var redisListener: RedisListener? = null
     private var useLuckPerm = false
+    private val onInviterMap = mutableMapOf<UUID, List<UUID>>()
 
     val dimensionconfig = BuiltInConfiguration("Dimension.yml")
     val expansionconfig = BuiltInConfiguration("Expansion.yml")
@@ -127,7 +125,7 @@ class PixelWorldPro : EasyPlugin() {
                 val files = file.listFiles()!!
                 for (f in files) {
                     Bukkit.getConsoleSender().sendMessage("更新${f.name}世界格式")
-                    val nfile = File(PixelWorldPro.instance.config.getString("WorldPath"), f.name + "/world")
+                    val nfile = File(config.getString("WorldPath"), f.name + "/world")
                     f.copyRecursively(nfile)
                 }
             }
@@ -192,6 +190,14 @@ class PixelWorldPro : EasyPlugin() {
         reloadLang()
         Gui.reloadConfig()
         isBungee = config.getBoolean("Bungee")
+    }
+
+    fun setOnInviter(uuid: UUID, inviter: List<UUID>) {
+        onInviterMap[uuid] = inviter
+    }
+
+    fun getOnInviter(uuid: UUID): List<UUID>? {
+        return onInviterMap[uuid]
     }
 
     fun setData(uuid: UUID, value: String) {

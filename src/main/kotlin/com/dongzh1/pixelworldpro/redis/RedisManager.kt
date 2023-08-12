@@ -182,7 +182,7 @@ object RedisManager : Module<EasyPlugin> {
         }
     }
 
-    fun removeLock(serverName: String){
+    private fun removeLock(serverName: String){
         var lockValue = getLock()
         if (lockValue == null){
             return

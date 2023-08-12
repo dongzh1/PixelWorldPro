@@ -72,8 +72,9 @@ class RedisListener : JedisPubSub() {
                     }
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     val template = message.split("|,|")[2]
+                    val name = message.split("|,|")[3]
                     submit {
-                        if (WorldImpl.createWorldLocal(uuid, template)){
+                        if (WorldImpl.createWorldLocal(uuid, template, name)){
                             RedisManager.push("createWorldSuccess|,|${uuid}")
                         }
                     }

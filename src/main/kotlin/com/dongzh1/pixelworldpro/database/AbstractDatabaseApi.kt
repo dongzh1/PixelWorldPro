@@ -9,8 +9,6 @@ import com.xbaimiao.easylib.module.database.Ormlite
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
 import java.util.*
-import java.util.regex.Matcher
-import java.util.regex.Pattern
 
 
 abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {

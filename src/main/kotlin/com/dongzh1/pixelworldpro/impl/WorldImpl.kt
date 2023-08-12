@@ -22,12 +22,10 @@ import com.xbaimiao.easylib.bridge.economy.Vault
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.*
 import org.bukkit.entity.Player
-import org.bukkit.event.HandlerList
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CompletableFuture
-import kotlin.collections.HashMap
 
 
 object WorldImpl : WorldApi {
@@ -51,7 +49,7 @@ object WorldImpl : WorldApi {
             submit(async = true, period = 2L, maxRunningNum = 60, delay = 0L) {
 
                 if (i == 0) {
-                    RedisManager.push("createWorld|,|$uuid|,|$templateName")
+                    RedisManager.push("createWorld|,|$uuid|,|$templateName|,|${Bukkit.getPlayer(uuid)!!.name}")
                 }
                 i++
                 if (!createWorldList.contains(uuid)) {
@@ -89,7 +87,7 @@ object WorldImpl : WorldApi {
             createWorld(uuid, file.name)
         } else {
             val future = CompletableFuture<Boolean>()
-            if (createWorldLocal(uuid, file)) {
+            if (createWorldLocal(uuid, file, Bukkit.getPlayer(uuid)!!.name)) {
                 future.complete(true)
             } else {
                 future.complete(false)
@@ -98,12 +96,12 @@ object WorldImpl : WorldApi {
         }
     }
 
-    fun createWorldLocal(uuid: UUID, templateName: String): Boolean {
-        return createWorldLocal(uuid, File(PixelWorldPro.instance.config.getString("WorldTemplatePath"), templateName))
+    fun createWorldLocal(uuid: UUID, templateName: String, playerName: String): Boolean {
+        return createWorldLocal(uuid, File(PixelWorldPro.instance.config.getString("WorldTemplatePath"), templateName), playerName)
 
     }
 
-    private fun createWorldLocal(uuid: UUID, file: File): Boolean {
+    private fun createWorldLocal(uuid: UUID, file: File, playerName: String): Boolean {
         val time = System.currentTimeMillis()
         val createTime = time.toString()
         val date = Date(time)
@@ -164,7 +162,7 @@ object WorldImpl : WorldApi {
                     worldLevel = PixelWorldPro.instance.config.getConfigurationSection("WorldSetting.WorldLevel")!!
                         .getKeys(false).first(),
                     arrayListOf(uuid),
-                    arrayListOf(Bukkit.getOfflinePlayer(uuid).name!!),
+                    arrayListOf(playerName),
                     arrayListOf(),
                     arrayListOf(),
                     "anyone",
@@ -172,7 +170,8 @@ object WorldImpl : WorldApi {
                     System.currentTimeMillis(),
                     1,
                     false,
-                    isCreateEnd = false
+                    isCreateEnd = false,
+                    arrayListOf()
                 )
             )
             getWorldDimensionData("PixelWorldPro/$worldName")

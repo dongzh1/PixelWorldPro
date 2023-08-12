@@ -88,6 +88,10 @@ WorldSetting:
     World: "auto"
   #世界空置后卸载等待时间，默认单位为分钟,-1关闭
   unloadTime: 30
+  #邀请设置
+  Inviter:
+    #设置邀请者的权限
+    permission: "anyone"
 
 
 #插件提供papi变量的一些格式
@@ -114,6 +118,7 @@ Papi:
   state:
     anyone: '&a开放'
     member: '&a成员'
+    inviter: '&a邀请'
     owner: '&a不开放'
 #PWP默认大厅服务器，仅bungee下有效
 lobby: "lobby"

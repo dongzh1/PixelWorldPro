@@ -141,6 +141,10 @@ class WorldEdit(val player: Player) {
                             }
                             val newState = when (worldData.state) {
                                 "anyone" -> {
+                                    "inviter"
+                                }
+
+                                "inviter" -> {
                                     "member"
                                 }
 

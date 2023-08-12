@@ -5,6 +5,7 @@ import com.dongzh1.pixelworldpro.database.WorldData
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import java.util.*
+import kotlin.collections.ArrayList
 
 object Serialize {
     //序列化存入的数据
@@ -20,7 +21,8 @@ object Serialize {
                 "${worldData.lastTime},|.|," +
                 "${worldData.onlinePlayerNumber},|.|," +
                 "${worldData.isCreateNether},|.|," +
-                "${worldData.isCreateEnd}"
+                "${worldData.isCreateEnd},|.|," +
+                worldData.inviter.joinToString(",")
 
     }
     fun deserialize(value: String?): WorldData? {
@@ -43,15 +45,22 @@ object Serialize {
         }
         val memberName = if ((list[3].split(",").size == 1 && list[3].split(",")[0] == "")||
             (list[3].split(",").size == 2 && list[3].split(",")[1] == ""&&list[3].split(",")[0] == "")) {
-            mutableListOf<String>()
+            mutableListOf()
         } else {
             list[3].split(",").dropLast(1)
         }
         val banName = if ((list[5].split(",").size == 1 && list[5].split(",")[0] == "")||
             (list[5].split(",").size == 2 && list[5].split(",")[1] == ""&&list[5].split(",")[0] == "")) {
-            mutableListOf<String>()
+            mutableListOf()
         } else {
             list[5].split(",").dropLast(1)
+        }
+        val inviter = mutableListOf<UUID>()
+        if ((list.size >= 13).and(list[12] != "")) {
+            Bukkit.getConsoleSender().sendMessage(list[12])
+            for (id in list[12].split(",")) {
+                inviter.add(UUID.fromString(id))
+            }
         }
         return WorldData(
             worldName = list[0],
@@ -65,7 +74,8 @@ object Serialize {
             lastTime = list[8].toLong(),
             onlinePlayerNumber = list[9].toInt(),
             isCreateNether = list[10].toBoolean(),
-            isCreateEnd = list[11].toBoolean()
+            isCreateEnd = list[11].toBoolean(),
+            inviter = inviter
         )
     }
 

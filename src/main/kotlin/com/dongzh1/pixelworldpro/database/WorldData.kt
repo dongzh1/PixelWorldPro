@@ -9,13 +9,14 @@ data class WorldData (
     val memberName: List<String>,
     val banPlayers: List<UUID>,
     val banName: List<String>,
-    //anyone, member, owner
+    //anyone, member, owner, inviter
     val state: String,
     val createTime: String,
     val lastTime: Long,
     val onlinePlayerNumber: Int,
     val isCreateNether: Boolean,
-    val isCreateEnd: Boolean
+    val isCreateEnd: Boolean,
+    var inviter: List<UUID>
 )
 data class PlayerData (
     val joinedWorld: List<UUID>,

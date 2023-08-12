@@ -73,6 +73,9 @@ object Papi: PlaceholderExpansion() {
                     "anyone" ->{
                         return PixelWorldPro.instance.config.getString("Papi.state.anyone")!!.colored().replacePlaceholder(p)
                     }
+                    "inviter" ->{
+                        return PixelWorldPro.instance.config.getString("Papi.state.inviter")!!.colored().replacePlaceholder(p)
+                    }
                     "member" ->{
                         return PixelWorldPro.instance.config.getString("Papi.state.member")!!.colored().replacePlaceholder(p)
                     }

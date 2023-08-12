@@ -55,7 +55,7 @@ class Commands {
     )
     private val modeArgNode = ArgNode(lang("Mode"),
         exec = {
-            listOf("anyone", "member", "owner")
+            listOf("anyone", "inviter", "member", "owner")
         }, parse = {
             it
         }
@@ -949,6 +949,29 @@ class Commands {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private val invite = command<CommandSender>("invite") {
+        permission = "pixelworldpro.command.invite"
+        exec {
+            if(args.size == 0) {
+                sender.sendMessage(lang("ArgNotValid"))
+                return@exec
+            }
+            if(args.size == 1) {
+                if(sender !is Player) {
+                    sender.sendMessage(lang("NeedPlayer"))
+                    return@exec
+                }
+                val player = sender as Player
+                val worldData = PixelWorldPro.databaseApi.getWorldData(player.uniqueId)
+                if (worldData == null) {
+                    sender.sendMessage(lang("WorldNotExist"))
+                    return@exec
+                }
+
             }
         }
     }

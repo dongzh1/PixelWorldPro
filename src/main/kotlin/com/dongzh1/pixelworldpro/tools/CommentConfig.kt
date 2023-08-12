@@ -40,9 +40,16 @@ object CommentConfig : YamlConfiguration() {
                 PixelWorldPro.instance.saveConfig()
             }
             4 ->{
-                Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 跟新配置文件")
+                Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新配置文件")
                 PixelWorldPro.instance.config.set("version", 5)
                 PixelWorldPro.instance.config.set("WorldSetting.unloadTime",30)
+                PixelWorldPro.instance.saveConfig()
+            }
+            5 ->{
+                Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新配置文件")
+                PixelWorldPro.instance.config.set("version", 6)
+                PixelWorldPro.instance.config.set("WorldSetting.Inviter.permission", "anyone")
+                PixelWorldPro.instance.config.set("Papi.state.inviter", "&a邀请")
                 PixelWorldPro.instance.saveConfig()
             }
             else ->return
