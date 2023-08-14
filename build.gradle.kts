@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "com.dongzh1.pixelworldpro"
-version = "1.1.5"
+version = "1.1.6"
 
 repositories {
     mavenCentral()

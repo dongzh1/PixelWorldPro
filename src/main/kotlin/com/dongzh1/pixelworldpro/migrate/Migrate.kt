@@ -25,7 +25,7 @@ object Migrate {
             val wordlist = ArrayList<com.xbaimiao.template.database.dao.WorldData>()
             while (true) {
                 val oldlist = event.INSTANCE.getWorldList(10, n, player)
-                if (wordlist.isNullOrEmpty()) {
+                if (oldlist.isNullOrEmpty()) {
                     break
                 }
                 for (worlddata in oldlist) {
@@ -63,7 +63,7 @@ object Migrate {
                     val worldName = "${players}_${timeString}"
                     val worldData = WorldData(
                         "Pixelworldpro/$worldName",
-                        worldLevel = worlddata.level.toString(),
+                        worlddata.level.toString(),
                         mumberL,
                         mumberN,
                         banL,
@@ -79,7 +79,7 @@ object Migrate {
                     val p = ArrayList<UUID>()
                     p.add(players)
                     val playerData = PlayerData(
-                        p, database.getMemberNumber(players)
+                        p, database.getMemberNumber(players), listOf()
                     )
                     databaseApi.setWorldData(players, worldData)
                     databaseApi.setPlayerData(players, playerData)

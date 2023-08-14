@@ -184,7 +184,8 @@ object WorldImpl : WorldApi {
                 if (playerData == null) {
                     playerData = PlayerData(
                         mutableListOf(uuid),
-                        memberNumber = Gui.getMembersEditConfig().getInt("DefaultMembersNumber")
+                        memberNumber = Gui.getMembersEditConfig().getInt("DefaultMembersNumber"),
+                        listOf()
                     )
                     PixelWorldPro.databaseApi.setPlayerData(uuid, playerData)
                 } else {
@@ -402,6 +403,7 @@ object WorldImpl : WorldApi {
                     world.keepSpawnInMemory = false
                     setGamerule(world)
                     loadWorldList.add(uuid)
+                    PixelWorldPro.instance.setOnInviter(uuid, listOf())
                     true
                 }
             }
@@ -418,7 +420,7 @@ object WorldImpl : WorldApi {
                     worldcreator = worldcreator.seed(dimensionData.seed.toLong())
                     Bukkit.getConsoleSender().sendMessage(worldcreator.seed().toString())
                 }
-                if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.World") != "null") {
+                if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.World") != "auto") {
                     worldcreator = worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.World"))
                 }
                 val world = Bukkit.createWorld(worldcreator)

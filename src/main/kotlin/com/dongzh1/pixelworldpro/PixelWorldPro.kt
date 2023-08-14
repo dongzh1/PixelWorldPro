@@ -22,6 +22,7 @@ import com.xbaimiao.easylib.module.utils.submit
 import com.xbaimiao.easylib.module.utils.unregisterListener
 import com.xbaimiao.easylib.task.EasyLibTask
 import org.bukkit.Bukkit
+import org.bukkit.WorldCreator
 import redis.clients.jedis.JedisPool
 import java.io.File
 import java.util.*
@@ -52,6 +53,7 @@ class PixelWorldPro : EasyPlugin() {
     val expansionconfig = BuiltInConfiguration("Expansion.yml")
     val worldBorder = BuiltInConfiguration("WorldBorder.yml")
     val advancedWorldSettings = BuiltInConfiguration("AdvancedWorldSettings.yml")
+    val world = BuiltInConfiguration("World.yml")
 
 
     override fun enable() {
@@ -137,6 +139,22 @@ class PixelWorldPro : EasyPlugin() {
             //    Thread.sleep((config.getLong("WorldSetting.unloadTime") * 60 * 1000))
             //    WorldImpl.unloadtimeoutworld()
             //}.start()
+            //加载世界
+            val worldList = world.getStringList("loadWorldList")
+            for(worldName in worldList){
+                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载世界${worldName}")
+                var world = Bukkit.getWorld(worldName)
+                if(world != null){
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 世界${worldName}已加载")
+                    continue
+                }
+                world = Bukkit.createWorld(WorldCreator(worldName))
+                if(world != null){
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载世界${worldName}成功")
+                    continue
+                }
+                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载世界${worldName}失败")
+            }
         }else{
             Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro Invalid token")
         }

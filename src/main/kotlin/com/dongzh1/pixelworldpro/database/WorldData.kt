@@ -20,7 +20,8 @@ data class WorldData (
 )
 data class PlayerData (
     val joinedWorld: List<UUID>,
-    val memberNumber: Int
+    val memberNumber: Int,
+    var inviterMsg: List<UUID>
 )
 data class DimensionData (
     val name: String,

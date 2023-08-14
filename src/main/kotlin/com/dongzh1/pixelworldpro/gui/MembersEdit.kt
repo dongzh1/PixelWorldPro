@@ -24,7 +24,7 @@ class MembersEdit(val player: Player) {
         //获取玩家数据
         playerData = PixelWorldPro.databaseApi.getPlayerData(player.uniqueId)
         if (playerData == null){
-            playerData = PlayerData(listOf(),Gui.getMembersEditConfig().getInt("DefaultMembersNumber"))
+            playerData = PlayerData(listOf(),Gui.getMembersEditConfig().getInt("DefaultMembersNumber"), listOf())
             PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData!!)
         }
         for (guiData in charMap){

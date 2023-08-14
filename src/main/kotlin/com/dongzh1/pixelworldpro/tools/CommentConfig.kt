@@ -1,6 +1,7 @@
 package com.dongzh1.pixelworldpro.tools
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
+import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
 
 import org.bukkit.configuration.file.YamlConfiguration
@@ -17,44 +18,49 @@ object CommentConfig : YamlConfiguration() {
         updateYaml("lang/$path.yml")
     }
     fun updateConfig(){
-        val configFile = File(PixelWorldPro.instance.dataFolder, "config.yml")
-        when(PixelWorldPro.instance.config.getInt("version")){
-            1 ->{
-                PixelWorldPro.instance.config.set("version", 2)
-                PixelWorldPro.instance.saveConfig()
-                configFile.appendText("#是否使用worldBorder插件生成世界边界\n" +
-                        "#Whether to use the worldBorder plugin to generate the world border\n" +
-                        "WorldBorder: false\n")
-            }
-            2 ->{
-                PixelWorldPro.instance.config.set("version", 3)
-                PixelWorldPro.instance.config.set("WorldSetting.Gamemode.owner","SURVIVAL")
-                PixelWorldPro.instance.config.set("WorldSetting.Gamemode.member","SURVIVAL")
-                PixelWorldPro.instance.config.set("WorldSetting.Gamemode.anyone","ADVENTURE")
-                PixelWorldPro.instance.saveConfig()
-            }
-            3 ->{
-                PixelWorldPro.instance.config.set("version", 4)
-                PixelWorldPro.instance.config.set("WorldSetting.Creater.World","auto")
-                PixelWorldPro.instance.config.set("lobby","lobby")
-                PixelWorldPro.instance.saveConfig()
-            }
-            4 ->{
-                Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新配置文件")
-                PixelWorldPro.instance.config.set("version", 5)
-                PixelWorldPro.instance.config.set("WorldSetting.unloadTime",30)
-                PixelWorldPro.instance.saveConfig()
-            }
-            5 ->{
-                Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新配置文件")
-                PixelWorldPro.instance.config.set("version", 6)
-                PixelWorldPro.instance.config.set("WorldSetting.Inviter.permission", "anyone")
-                PixelWorldPro.instance.config.set("Papi.state.inviter", "&a邀请")
-                PixelWorldPro.instance.saveConfig()
-            }
-            else ->return
-        }
+        submit(async = true) {
+            while (true) {
+                when (PixelWorldPro.instance.config.getInt("version")) {
+                    2 -> {
+                        PixelWorldPro.instance.config.set("version", 3)
+                        PixelWorldPro.instance.config.set("WorldSetting.Gamemode.owner", "SURVIVAL")
+                        PixelWorldPro.instance.config.set("WorldSetting.Gamemode.member", "SURVIVAL")
+                        PixelWorldPro.instance.config.set("WorldSetting.Gamemode.anyone", "ADVENTURE")
+                        PixelWorldPro.instance.saveConfig()
+                    }
 
+                    3 -> {
+                        PixelWorldPro.instance.config.set("version", 4)
+                        PixelWorldPro.instance.config.set("WorldSetting.Creater.World", "auto")
+                        PixelWorldPro.instance.config.set("lobby", "lobby")
+                        PixelWorldPro.instance.saveConfig()
+                    }
+
+                    4 -> {
+                        Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新配置文件")
+                        PixelWorldPro.instance.config.set("version", 5)
+                        PixelWorldPro.instance.config.set("WorldSetting.unloadTime", 30)
+                        PixelWorldPro.instance.saveConfig()
+                    }
+
+                    5 -> {
+                        Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新配置文件")
+                        PixelWorldPro.instance.config.set("version", 6)
+                        PixelWorldPro.instance.config.set("WorldSetting.Inviter.permission", "anyone")
+                        PixelWorldPro.instance.config.set("Papi.state.inviter", "&a邀请")
+                        PixelWorldPro.instance.saveConfig()
+                    }
+                    6 -> {
+                        Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新配置文件")
+                        PixelWorldPro.instance.config.set("version", 7)
+                        PixelWorldPro.instance.config.set("mainCommand", "pwp")
+                        PixelWorldPro.instance.saveConfig()
+                    }
+
+                    else -> return@submit
+                }
+            }
+        }
     }
     private fun updateYaml(path: String){
         //获取插件文件的文件

@@ -112,9 +112,11 @@ object RedisManager : Module<EasyPlugin> {
         }
     }
     fun removeMspt() {
-        jedisPool.resource.also {
-            it.del("PixelWorldPromspt")
-            it.close()
+        if (PixelWorldPro.instance.config.getBoolean("buildWorld")) {
+            jedisPool.resource.also {
+                it.del("PixelWorldPromspt")
+                it.close()
+            }
         }
     }
     fun removeLock() {
@@ -253,8 +255,8 @@ object RedisManager : Module<EasyPlugin> {
                     it.close()
                 }
             }
-            //删除本服所有加载的世界lock
-            removeLock(serverName)
         }
+        //删除本服所有加载的世界lock
+        removeLock(serverName)
     }
 }

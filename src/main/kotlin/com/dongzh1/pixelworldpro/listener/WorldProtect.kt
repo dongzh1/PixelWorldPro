@@ -4,7 +4,9 @@ import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.database.RedStone
 import com.dongzh1.pixelworldpro.impl.WorldImpl
 import com.dongzh1.pixelworldpro.redis.RedisManager
+import org.bukkit.Bukkit
 import org.bukkit.GameMode
+import org.bukkit.GameRule
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -17,6 +19,7 @@ import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerTeleportEvent
+import org.bukkit.event.world.WorldLoadEvent
 import org.bukkit.event.world.WorldUnloadEvent
 import java.text.SimpleDateFormat
 import java.util.*
@@ -58,6 +61,13 @@ class WorldProtect : Listener {
                 return
             if (worldData.members.contains(damager.uniqueId))
                 return
+            if (e.entity.uniqueId in PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!)!!) {
+                when (PixelWorldPro.instance.config.getString("WorldSetting.Inviter.permission")) {
+                    "member" -> {
+                        return
+                    }
+                }
+            }
             e.isCancelled = true
         }
         //如果被攻击者是玩家且不是成员，则取消事件
@@ -65,6 +75,13 @@ class WorldProtect : Listener {
             val entity = e.entity as Player
             if (worldData.members.contains(entity.uniqueId))
                 return
+            if (e.entity.uniqueId in PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!)!!) {
+                when (PixelWorldPro.instance.config.getString("WorldSetting.Inviter.permission")) {
+                    "member" -> {
+                        return
+                    }
+                }
+            }
             e.isCancelled = true
         }
     }
@@ -81,6 +98,13 @@ class WorldProtect : Listener {
         //如果玩家不是成员，则取消事件
         if (worldData.members.contains(e.player.uniqueId))
             return
+        if (e.player.uniqueId in PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!)!!) {
+            when (PixelWorldPro.instance.config.getString("WorldSetting.Inviter.permission")) {
+                "member" -> {
+                    return
+                }
+            }
+        }
         e.isCancelled = true
     }
 
@@ -96,12 +120,18 @@ class WorldProtect : Listener {
         //如果玩家不是成员，则取消事件
         if (worldData.members.contains(e.player.uniqueId))
             return
+        if (e.player.uniqueId in PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!)!!) {
+            when (PixelWorldPro.instance.config.getString("WorldSetting.Inviter.permission")) {
+                "member" -> {
+                    return
+                }
+            }
+        }
         e.isCancelled = true
     }
 
     @EventHandler
     fun worldChange(e: PlayerChangedWorldEvent) {
-        WorldImpl.setGamerule(e.player.world)
         if (e.player.isOp) {
             return
         }
@@ -217,7 +247,45 @@ class WorldProtect : Listener {
 
     @EventHandler
     fun teleport(e: PlayerTeleportEvent) {
-        WorldImpl.setGamerule(e.to.world)
+        val worldConfig = PixelWorldPro.instance.world
+        val world = e.player.world
+        val gameMode = worldConfig.getString("worldData.${world.name}.gameMode")
+        when(val permission = worldConfig.getString("worldData.${world.name}.enableGameMode")){
+            "off" ->{}
+            "op" ->{}
+            null ->{}
+            else ->{
+                if(e.player.hasPermission(permission)){
+                    when(gameMode){
+                        "ADVENTURE" -> {
+                            e.player.gameMode = GameMode.ADVENTURE
+                            return
+                        }
+
+                        "SURVIVAL" -> {
+                            e.player.gameMode = GameMode.SURVIVAL
+                            return
+                        }
+
+                        "CREATIVE" -> {
+                            e.player.gameMode = GameMode.CREATIVE
+                            return
+                        }
+
+                        "SPECTATOR" -> {
+                            e.player.gameMode = GameMode.SPECTATOR
+                            return
+                        }
+
+                        "AUTO" -> {
+                            return
+                        }
+                    }
+                }else{
+                    e.isCancelled = true
+                }
+            }
+        }
         if (e.player.isOp)
             return
         val worldName = e.to.world.name
@@ -236,17 +304,24 @@ class WorldProtect : Listener {
             e.isCancelled = true
         }
         //吊销邀请状态
-        if(e.player.uniqueId in PixelWorldPro.instance.getOnInviter(getWorldNameUUID(e.from.world.name)!!)!!){
-            val onInviteList = PixelWorldPro.instance.getOnInviter(getWorldNameUUID(e.from.world.name)!!)!! as ArrayList
-            onInviteList.remove(e.player.uniqueId)
-            PixelWorldPro.instance.setOnInviter(getWorldNameUUID(e.to.world.name)!!, onInviteList)
+        if(getWorldNameUUID(e.from.world.name) != null) {
+            if(PixelWorldPro.instance.getOnInviter(getWorldNameUUID(e.from.world.name)!!) != null) {
+                if(e.player.uniqueId in PixelWorldPro.instance.getOnInviter(getWorldNameUUID(e.from.world.name)!!)!!) {
+                    val onInviteList =
+                        PixelWorldPro.instance.getOnInviter(getWorldNameUUID(e.from.world.name)!!)!! as ArrayList
+                    onInviteList.remove(e.player.uniqueId)
+                    PixelWorldPro.instance.setOnInviter(getWorldNameUUID(e.to.world.name)!!, onInviteList)
+                }
+            }
         }
         when (worldData.state) {
             "owner" -> {
+                Bukkit.getConsoleSender().sendMessage("3")
                 e.player.sendMessage("此世界无法进入")
                 e.isCancelled = true
             }
             "member" ->{
+                Bukkit.getConsoleSender().sendMessage("2")
                 if(worldData.members.contains(e.player.uniqueId)) {
                     e.player.sendMessage("传送中")
                     return
@@ -257,28 +332,40 @@ class WorldProtect : Listener {
             "anyone" ->{
                 e.player.sendMessage("传送中")
             }
-            "Inviter" ->{
+            "inviter" ->{
+                Bukkit.getConsoleSender().sendMessage("1")
                 if(e.player.uniqueId in worldData.members){
                     e.player.sendMessage("传送中")
                     return
                 }
+                Bukkit.getConsoleSender().sendMessage(worldData.inviter.toString())
                 if(e.player.uniqueId in worldData.inviter){
                     e.player.sendMessage("传送中")
                     e.player.sendMessage("消耗来自世界主人的一张邀请函")
                     val inviterList = worldData.inviter as ArrayList
                     inviterList.remove(e.player.uniqueId)
                     worldData.inviter = inviterList
-                    PixelWorldPro.databaseApi.setWorldData(e.player.uniqueId, worldData)
-                    val onInviteList = PixelWorldPro.instance.getOnInviter(getWorldNameUUID(e.to.world.name)!!)!! as ArrayList
-                    onInviteList.add(e.player.uniqueId)
-                    PixelWorldPro.instance.setOnInviter(getWorldNameUUID(e.to.world.name)!!, onInviteList)
-                    return
+                    val uid = getWorldNameUUID(e.to.world.name)!!
+                    PixelWorldPro.databaseApi.setWorldData(uid, worldData)
+                    val oldOnInviteList = PixelWorldPro.instance.getOnInviter(uid)
+                    if(oldOnInviteList == null){
+                        val onInviteList = ArrayList<UUID>()
+                        onInviteList.add(e.player.uniqueId)
+                        PixelWorldPro.instance.setOnInviter(getWorldNameUUID(e.to.world.name)!!, onInviteList)
+                        return
+                    }else{
+                        val onInviteList = oldOnInviteList as ArrayList<UUID>
+                        onInviteList.add(e.player.uniqueId)
+                        PixelWorldPro.instance.setOnInviter(getWorldNameUUID(e.to.world.name)!!, onInviteList)
+                        return
+                    }
                 }
                 e.player.sendMessage("此世界无法进入")
                 e.isCancelled = true
             }
 
             else ->{
+                Bukkit.getConsoleSender().sendMessage("0")
                 e.player.sendMessage("此世界无法进入")
                 e.isCancelled = true
             }
@@ -355,6 +442,36 @@ class WorldProtect : Listener {
         }
     }
 
+    @EventHandler
+    fun worldLoad(e: WorldLoadEvent) {
+        val worldConfig = PixelWorldPro.instance.world
+        val world = e.world
+        val gameRulesList = worldConfig.getConfigurationSection("worldData.${world.name}.GameRule") ?: return
+        val gameRulesStringList = gameRulesList.getKeys(false)
+        try {
+            for (gameruleString in gameRulesStringList) {
+                val gamerule = GameRule.getByName(gameruleString)
+                if (gamerule == null) {
+                    Bukkit.getConsoleSender().sendMessage("§4$gameruleString ${WorldImpl.lang("NotValidGameRule")}")
+                    continue
+                }
+                if (gamerule.type == Class.forName("java.lang.Boolean")) {
+                    val valueBoolean = PixelWorldPro.instance.config.getBoolean("worldData.${world.name}.GameRule.$gameruleString")
+                    world.setGameRule(gamerule as GameRule<Boolean>, valueBoolean)
+                    world.setGameRule(gamerule, valueBoolean)
+                    world.save()
+                }
+                if (gamerule.type == Class.forName("java.lang.Integer")) {
+                    val valueInt = PixelWorldPro.instance.config.getInt("worldData.${world.name}.GameRule.$gameruleString")
+                    world.setGameRule(gamerule as GameRule<Int>, valueInt)
+                    world.setGameRule(gamerule, valueInt)
+                    world.save()
+                }
+            }
+        } catch (_: Exception) {
+            Bukkit.getConsoleSender().sendMessage("设置世界规则失败，可能当前服务端版本低于1.13")
+        }
+    }
 
     //判断是否为玩家世界
     private fun isPlayerWorld(worldName:String,player:UUID):Boolean{

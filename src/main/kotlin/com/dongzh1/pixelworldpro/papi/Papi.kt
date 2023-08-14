@@ -15,7 +15,7 @@ object Papi: PlaceholderExpansion() {
     override val identifier: String
         get() = "pixelworldpro"
     override val version: String
-        get() = "1.0.0"
+        get() = "1.1.6"
 
     override fun onRequest(p: OfflinePlayer, params: String): String? {
         when(params){
@@ -92,6 +92,9 @@ object Papi: PlaceholderExpansion() {
                     "anyone" ->{
                         return PixelWorldPro.instance.config.getString("Papi.state.anyone")!!.colored().replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
                     }
+                    "inviter" ->{
+                        return PixelWorldPro.instance.config.getString("Papi.state.inviter")!!.colored().replacePlaceholder(p)
+                    }
                     "member" ->{
                         return PixelWorldPro.instance.config.getString("Papi.state.member")!!.colored().replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
                     }
@@ -110,6 +113,7 @@ object Papi: PlaceholderExpansion() {
                 val worldData = PixelWorldPro.databaseApi.getWorldData(uuid) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
                 return worldData.onlinePlayerNumber.toString()
             }
+
         }
         return null
     }

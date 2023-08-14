@@ -56,10 +56,11 @@ object Serialize {
             list[5].split(",").dropLast(1)
         }
         val inviter = mutableListOf<UUID>()
-        if ((list.size >= 13).and(list[12] != "")) {
-            Bukkit.getConsoleSender().sendMessage(list[12])
-            for (id in list[12].split(",")) {
-                inviter.add(UUID.fromString(id))
+        if (list.size >= 13) {
+            if(list[12] != "") {
+                for (id in list[12].split(",")) {
+                    inviter.add(UUID.fromString(id))
+                }
             }
         }
         return WorldData(
@@ -81,13 +82,13 @@ object Serialize {
 
     fun serializePlayerData(playerData: PlayerData): String {
         return "${playerData.joinedWorld.joinToString(",")},,|.|," +
-                "${playerData.memberNumber}"
+                "${playerData.memberNumber},|.|," +
+                playerData.inviterMsg.joinToString(",")
     }
     fun deserializePlayerData(value: String?): PlayerData? {
         if (value == null) {
             return null
         }
-
         val list = value.split(",|.|,")
         val joinedWorld = if ((list[0].split(",").size == 1 && list[0].split(",")[0] == "")||
             (list[0].split(",").size == 2 && list[0].split(",")[1] == ""&&list[0].split(",")[0] == "")) {
@@ -96,9 +97,18 @@ object Serialize {
             //去掉最后一个
             list[0].split(",").dropLast(1).map { UUID.fromString(it) }
         }
+        val inviter = mutableListOf<UUID>()
+        if(list.size >= 3){
+            if(list[2] != "") {
+                for (id in list[2].split(",")) {
+                    inviter.add(UUID.fromString(id))
+                }
+            }
+        }
         return PlayerData(
             joinedWorld = joinedWorld,
-            memberNumber = list[1].toInt()
+            memberNumber = list[1].toInt(),
+            inviter
         )
     }
     fun deserializeLocation(location: String): Location {
