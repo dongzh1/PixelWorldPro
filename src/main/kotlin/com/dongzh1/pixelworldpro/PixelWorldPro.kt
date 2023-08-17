@@ -54,109 +54,118 @@ class PixelWorldPro : EasyPlugin() {
     val worldBorder = BuiltInConfiguration("WorldBorder.yml")
     val advancedWorldSettings = BuiltInConfiguration("AdvancedWorldSettings.yml")
     val world = BuiltInConfiguration("World.yml")
+    val eula = BuiltInConfiguration("eula.yml")
 
 
     override fun enable() {
-        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro is loading")
-        instance = this
-        //加载默认配置文件
-        saveDefaultConfig()
-        //加载语言文件
-        saveLang()
-        //加载gui界面
-        saveGui()
-        //更新配置文件
-        CommentConfig.updateConfig()
-        if(config.getString("token")?.let { V2.auth(it) } == true) {
-            Bukkit.getConsoleSender().sendMessage("§a恭喜您验证成功！！PixelWorldPro插件感谢您的赞助")
-            Bukkit.getConsoleSender().sendMessage("§aCongratulations on your successful verification! ! PixelWorldPro plugin thanks for your sponsorship")
-            Bukkit.getConsoleSender().sendMessage("§a将您的验证码交给他人使用可能导致您的服务器被封禁")
-            Bukkit.getConsoleSender().sendMessage("§a有疑问请加群咨询789731437")
-            loadExpansion()
-            //注册全局监听
-            Bukkit.getPluginManager().registerEvents( OnPlayerJoin(), this)
-            Bukkit.getPluginManager().registerEvents(OnWorldUnload(), this)
-            Bukkit.getPluginManager().registerEvents(WorldProtect(), this)
+        if (eula.getBoolean("eula")) {
+            //PixelWorldPro全部版本遵循《用户协议-付费插件》
+            //https://wiki.mcyzj.cn/#/zh-cn/agreement?id=%e4%bb%98%e8%b4%b9%e6%8f%92%e4%bb%b6
+            //购买/反编译/使用 插件即表明您认可我们的协议
+            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro is loading")
+            instance = this
+            //加载默认配置文件
+            saveDefaultConfig()
+            //加载语言文件
+            saveLang()
+            //加载gui界面
+            saveGui()
+            //更新配置文件
+            CommentConfig.updateConfig()
+            if (config.getString("token")?.let { V2.auth(it) } == true) {
+                Bukkit.getConsoleSender().sendMessage("§a恭喜您验证成功！！PixelWorldPro插件感谢您的赞助")
+                Bukkit.getConsoleSender()
+                    .sendMessage("§aCongratulations on your successful verification! ! PixelWorldPro plugin thanks for your sponsorship")
+                Bukkit.getConsoleSender().sendMessage("§a将您的验证码交给他人使用可能导致您的服务器被封禁")
+                Bukkit.getConsoleSender().sendMessage("§a有疑问请加群咨询789731437")
+                loadExpansion()
+                //注册全局监听
+                Bukkit.getPluginManager().registerEvents(OnPlayerJoin(), this)
+                Bukkit.getPluginManager().registerEvents(OnWorldUnload(), this)
+                Bukkit.getPluginManager().registerEvents(WorldProtect(), this)
 
-            //加载redis
-            if (config.getBoolean("Bungee")) {
-                isBungee = true
-                Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord")
-                val redisConfig = RedisConfig(config)
-                Bukkit.getConsoleSender().sendMessage("RedisInfo: " + redisConfig.host + ":" + redisConfig.port)
-                jedisPool = if (redisConfig.password != null) {
-                    JedisPool(redisConfig, redisConfig.host, redisConfig.port, 1000, redisConfig.password)
-                } else {
-                    JedisPool(redisConfig, redisConfig.host, redisConfig.port)
+                //加载redis
+                if (config.getBoolean("Bungee")) {
+                    isBungee = true
+                    Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord")
+                    val redisConfig = RedisConfig(config)
+                    Bukkit.getConsoleSender().sendMessage("RedisInfo: " + redisConfig.host + ":" + redisConfig.port)
+                    jedisPool = if (redisConfig.password != null) {
+                        JedisPool(redisConfig, redisConfig.host, redisConfig.port, 1000, redisConfig.password)
+                    } else {
+                        JedisPool(redisConfig, redisConfig.host, redisConfig.port)
+                    }
+                    redisListener = RedisListener()
+                    subscribeTask = submit(async = true) {
+                        jedisPool.resource.use { jedis ->
+                            jedis.subscribe(redisListener, channel)
+                        }
+                    }
+                    RedisManager.setMspt(Bukkit.getTicksPerMonsterSpawns().toDouble())
+                    if (config.getBoolean("buildWorld")) {
+                        registerListener(TickListener)
+                    }
+                    Server().commandRoot.register()
                 }
-                redisListener = RedisListener()
-                subscribeTask = submit(async = true) {
-                    jedisPool.resource.use { jedis ->
-                        jedis.subscribe(redisListener, channel)
+                //加载数据库
+                if (config.getString("Database").equals("db", true)) {
+                    databaseApi = SQLiteDatabaseApi()
+                }
+                if (config.getString("Database").equals("mysql", true)) {
+                    databaseApi = MysqlDatabaseApi()
+
+                }
+                //提取到内存
+                databaseApi.importWorldData()
+                //注册指令
+                Commands().commandRoot.register()
+
+                //避免数据库未初始化玩家进入
+                val initListener = OnPlayerLogin()
+                registerListener(initListener)
+                Papi.register()
+                //等待3秒后注销事件
+                submit(delay = 60) {
+                    unregisterListener(initListener)
+                }
+                val file = File("./PixelWorldPro_old")
+                if (file.exists() && !file.isDirectory) {
+                    val files = file.listFiles()!!
+                    for (f in files) {
+                        Bukkit.getConsoleSender().sendMessage("更新${f.name}世界格式")
+                        val nfile = File(config.getString("WorldPath"), f.name + "/world")
+                        f.copyRecursively(nfile)
                     }
                 }
-                RedisManager.setMspt(Bukkit.getTicksPerMonsterSpawns().toDouble())
-                if (config.getBoolean("buildWorld")) {
-                    registerListener(TickListener)
+                if (Bukkit.getPluginManager().isPluginEnabled("jiangfriends")) {
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测到JiangFriends，自动挂勾")
                 }
-                Server().commandRoot.register()
-            }
-            //加载数据库
-            if (config.getString("Database").equals("db", true)) {
-                databaseApi = SQLiteDatabaseApi()
-            }
-            if (config.getString("Database").equals("mysql", true)) {
-                databaseApi = MysqlDatabaseApi()
-
-            }
-            //提取到内存
-            databaseApi.importWorldData()
-            //注册指令
-            Commands().commandRoot.register()
-
-            //避免数据库未初始化玩家进入
-            val initListener = OnPlayerLogin()
-            registerListener(initListener)
-            Papi.register()
-            //等待3秒后注销事件
-            submit(delay = 60) {
-                unregisterListener(initListener)
-            }
-            val file = File("./PixelWorldPro_old")
-            if (file.exists() && !file.isDirectory) {
-                val files = file.listFiles()!!
-                for (f in files) {
-                    Bukkit.getConsoleSender().sendMessage("更新${f.name}世界格式")
-                    val nfile = File(config.getString("WorldPath"), f.name + "/world")
-                    f.copyRecursively(nfile)
+                //Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 启用清理闲置世界")
+                //Thread {
+                //    Thread.sleep((config.getLong("WorldSetting.unloadTime") * 60 * 1000))
+                //    WorldImpl.unloadtimeoutworld()
+                //}.start()
+                //加载世界
+                val worldList = world.getStringList("loadWorldList")
+                for (worldName in worldList) {
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载世界${worldName}")
+                    var world = Bukkit.getWorld(worldName)
+                    if (world != null) {
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 世界${worldName}已加载")
+                        continue
+                    }
+                    world = Bukkit.createWorld(WorldCreator(worldName))
+                    if (world != null) {
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载世界${worldName}成功")
+                        continue
+                    }
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载世界${worldName}失败")
                 }
-            }
-            if(Bukkit.getPluginManager().isPluginEnabled("jiangfriends")){
-                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测到JiangFriends，自动挂勾")
-            }
-            //Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 启用清理闲置世界")
-            //Thread {
-            //    Thread.sleep((config.getLong("WorldSetting.unloadTime") * 60 * 1000))
-            //    WorldImpl.unloadtimeoutworld()
-            //}.start()
-            //加载世界
-            val worldList = world.getStringList("loadWorldList")
-            for(worldName in worldList){
-                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载世界${worldName}")
-                var world = Bukkit.getWorld(worldName)
-                if(world != null){
-                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 世界${worldName}已加载")
-                    continue
-                }
-                world = Bukkit.createWorld(WorldCreator(worldName))
-                if(world != null){
-                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载世界${worldName}成功")
-                    continue
-                }
-                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载世界${worldName}失败")
+            } else {
+                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro Invalid token")
             }
         }else{
-            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro Invalid token")
+            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 您需要同意eula才能使用插件")
         }
     }
     override fun disable() {
