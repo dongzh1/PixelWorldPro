@@ -8,6 +8,7 @@ import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.impl.WorldImpl
 import com.dongzh1.pixelworldpro.listener.WorldProtect
 import com.dongzh1.pixelworldpro.migrate.Migrate
+import com.dongzh1.pixelworldpro.migrate.WorldMove
 import com.dongzh1.pixelworldpro.redis.RedisManager
 import com.dongzh1.pixelworldpro.tools.Config
 import com.dongzh1.pixelworldpro.tools.JiangCore
@@ -19,7 +20,6 @@ import com.xbaimiao.easylib.module.command.ArgNode
 import com.xbaimiao.easylib.module.command.command
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
-import org.bukkit.World
 import org.bukkit.WorldCreator
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -735,8 +735,8 @@ class Commands {
                 if (sender is Player) {
                     val player = sender as Player
                     //try {
-                    val config = PixelWorldPro.instance.config
-                    val dimensionlist = config.getList("WorldSetting.Dimension")!!
+                    val config = PixelWorldPro.instance.dimensionconfig
+                    val dimensionlist = config.getList("Dimension")!!
                     val dimensionList = ArrayList<String>()
                     for (d in dimensionlist) {
                         val g = Gson()
@@ -1341,6 +1341,27 @@ class Commands {
         }
     }
 
+    private val move = command<CommandSender>("move") {
+        permission = "pixelworldpro.command.admin"
+        exec{
+            if ((args.size == 2).and(sender.hasPermission("pixelworldpro.command.admin"))) {
+                val from = JiangCore.getPlayer(args[0])
+                if(from == null){
+                    sender.sendMessage("无法寻找到玩家${args[0]}")
+                    return@exec
+                }
+                val to = JiangCore.getPlayer(args[1])
+                if(to == null){
+                    sender.sendMessage("无法寻找到玩家${args[1]}")
+                    return@exec
+                }
+                WorldMove.main(from.uuid, to.uuid, sender)
+            }else{
+                sender.sendMessage("参数不合法")
+            }
+        }
+    }
+
     private val world = command<CommandSender>("world") {
         permission = "pixelworldpro.command.world"
         sub(worldTp)
@@ -1351,7 +1372,7 @@ class Commands {
     private fun lang(string: String): String {
         return PixelWorldPro.instance.lang().getStringColored(string)
     }
-    val mainCommand = PixelWorldPro.instance.config.getString("mainCommand") ?:"pwp"
+    private val mainCommand = PixelWorldPro.instance.config.getString("mainCommand") ?:"pwp"
     val commandRoot = command<CommandSender>(mainCommand) {
         permission = "pixelworldpro.command"
         sub(blacklist)
@@ -1367,6 +1388,7 @@ class Commands {
         sub(load)
         sub(members)
         sub(migrateppw)
+        sub(move)
         sub(levelup)
         sub(gui)
         sub(mode)

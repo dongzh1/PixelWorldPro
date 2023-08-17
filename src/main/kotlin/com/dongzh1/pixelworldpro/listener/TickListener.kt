@@ -18,7 +18,7 @@ object TickListener : Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     fun event(event: ServerTickEndEvent) {
         submit(async = true) {
-            if (indices >= 600) {
+            if (indices >= 2000) {
                 //定期存入redis
                 RedisManager.setMspt(Bukkit.getTicksPerMonsterSpawns().toDouble())
                 indices = 1

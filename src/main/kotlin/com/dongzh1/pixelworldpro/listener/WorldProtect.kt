@@ -42,6 +42,17 @@ class WorldProtect : Listener {
             val target = e.target as Player
             if (worldData.members.contains(target.uniqueId))
                 return
+            if (PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!) == null){
+                PixelWorldPro.instance.setOnInviter(getWorldNameUUID(worldName)!!, listOf())
+            }else{
+                if ((e.target as Player).uniqueId in PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!)!!) {
+                    when (PixelWorldPro.instance.config.getString("WorldSetting.Inviter.permission")) {
+                        "member" -> {
+                            return
+                        }
+                    }
+                }
+            }
             e.isCancelled = true
         }
     }
@@ -61,10 +72,14 @@ class WorldProtect : Listener {
                 return
             if (worldData.members.contains(damager.uniqueId))
                 return
-            if (e.entity.uniqueId in PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!)!!) {
-                when (PixelWorldPro.instance.config.getString("WorldSetting.Inviter.permission")) {
-                    "member" -> {
-                        return
+            if (PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!) == null){
+                PixelWorldPro.instance.setOnInviter(getWorldNameUUID(worldName)!!, listOf())
+            }else{
+                if (e.damager.uniqueId in PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!)!!) {
+                    when (PixelWorldPro.instance.config.getString("WorldSetting.Inviter.permission")) {
+                        "member" -> {
+                            return
+                        }
                     }
                 }
             }
@@ -75,10 +90,14 @@ class WorldProtect : Listener {
             val entity = e.entity as Player
             if (worldData.members.contains(entity.uniqueId))
                 return
-            if (e.entity.uniqueId in PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!)!!) {
-                when (PixelWorldPro.instance.config.getString("WorldSetting.Inviter.permission")) {
-                    "member" -> {
-                        return
+            if (PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!) == null){
+                PixelWorldPro.instance.setOnInviter(getWorldNameUUID(worldName)!!, listOf())
+            }else{
+                if (e.entity.uniqueId in PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!)!!) {
+                    when (PixelWorldPro.instance.config.getString("WorldSetting.Inviter.permission")) {
+                        "member" -> {
+                            return
+                        }
                     }
                 }
             }
@@ -98,10 +117,14 @@ class WorldProtect : Listener {
         //如果玩家不是成员，则取消事件
         if (worldData.members.contains(e.player.uniqueId))
             return
-        if (e.player.uniqueId in PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!)!!) {
-            when (PixelWorldPro.instance.config.getString("WorldSetting.Inviter.permission")) {
-                "member" -> {
-                    return
+        if (PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!) == null){
+            PixelWorldPro.instance.setOnInviter(getWorldNameUUID(worldName)!!, listOf())
+        }else{
+            if (e.player.uniqueId in PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!)!!) {
+                when (PixelWorldPro.instance.config.getString("WorldSetting.Inviter.permission")) {
+                    "member" -> {
+                        return
+                    }
                 }
             }
         }

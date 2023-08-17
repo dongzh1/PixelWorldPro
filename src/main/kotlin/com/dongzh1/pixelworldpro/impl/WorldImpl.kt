@@ -1,5 +1,3 @@
-@file:Suppress("unused", "UNCHECKED_CAST", "SameParameterValue")
-
 package com.dongzh1.pixelworldpro.impl
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
@@ -67,6 +65,9 @@ object WorldImpl : WorldApi {
             return future
         } else {
             val file = File(PixelWorldPro.instance.config.getString("WorldTemplatePath"), templateName)
+            if(!file.exists()){
+                Bukkit.getPlayer(uuid)!!.sendMessage("模板不存在")
+            }
             return createWorld(uuid, file)
         }
     }
@@ -144,7 +145,7 @@ object WorldImpl : WorldApi {
             return false
         } else {
             //设置世界规则
-            setGamerule(world)
+            setGameRule(world)
             //设置世界难度
             world.difficulty =
                 Difficulty.valueOf(PixelWorldPro.instance.config.getString("WorldSetting.WorldDifficulty")!!)
@@ -214,7 +215,7 @@ object WorldImpl : WorldApi {
                     future.complete(false)
                 } else {
                     //设置世界规则
-                    setGamerule(world)
+                    setGameRule(world)
                     //设置世界难度
                     world.difficulty =
                         Difficulty.valueOf(PixelWorldPro.instance.config.getString("WorldSetting.WorldDifficulty")!!)
@@ -401,7 +402,7 @@ object WorldImpl : WorldApi {
                     setTime(world)
                     setWorldBorder(world, worldData.worldLevel)
                     world.keepSpawnInMemory = false
-                    setGamerule(world)
+                    setGameRule(world)
                     loadWorldList.add(uuid)
                     PixelWorldPro.instance.setOnInviter(uuid, listOf())
                     true
@@ -411,7 +412,7 @@ object WorldImpl : WorldApi {
             return if (Bukkit.getWorld(worldData.worldName) != null) {
                 setTime(Bukkit.getWorld(worldData.worldName)!!)
                 setWorldBorder(Bukkit.getWorld(worldData.worldName)!!, worldData.worldLevel)
-                setGamerule(Bukkit.getWorld(worldData.worldName)!!)
+                setGameRule(Bukkit.getWorld(worldData.worldName)!!)
                 true
             } else {
                 var worldcreator = WorldCreator(worldData.worldName+"/world")
@@ -430,7 +431,7 @@ object WorldImpl : WorldApi {
                     Bukkit.getConsoleSender().sendMessage(world.seed.toString())
                     setTime(world)
                     setWorldBorder(world, worldData.worldLevel)
-                    setGamerule(world)
+                    setGameRule(world)
                     loadWorldList.add(uuid)
                     true
                 }
@@ -450,28 +451,14 @@ object WorldImpl : WorldApi {
         return PixelWorldPro.instance.lang().getStringColored(string)
     }
 
-    fun setGamerule(world: World) {
+    private fun setGameRule(world: World) {
         try {
             val gamerulesStringList =
                 PixelWorldPro.instance.config.getConfigurationSection("WorldSetting.GameRule")!!.getKeys(false)
             for (gameruleString in gamerulesStringList) {
-                val gamerule = GameRule.getByName(gameruleString)
-                if (gamerule == null) {
-                    Bukkit.getConsoleSender().sendMessage("§4$gameruleString ${lang("NotValidGameRule")}")
-                    continue
-                }
-                if (gamerule.type == Class.forName("java.lang.Boolean")) {
-                    val valueBoolean = PixelWorldPro.instance.config.getBoolean("WorldSetting.GameRule.$gameruleString")
-                    world.setGameRule(gamerule as GameRule<Boolean>, valueBoolean)
-                    world.setGameRule(gamerule, valueBoolean)
-                    world.save()
-                }
-                if (gamerule.type == Class.forName("java.lang.Integer")) {
-                    val valueInt = PixelWorldPro.instance.config.getInt("WorldSetting.GameRule.$gameruleString")
-                    world.setGameRule(gamerule as GameRule<Int>, valueInt)
-                    world.setGameRule(gamerule, valueInt)
-                    world.save()
-                }
+                val valueBoolean = PixelWorldPro.instance.config.getBoolean("WorldSetting.GameRule.$gameruleString")
+                world.setGameRuleValue(gameruleString, valueBoolean.toString())
+                world.save()
             }
         }catch (e:Exception){
             Bukkit.getConsoleSender().sendMessage("设置世界规则失败，可能当前服务端版本低于1.13")
@@ -577,7 +564,7 @@ object WorldImpl : WorldApi {
         if (Bukkit.getWorld(worldname) != null) {
             setTime(Bukkit.getWorld(worldname)!!)
             setWorldBorder(Bukkit.getWorld(worldname)!!, worldData.worldLevel)
-            setGamerule(Bukkit.getWorld(worldname)!!)
+            setGameRule(Bukkit.getWorld(worldname)!!)
             return true
          } else {
             if (dimensiondata != null) {
@@ -601,7 +588,7 @@ object WorldImpl : WorldApi {
                             worlds.worldBorder.center = worlds.spawnLocation
                             worlds.worldBorder.size = 60000000.0
                         }
-                        setGamerule(worlds)
+                        setGameRule(worlds)
                         true
                     }
                 }
@@ -620,7 +607,7 @@ object WorldImpl : WorldApi {
         if (Bukkit.getWorld(worldname) != null) {
             setTime(Bukkit.getWorld(worldname)!!)
             setWorldBorder(Bukkit.getWorld(worldname)!!, worldData.worldLevel)
-            setGamerule(Bukkit.getWorld(worldname)!!)
+            setGameRule(Bukkit.getWorld(worldname)!!)
             return true
         } else {
             if (dimensiondata != null) {
@@ -684,7 +671,7 @@ object WorldImpl : WorldApi {
                         if (PixelWorldPro.instance.config.getBoolean("WorldSetting.Dimension.${dimension}.Barrier")) {
                             setWorldBorder(worlds, worldData.worldLevel)
                         }
-                        setGamerule(worlds)
+                        setGameRule(worlds)
                         getWorldDimensionData(worldData.worldName)
                         setWorldDimensionData(worldData.worldName, dimension, true)
                         true

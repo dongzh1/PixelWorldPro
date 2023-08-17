@@ -15,7 +15,7 @@ items:
     material: PAPER
     name: '&a&l世界升级'
     lore:
-      - '&f当前世界等级为: %pixelworldpro_level%'
+      - '&f当前世界等级为: %pixelworldpro_worldlevel%'
       - '&f点击升级'
   B:
     type: Restart

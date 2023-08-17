@@ -6,6 +6,7 @@ import com.dongzh1.pixelworldpro.database.WorldData
 import com.dongzh1.pixelworldpro.tools.Serialize
 import com.xbaimiao.easylib.EasyPlugin
 import com.xbaimiao.easylib.module.utils.Module
+import org.bukkit.Bukkit
 import java.util.*
 
 
@@ -81,16 +82,20 @@ object RedisManager : Module<EasyPlugin> {
                     if (server.split(":")[0] == PixelWorldPro.instance.config.getString("ServerName")) {
                         value = value.replace(server, "${PixelWorldPro.instance.config.getString("ServerName")}:$mspt")
                         isFound = true
+                        Bukkit.getConsoleSender().sendMessage("3")
                         break
                     }
                 }
                 if (!isFound) {
+                    Bukkit.getConsoleSender().sendMessage("2")
                     value += "${PixelWorldPro.instance.config.getString("ServerName")}:$mspt,"
                 }
             } else {
+                Bukkit.getConsoleSender().sendMessage("1")
                 value = "${PixelWorldPro.instance.config.getString("ServerName")}:$mspt,"
             }
             jedisPool.resource.also {
+                it.del("PixelWorldPromspt")
                 it.set("PixelWorldPromspt", value)
                 it.close()
             }
@@ -108,6 +113,7 @@ object RedisManager : Module<EasyPlugin> {
             if (value == null) {
                 return null
             }
+            Bukkit.getConsoleSender().sendMessage(value)
             return value
         }
     }

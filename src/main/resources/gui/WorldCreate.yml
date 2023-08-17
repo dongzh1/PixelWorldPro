@@ -59,7 +59,7 @@ items:
       - '[player] pixelworldpro gui custom/customGui.yml'
 setting:
   #money/points/both/none/permission
-  createUse: both
+  createUse: Points
   createMoney: 100.0
   createPoints: 100.0
   createPermission: 'pixelworldpro.worldcreate.create'

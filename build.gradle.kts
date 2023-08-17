@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "com.dongzh1.pixelworldpro"
-version = "1.1.6"
+version = "1.1.7"
 
 repositories {
     mavenCentral()
@@ -36,7 +36,7 @@ repositories {
 
 dependencies {
     compileOnly ("com.destroystokyo.paper:paper-api:1.14.1-R0.1-SNAPSHOT")
-    implementation("com.xbaimiao:EasyLib:2.2.2")
+    implementation("com.xbaimiao:EasyLib:2.2.7")
     implementation(kotlin("stdlib-jdk8"))
 //    implementation ("de.tr7zw:item-nbt-api:2.11.2")
     implementation ("com.j256.ormlite:ormlite-core:6.1")
@@ -45,6 +45,7 @@ dependencies {
     implementation ("redis.clients:jedis:3.7.0")
     implementation ("com.google.code.gson:gson:2.10")
     implementation ("org.bouncycastle:bcprov-lts8on:2.73.3")
+    implementation("org.json:json:20230227")
     compileOnly(fileTree("libs"))
     compileOnly(dependencyNotation = "org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
 
@@ -72,7 +73,8 @@ tasks {
             "de.tr7zw=nbtapi",
             "de.tr7zw.changeme.nbtapi=nbtapi",
             "kotlin=kotlin",
-            "org.jetbrains.annotations=jetbrains"
+            "org.jetbrains.annotations=jetbrains",
+            "com.google.code.gson=json"
         ).forEach {
             val args = it.split("=")
             relocate(args[0], "${project.group}.shadow.${args[1]}")

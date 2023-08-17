@@ -13,7 +13,7 @@ items:
     material: GLASS_PANE
   B:
     type: MemberList
-    #both/money/points/none
+    #both/money/points/none/permission
     value: both
   X:
     material: BARRIER
@@ -36,6 +36,9 @@ UnMember:
     - '需要花钱或者权限或者点券'
 #玩家世界默认可以有的成员数
 #Player world default members number
-DefaultMembersNumber: 1
+DefaultMembersNumber: 5
 Money: 100.0
 Points: 100.0
+Permission:
+  pixelworldpro.vip: 10
+  pixelworldpro.svip: 20

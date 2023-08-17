@@ -50,7 +50,7 @@ items:
       - '&f创建世界需要花费: 100 点券'
 setting:
   #money/points/both/none/permission
-  restartUse: both
+  restartUse: Points
   restartMoney: 100.0
   restartPoints: 100.0
   restartPermission: 'pixelworldpro.worldrestart.create'

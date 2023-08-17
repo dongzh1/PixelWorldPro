@@ -80,9 +80,9 @@ class TeleportImpl: TeleportApi {
 
     override fun teleportDimension(uuid: UUID, playerUuid: UUID, dimension: String) {
         submit {
-            val worldData = PixelWorldPro.databaseApi.getWorldData(playerUuid) ?: return@submit
+            val worldData = PixelWorldPro.databaseApi.getWorldData(uuid) ?: return@submit
             //如果是本地模式则直接传送
-            val player = Bukkit.getPlayer(uuid) ?: return@submit
+            val player = Bukkit.getPlayer(playerUuid) ?: return@submit
             var world = Bukkit.getWorld("./${worldData.worldName}/$dimension")
             if (world == null) {
                 val back = WorldImpl.loadDimension(uuid, Bukkit.getPlayer(playerUuid)!!, dimension)
