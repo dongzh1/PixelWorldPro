@@ -43,7 +43,11 @@ object V2 {
         return sb.toString().uppercase(Locale.getDefault())
     }
     fun auth(token:String): Boolean {
-        val mac = getMacByIP()
+        var mac = "0"
+        try {
+            mac = getMacByIP()
+        }catch (_:Exception){
+        }
         val dummyUrl = URL("https://sh1.plugin.mcyzj.cn:1031/v1/auth/Pixelworldpro")
         val data = mapOf("token" to token, "macs" to mac)
         val dummyData = JSONObject(data).toString()
@@ -72,7 +76,11 @@ object V2 {
     }
 
     fun verify(token:String): Boolean {
-        val mac = getMacByIP()
+        var mac = "0"
+        try {
+            mac = getMacByIP()
+        }catch (_:Exception){
+        }
         val dummyUrl = URL("https://sh1.plugin.mcyzj.cn:1031/v1/verify/Pixelworldpro")
         val data = mapOf("token" to token, "macs" to mac)
         val dummyData = JSONObject(data).toString()
