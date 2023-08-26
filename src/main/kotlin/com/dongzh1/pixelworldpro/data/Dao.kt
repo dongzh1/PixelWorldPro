@@ -1,11 +1,11 @@
-package com.dongzh1.pixelworldpro.database
+package com.dongzh1.pixelworldpro.data
 
 import com.j256.ormlite.field.DataType
 import com.j256.ormlite.field.DatabaseField
 import com.j256.ormlite.table.DatabaseTable
 import java.util.*
-//1.2.1删除
-@DatabaseTable(tableName = "WorldData")
+//新数据库
+@DatabaseTable(tableName = "PixelWorldPro_WorldData")
 class WorldDao {
 
     @DatabaseField(generatedId = true)
@@ -17,7 +17,7 @@ class WorldDao {
     @DatabaseField(dataType = DataType.LONG_STRING,canBeNull = false, columnName = "data")
     lateinit var data: String
 }
-@DatabaseTable(tableName = "PlayerData")
+@DatabaseTable(tableName = "PixelWorldPro_PlayerData")
 class PlayerDao {
 
     @DatabaseField(generatedId = true)

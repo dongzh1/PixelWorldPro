@@ -70,7 +70,6 @@ object V2 {
             }
         } catch (e: IOException) {
             e.printStackTrace()
-            return false
         }
         return false
     }
@@ -106,7 +105,6 @@ object V2 {
             }
         } catch (e: IOException) {
             e.printStackTrace()
-            return false
         }
         return false
     }

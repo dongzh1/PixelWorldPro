@@ -380,17 +380,20 @@ object WorldImpl : WorldApi {
 
     fun loadWorldLocal(uuid: UUID): Boolean {
         val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
-        val dimensionData = getWorldDimensionData(worldData.worldName)
+        //val dimensionData = getWorldDimensionData(worldData.worldName)
         if (PixelWorldPro.instance.isBungee()) {
             return if (RedisManager.isLock(uuid)) {
                 true
             } else {
                 RedisManager.setLock(uuid)
                 var worldcreator = WorldCreator(worldData.worldName + "/world")
+                /*
                 if (dimensionData.seed != "0"){
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 设置世界种子${dimensionData.seed.toLong()}")
                     worldcreator = worldcreator.seed(dimensionData.seed.toLong())
                 }
+
+                 */
                 if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.World") != "auto") {
                     worldcreator = worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.World"))
                 }
@@ -416,11 +419,14 @@ object WorldImpl : WorldApi {
                 true
             } else {
                 var worldcreator = WorldCreator(worldData.worldName+"/world")
+                /*
                 if (dimensionData.seed != "0"){
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 设置世界种子${dimensionData.seed.toLong()}")
                     worldcreator = worldcreator.seed(dimensionData.seed.toLong())
                     Bukkit.getConsoleSender().sendMessage(worldcreator.seed().toString())
                 }
+
+                 */
                 if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.World") != "auto") {
                     worldcreator = worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.World"))
                 }
