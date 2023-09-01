@@ -7,49 +7,36 @@ plugins {
     java
     id("com.github.johnrengelman.shadow") version ("7.1.2")
     kotlin("jvm") version "1.8.0"
-    id("org.jetbrains.kotlin.plugin.lombok") version "1.8.0"
+    id("com.xbaimiao.easylib") version ("1.1.0")
     `maven-publish`
 }
 
 group = "com.dongzh1.pixelworldpro"
 version = "1.2.0"
 
+easylib {
+    version = "2.3.5"
+    nbt = false
+    hikariCP = true
+    ormlite = true
+    userMinecraftLib = false
+    minecraftVersion = "1.12.2"
+    isPaper = false
+}
+
 repositories {
     mavenCentral()
-    maven ("https://repo.papermc.io/repository/maven-public/")
-    maven ("https://oss.sonatype.org/content/groups/public/")
-    maven("https://papermc.io/repo/repository/maven-public/")
-    maven("https://repo.aikar.co/content/groups/aikar/")
-    maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
-    maven("https://repo.codemc.org/repository/maven-public/")
-    maven("https://maven.xbaimiao.com/repository/releases/")
-    maven("https://repo1.maven.org/maven2/")
-    maven {
-        url = uri("https://maven.xbaimiao.com/repository/maven-private/")
-        credentials {
-            username = project.findProperty("BaiUser").toString()
-            password = project.findProperty("BaiPassword").toString()
-        }
-    }
-    mavenLocal()
+    maven("https://oss.sonatype.org/content/groups/public/")
 }
 
 dependencies {
-    compileOnly ("com.destroystokyo.paper:paper-api:1.14.1-R0.1-SNAPSHOT")
-    implementation("com.xbaimiao:EasyLib:2.2.7")
     implementation(kotlin("stdlib-jdk8"))
-//    implementation ("de.tr7zw:item-nbt-api:2.11.2")
-    implementation ("com.j256.ormlite:ormlite-core:6.1")
-    implementation ("com.j256.ormlite:ormlite-jdbc:6.1")
-    implementation ("com.zaxxer:HikariCP:4.0.3")
-    implementation ("redis.clients:jedis:3.7.0")
-    implementation ("com.google.code.gson:gson:2.10")
-    implementation ("org.bouncycastle:bcprov-lts8on:2.73.3")
+    implementation("redis.clients:jedis:3.7.0")
+    implementation("com.google.code.gson:gson:2.10")
+    implementation("org.bouncycastle:bcprov-lts8on:2.73.3")
     implementation("org.json:json:20230227")
     compileOnly(fileTree("libs"))
-    compileOnly(dependencyNotation = "org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
-
-//    compileOnly ("com.mojang:authlib:1.5.21")
+    compileOnly("public:paper:1.16.5")
 }
 
 fun releaseTime() = LocalDate.now().format(DateTimeFormatter.ofPattern("y.M.d"))
@@ -74,7 +61,11 @@ tasks {
             "de.tr7zw.changeme.nbtapi=nbtapi",
             "kotlin=kotlin",
             "org.jetbrains.annotations=jetbrains",
-            "com.google.code.gson=json"
+            "com.google.code.gson=gson",
+            "redis.clients.jedis=jedis",
+            "org.json=json",
+            "org.bouncycastle=bouncycastle",
+            "org.apache.commons=common"
         ).forEach {
             val args = it.split("=")
             relocate(args[0], "${project.group}.shadow.${args[1]}")
