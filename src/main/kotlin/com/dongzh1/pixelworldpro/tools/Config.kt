@@ -9,7 +9,7 @@ import java.io.File
 
 object Config {
     private fun getWorldDimensionconfig(worldname: String): YamlConfiguration {
-        val config = File("${PixelWorldPro.instance.config.getString("WorldPath")}/$worldname", "world.yml")
+        val config = File(worldname, "world.yml")
         val data = YamlConfiguration()
         if (!config.exists()) {
             config.createNewFile()
@@ -59,7 +59,7 @@ object Config {
     }
 
     fun setWorldDimensionData(worldname: String, dimension: String, finish: Any){
-        val config = File("${PixelWorldPro.instance.config.getString("WorldPath")}/$worldname", "world.yml")
+        val config = File(worldname, "world.yml")
         val data = getWorldDimensionconfig(worldname)
         data.set(dimension, finish)
         data.save(config)

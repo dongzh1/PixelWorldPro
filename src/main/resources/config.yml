@@ -79,7 +79,7 @@ WorldSetting:
     2: 200
     # 等级是自定义的文字,按照上下顺序进行升级,屏障范围大小为-1时,不会生成屏障
     # The level is custom text, and the upgrade is performed in the order of up and down. When the barrier range size is -1, the barrier will not be generated
-    '3': -1
+    3: -1
   Gamemode:
     owner: SURVIVAL
     member: SURVIVAL
