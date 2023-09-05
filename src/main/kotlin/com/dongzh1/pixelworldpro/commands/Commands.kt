@@ -746,14 +746,12 @@ class Commands {
                     }
                     dimensionList.add("world")
                     var name = player.world.name
-                    Bukkit.getConsoleSender().sendMessage(name)
                     if (name.startsWith("Pixelworldpro/")) {
                         name = name.replace("Pixelworldpro/", "")
                         for (d in dimensionList) {
                             if (name.contains(d)) {
                                 name = name.substring(0, name.length - d.length)
                                 name = name.substring(0, name.length - 21)
-                                Bukkit.getConsoleSender().sendMessage(name)
                                 break
                             }
                         }

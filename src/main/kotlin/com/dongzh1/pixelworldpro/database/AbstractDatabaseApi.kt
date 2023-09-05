@@ -127,7 +127,7 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
         val realName = name.split("/")[realNamelist - 2]
         val uuidString :String? = Regex(pattern = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-z]{12}")
             .find(realName)?.value
-        uuidString?.let { Bukkit.getConsoleSender().sendMessage(it) }
+        //uuidString?.let { Bukkit.getConsoleSender().sendMessage(it) }
         val uuid = UUID.fromString(uuidString)
         val data = if (PixelWorldPro.instance.isBungee()) {
             RedisManager[uuid]

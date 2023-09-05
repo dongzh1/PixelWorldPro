@@ -339,12 +339,10 @@ class WorldProtect : Listener {
         }
         when (worldData.state) {
             "owner" -> {
-                Bukkit.getConsoleSender().sendMessage("3")
                 e.player.sendMessage("此世界无法进入")
                 e.isCancelled = true
             }
             "member" ->{
-                Bukkit.getConsoleSender().sendMessage("2")
                 if(worldData.members.contains(e.player.uniqueId)) {
                     e.player.sendMessage("传送中")
                     return
@@ -356,12 +354,10 @@ class WorldProtect : Listener {
                 e.player.sendMessage("传送中")
             }
             "inviter" ->{
-                Bukkit.getConsoleSender().sendMessage("1")
                 if(e.player.uniqueId in worldData.members){
                     e.player.sendMessage("传送中")
                     return
                 }
-                Bukkit.getConsoleSender().sendMessage(worldData.inviter.toString())
                 if(e.player.uniqueId in worldData.inviter){
                     e.player.sendMessage("传送中")
                     e.player.sendMessage("消耗来自世界主人的一张邀请函")
@@ -388,7 +384,6 @@ class WorldProtect : Listener {
             }
 
             else ->{
-                Bukkit.getConsoleSender().sendMessage("0")
                 e.player.sendMessage("此世界无法进入")
                 e.isCancelled = true
             }
