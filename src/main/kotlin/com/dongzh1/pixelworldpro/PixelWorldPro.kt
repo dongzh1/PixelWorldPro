@@ -21,6 +21,9 @@ import com.xbaimiao.easylib.module.utils.registerListener
 import com.xbaimiao.easylib.module.utils.submit
 import com.xbaimiao.easylib.module.utils.unregisterListener
 import com.xbaimiao.easylib.task.EasyLibTask
+import com.xbaimiao.ktor.KtorPluginsBukkit
+import com.xbaimiao.ktor.KtorStat
+import com.xbaimiao.template.shadow.easylib.module.utils.BukkitKt.info
 import org.bukkit.Bukkit
 import org.bukkit.WorldCreator
 import redis.clients.jedis.JedisPool
@@ -29,7 +32,7 @@ import java.util.*
 
 
 @Suppress("unused")
-class PixelWorldPro : EasyPlugin() {
+class PixelWorldPro : EasyPlugin(),KtorStat {
 
     companion object {
 
@@ -58,6 +61,12 @@ class PixelWorldPro : EasyPlugin() {
 
 
     override fun enable() {
+        //初始化统计
+        KtorPluginsBukkit.init(this,this)
+        //userid是用户id,如果出错代表没有注入
+        info("${userId}感谢您的购买")
+        //统计
+        stat()
         if (eula.getBoolean("eula")) {
             //PixelWorldPro全部版本遵循《用户协议-付费插件》
             //https://wiki.mcyzj.cn/#/zh-cn/agreement?id=%e4%bb%98%e8%b4%b9%e6%8f%92%e4%bb%b6

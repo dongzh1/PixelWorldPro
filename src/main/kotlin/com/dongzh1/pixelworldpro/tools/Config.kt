@@ -9,7 +9,7 @@ import java.io.File
 
 object Config {
     private fun getWorldDimensionconfig(worldname: String): YamlConfiguration {
-        val config = File(worldname, "world.yml")
+        val config = File("./$worldname", "world.yml")
         val data = YamlConfiguration()
         if (!config.exists()) {
             config.createNewFile()

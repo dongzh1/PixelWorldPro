@@ -22,6 +22,12 @@ items:
       - '&f点击关闭'
     commands:
       - '[close]'
+Owner:
+  material: PLAYER_HEAD
+  name: '&a&l%player_name%'
+  skull: '%player_name%'
+  lore:
+    - '&f这是你自己。删除不了的'
 Member:
   material: PLAYER_HEAD
   name: '&a&l%player_name%'

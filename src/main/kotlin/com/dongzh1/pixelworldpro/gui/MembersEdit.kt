@@ -68,9 +68,15 @@ class MembersEdit(val player: Player) {
                             Gui.setPlayerMembersMap(player,offlinePlayerMap)
                         }
                     }
-                    val memberConfig = config.getConfigurationSection("Member")!!
-                    val item = Gui.buildItem(memberConfig,member)!!
-                    basic.set(slot,item)
+                    if (i == 0){
+                        val memberConfig = config.getConfigurationSection("Owner")!!
+                        val item = Gui.buildItem(memberConfig,member)!!
+                        basic.set(slot,item)
+                    }else{
+                        val memberConfig = config.getConfigurationSection("Member")!!
+                        val item = Gui.buildItem(memberConfig,member)!!
+                        basic.set(slot,item)
+                    }
                     memberMap[slot] = memberUUID
                 }
                 i++
