@@ -23,7 +23,6 @@ import com.xbaimiao.easylib.module.utils.unregisterListener
 import com.xbaimiao.easylib.task.EasyLibTask
 import com.xbaimiao.ktor.KtorPluginsBukkit
 import com.xbaimiao.ktor.KtorStat
-import com.xbaimiao.template.shadow.easylib.module.utils.BukkitKt.info
 import org.bukkit.Bukkit
 import org.bukkit.WorldCreator
 import redis.clients.jedis.JedisPool
@@ -57,14 +56,14 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
     val worldBorder = BuiltInConfiguration("WorldBorder.yml")
     val advancedWorldSettings = BuiltInConfiguration("AdvancedWorldSettings.yml")
     val world = BuiltInConfiguration("World.yml")
-    val eula = BuiltInConfiguration("eula.yml")
+    private val eula = BuiltInConfiguration("eula.yml")
 
 
     override fun enable() {
         //初始化统计
         KtorPluginsBukkit.init(this,this)
         //userid是用户id,如果出错代表没有注入
-        info("${userId}感谢您的购买")
+        //info("${userId}感谢您的购买")
         //统计
         stat()
         if (eula.getBoolean("eula")) {

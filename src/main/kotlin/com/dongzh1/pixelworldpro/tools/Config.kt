@@ -3,13 +3,12 @@
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.database.WorldDimensionData
 import com.dongzh1.pixelworldpro.tools.Dimension.getDimensionList
-import org.bukkit.Bukkit
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
 
 object Config {
-    private fun getWorldDimensionconfig(worldname: String): YamlConfiguration {
-        val config = File("./$worldname", "world.yml")
+    private fun getWorldDimensionConfig(worldName: String): YamlConfiguration {
+        val config = File("${PixelWorldPro.instance.config.getString("WorldPath")}/$worldName", "world.yml")
         val data = YamlConfiguration()
         if (!config.exists()) {
             config.createNewFile()
@@ -37,30 +36,44 @@ object Config {
         data.save(config)
         return data
     }
-    fun getWorldDimensionData(worldname: String): WorldDimensionData {
-        val data = getWorldDimensionconfig(worldname)
-        val dimensionlist = getDimensionList()
-        val createlist = ArrayList<String>()
-        val discreatelist = ArrayList<String>()
-        for (dimension in dimensionlist) {
+    fun getWorldDimensionData(realWorldName: String): WorldDimensionData {
+        val worldName = if(realWorldName.startsWith("PixelWorldPro/")){
+            val nameList = realWorldName.split("/")
+            nameList[1]
+        }else{
+            val nameList = realWorldName.split("/")
+            nameList[0]
+        }
+        val data = getWorldDimensionConfig(worldName)
+        val dimensionList = getDimensionList()
+        val createList = ArrayList<String>()
+        val discreateList = ArrayList<String>()
+        for (dimension in dimensionList) {
             val back = data.getBoolean(dimension)
             if (back) {
-                createlist.add(dimension)
+                createList.add(dimension)
             } else {
-                discreatelist.add(dimension)
+                discreateList.add(dimension)
             }
         }
-        createlist.add("world")
+        createList.add("world")
         return WorldDimensionData(
-            createlist,
-            discreatelist,
+            createList,
+            discreateList,
             data.getString("seed") ?:"0"
         )
     }
 
-    fun setWorldDimensionData(worldname: String, dimension: String, finish: Any){
-        val config = File(worldname, "world.yml")
-        val data = getWorldDimensionconfig(worldname)
+    fun setWorldDimensionData(realWorldName: String, dimension: String, finish: Any){
+        val worldName = if(realWorldName.startsWith("PixelWorldPro/")){
+            val nameList = realWorldName.split("/")
+            nameList[1]
+        }else{
+            val nameList = realWorldName.split("/")
+            nameList[0]
+        }
+        val config = File("${PixelWorldPro.instance.config.getString("WorldPath")}/$worldName", "world.yml")
+        val data = getWorldDimensionConfig(worldName)
         data.set(dimension, finish)
         data.save(config)
     }

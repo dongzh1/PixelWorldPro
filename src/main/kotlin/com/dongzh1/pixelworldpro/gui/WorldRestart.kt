@@ -150,6 +150,31 @@ class WorldRestart(val player: Player) {
                                 } else {
                                     player.sendMessage(lang("RestartFail"))
                                     player.closeInventory()
+                                    when (Gui.getWorldRestartConfig().getString("setting.restartUse")) {
+                                        "both" -> {
+                                            Vault().give(
+                                                player,
+                                                Gui.getWorldRestartConfig().getDouble("setting.restartMoney")
+                                            )
+                                            PlayerPoints().give(
+                                                player,
+                                                Gui.getWorldRestartConfig().getDouble("setting.restartPoints")
+                                            )
+                                        }
+                                        "money" -> {
+                                            Vault().give(
+                                                player,
+                                                Gui.getWorldRestartConfig().getDouble("setting.restartMoney")
+                                            )
+                                        }
+                                        "points" -> {
+                                            PlayerPoints().give(
+                                                player,
+                                                Gui.getWorldRestartConfig().getDouble("setting.restartPoints")
+                                            )
+                                        }
+                                        else -> {}
+                                    }
                                 }
                             }
                         }

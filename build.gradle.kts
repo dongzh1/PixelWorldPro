@@ -15,7 +15,7 @@ group = "com.dongzh1.pixelworldpro"
 version = "1.2.0"
 
 easylib {
-    version = "2.3.5"
+    version = "2.3.9"
     nbt = false
     hikariCP = true
     ormlite = true
