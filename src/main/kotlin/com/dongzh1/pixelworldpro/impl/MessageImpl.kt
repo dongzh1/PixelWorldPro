@@ -2,7 +2,7 @@ package com.dongzh1.pixelworldpro.impl
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.api.MessageApi
-import com.dongzh1.pixelworldpro.redis.RedisManager
+import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import org.bukkit.Bukkit
 import java.util.UUID
 

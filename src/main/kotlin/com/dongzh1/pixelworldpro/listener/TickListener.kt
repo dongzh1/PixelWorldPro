@@ -1,7 +1,7 @@
 package com.dongzh1.pixelworldpro.listener
 
 import com.destroystokyo.paper.event.server.ServerTickEndEvent
-import com.dongzh1.pixelworldpro.redis.RedisManager
+import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
 

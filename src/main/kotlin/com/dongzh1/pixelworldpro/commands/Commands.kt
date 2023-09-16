@@ -9,7 +9,7 @@ import com.dongzh1.pixelworldpro.impl.WorldImpl
 import com.dongzh1.pixelworldpro.listener.WorldProtect
 import com.dongzh1.pixelworldpro.migrate.Migrate
 import com.dongzh1.pixelworldpro.migrate.WorldMove
-import com.dongzh1.pixelworldpro.redis.RedisManager
+import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.dongzh1.pixelworldpro.tools.Config
 import com.dongzh1.pixelworldpro.tools.JiangCore
 import com.google.gson.Gson

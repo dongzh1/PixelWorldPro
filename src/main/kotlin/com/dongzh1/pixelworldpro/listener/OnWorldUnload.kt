@@ -2,7 +2,7 @@ package com.dongzh1.pixelworldpro.listener
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.impl.WorldImpl
-import com.dongzh1.pixelworldpro.redis.RedisManager
+import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.world.WorldUnloadEvent

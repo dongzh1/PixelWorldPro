@@ -3,12 +3,11 @@ package com.dongzh1.pixelworldpro.impl
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.api.TeleportApi
 import com.dongzh1.pixelworldpro.listener.OnPlayerJoin
-import com.dongzh1.pixelworldpro.redis.RedisManager
+import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.dongzh1.pixelworldpro.tools.Serialize
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.WorldCreator
 import org.bukkit.entity.Player
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream

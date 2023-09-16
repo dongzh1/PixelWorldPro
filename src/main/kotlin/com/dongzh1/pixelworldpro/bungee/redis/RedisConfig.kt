@@ -1,4 +1,4 @@
-package com.dongzh1.pixelworldpro.redis
+package com.dongzh1.pixelworldpro.bungee.redis
 
 import org.bukkit.configuration.Configuration
 import redis.clients.jedis.JedisPoolConfig

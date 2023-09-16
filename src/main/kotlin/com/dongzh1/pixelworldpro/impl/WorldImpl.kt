@@ -8,7 +8,7 @@ import com.dongzh1.pixelworldpro.database.WorldData
 import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.listener.TickListener
 import com.dongzh1.pixelworldpro.listener.WorldProtect.Companion.getWorldNameUUID
-import com.dongzh1.pixelworldpro.redis.RedisManager
+import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.dongzh1.pixelworldpro.tools.Bungee
 import com.dongzh1.pixelworldpro.tools.Config.getWorldDimensionData
 import com.dongzh1.pixelworldpro.tools.Config.setWorldDimensionData
@@ -32,6 +32,7 @@ object WorldImpl : WorldApi {
     private val loadWorldList: MutableList<UUID> = mutableListOf()
     private val timeOutWorldList: MutableList<String> = mutableListOf()
     private val seedMap = mutableMapOf<UUID, String>()
+    val worldMap = mutableMapOf<UUID, WorldData>()
 
 
     /**

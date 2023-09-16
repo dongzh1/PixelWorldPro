@@ -11,9 +11,9 @@ import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.listener.*
 import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.papi.Papi
-import com.dongzh1.pixelworldpro.redis.RedisConfig
-import com.dongzh1.pixelworldpro.redis.RedisListener
-import com.dongzh1.pixelworldpro.redis.RedisManager
+import com.dongzh1.pixelworldpro.bungee.redis.RedisConfig
+import com.dongzh1.pixelworldpro.bungee.redis.RedisListener
+import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.dongzh1.pixelworldpro.tools.CommentConfig
 import com.xbaimiao.easylib.EasyPlugin
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration

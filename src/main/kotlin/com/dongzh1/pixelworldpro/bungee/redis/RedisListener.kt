@@ -1,9 +1,11 @@
 @file:Suppress("SameParameterValue")
 
-package com.dongzh1.pixelworldpro.redis
+package com.dongzh1.pixelworldpro.bungee.redis
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.api.TeleportApi
+import com.dongzh1.pixelworldpro.bungee.server.Server
+import com.dongzh1.pixelworldpro.bungee.server.ServerData
 import com.dongzh1.pixelworldpro.impl.TeleportImpl
 import com.dongzh1.pixelworldpro.impl.WorldImpl
 import com.dongzh1.pixelworldpro.listener.TickListener
@@ -25,9 +27,11 @@ class RedisListener : JedisPubSub() {
         //如果onlineServer没有数据库里的名字就删除
         if (newOnlineServer.size < onlineServer.size){
             for (server in onlineServer){
-                if (!newOnlineServer.contains(server)){
-                    RedisManager.closeServer(server)
-                }
+                try {
+                    if (!newOnlineServer.contains(server)) {
+                        RedisManager.closeServer(server)
+                    }
+                }catch (_:Exception){}
             }
         }
         newOnlineServer.clear()
@@ -64,21 +68,18 @@ class RedisListener : JedisPubSub() {
                     }
                 }
                 "createWorld" ->{
-                    //获取最低mspt服务器
-                    val serverName = TickListener.getLowestMsptServer()
-                    //如果当前服务器为最低mspt服务器则创建世界
-                    if (serverName != PixelWorldPro.instance.config.getString("ServerName")){
-                        return
-                    }
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     val template = message.split("|,|")[2]
                     val name = message.split("|,|")[3]
-                    submit {
-                        if (WorldImpl.createWorldLocal(uuid, template, name)){
-                            RedisManager.push("createWorldSuccess|,|${uuid}")
+                    val server = message.split("|,|")[4]
+                    val serverData = Server.getLocalServer()
+                    if (server == serverData.realName) {
+                        submit {
+                            if (WorldImpl.createWorldLocal(uuid, template, name)) {
+                                RedisManager.push("createWorldSuccess|,|${uuid}")
+                            }
                         }
                     }
-
                 }
                 "createWorldSuccess" ->{
                     val uuid = UUID.fromString(message.split("|,|")[1])
@@ -216,6 +217,39 @@ class RedisListener : JedisPubSub() {
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     val seed = message.split("|,|")[2]
                     WorldImpl.setSeed(uuid, seed)
+                }
+                "getServerData" ->{
+                    val id = message.split("|,|")[1].toInt()
+                    val serverData = Server.getLocalServer()
+                    val msg = if (serverData.type == null){
+                        "returnServerData|,|${id}|,|${serverData.showName}|,|${serverData.realName}|,|${serverData.mode}|,|none"
+                    } else {
+                        "returnServerData|,|${id}|,|${serverData.showName}|,|${serverData.realName}|,|${serverData.mode}|,|${serverData.type}"
+                    }
+                    RedisManager.push(msg)
+                }
+                "returnServerData" ->{
+                    val id = message.split("|,|")[1].toInt()
+                    val showName = message.split("|,|")[2]
+                    val realName = message.split("|,|")[3]
+                    val mode = message.split("|,|")[4]
+                    val type = message.split("|,|")[5]
+                    val serverData = if (type == "none"){
+                        ServerData(
+                            showName,
+                            realName,
+                            mode,
+                            null
+                        )
+                    } else {
+                        ServerData(
+                            showName,
+                            realName,
+                            mode,
+                            type
+                        )
+                    }
+                    Server.setServerData(id, serverData)
                 }
                 else ->{
                     Bukkit.getLogger().warning("未知的redis消息类型")

@@ -1,4 +1,4 @@
-package com.dongzh1.pixelworldpro.redis
+package com.dongzh1.pixelworldpro.bungee.redis
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.PixelWorldPro.Companion.channel
@@ -6,7 +6,6 @@ import com.dongzh1.pixelworldpro.database.WorldData
 import com.dongzh1.pixelworldpro.tools.Serialize
 import com.xbaimiao.easylib.EasyPlugin
 import com.xbaimiao.easylib.module.utils.Module
-import org.bukkit.Bukkit
 import java.util.*
 
 
