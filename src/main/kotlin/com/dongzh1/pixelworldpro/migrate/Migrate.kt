@@ -3,8 +3,8 @@ package com.dongzh1.pixelworldpro.migrate
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.database.WorldData
-import com.dongzh1.pixelworldpro.tools.Config.getWorldDimensionData
-import com.dongzh1.pixelworldpro.tools.Config.setWorldDimensionData
+import com.dongzh1.pixelworldpro.dimension.DimensionConfig.getWorldDimensionData
+import com.dongzh1.pixelworldpro.dimension.DimensionConfig.setWorldDimensionData
 import com.xbaimiao.template.PixelPlayerWorld
 import com.xbaimiao.template.expansion.api.event
 import com.xbaimiao.template.expansion.api.world

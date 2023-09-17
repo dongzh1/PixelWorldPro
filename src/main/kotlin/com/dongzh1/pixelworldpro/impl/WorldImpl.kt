@@ -6,12 +6,12 @@ import com.dongzh1.pixelworldpro.api.WorldApi
 import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.database.WorldData
 import com.dongzh1.pixelworldpro.gui.Gui
-import com.dongzh1.pixelworldpro.listener.TickListener
 import com.dongzh1.pixelworldpro.listener.WorldProtect.Companion.getWorldNameUUID
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
+import com.dongzh1.pixelworldpro.bungee.server.Server
 import com.dongzh1.pixelworldpro.tools.Bungee
-import com.dongzh1.pixelworldpro.tools.Config.getWorldDimensionData
-import com.dongzh1.pixelworldpro.tools.Config.setWorldDimensionData
+import com.dongzh1.pixelworldpro.dimension.DimensionConfig.getWorldDimensionData
+import com.dongzh1.pixelworldpro.dimension.DimensionConfig.setWorldDimensionData
 import com.dongzh1.pixelworldpro.tools.Dimension
 import com.dongzh1.pixelworldpro.tools.WorldFile
 import com.wimbli.WorldBorder.Config
@@ -39,37 +39,15 @@ object WorldImpl : WorldApi {
      * 根据模板文件夹名新建世界,如果玩家在线则传送
      */
     override fun createWorld(uuid: UUID, templateName: String): CompletableFuture<Boolean> {
-
-        if (PixelWorldPro.instance.isBungee()) {
-            createWorldList.add(uuid)
-            val future = CompletableFuture<Boolean>()
-            //查询是否创建成功
-            var i = 0
-            submit(async = true, period = 2L, maxRunningNum = 60, delay = 0L) {
-
-                if (i == 0) {
-                    RedisManager.push("createWorld|,|$uuid|,|$templateName|,|${Bukkit.getPlayer(uuid)!!.name}")
-                }
-                i++
-                if (!createWorldList.contains(uuid)) {
-                    future.complete(true)
-                    this.cancel()
-                    return@submit
-                }
-                if (i >= 50) {
-                    removeCreateWorldList(uuid)
-                    future.complete(false)
-                    this.cancel()
-                    return@submit
-                }
-            }
-            return future
+        return if (PixelWorldPro.instance.isBungee()) {
+            com.dongzh1.pixelworldpro.bungee.world.World.createBungeeWorld(Bukkit.getPlayer(uuid)!!, templateName)
+            CompletableFuture()
         } else {
             val file = File(PixelWorldPro.instance.config.getString("WorldTemplatePath"), templateName)
             if(!file.exists()){
                 Bukkit.getPlayer(uuid)!!.sendMessage("模板不存在")
             }
-            return createWorld(uuid, file)
+            createWorld(uuid, file)
         }
     }
 
@@ -197,6 +175,9 @@ object WorldImpl : WorldApi {
             }
         }
         loadWorldList.add(uuid)
+        if (Server.getLocalServer().mode == "build"){
+            unloadWorld(uuid)
+        }
         return true
     }
 
@@ -265,11 +246,22 @@ object WorldImpl : WorldApi {
         val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
         if (PixelWorldPro.instance.isBungee()) {
             if (RedisManager.isLock(uuid)) {
-                val world = Bukkit.getWorld(worldData.worldName+"/world")
+                Bukkit.getConsoleSender().sendMessage("开始卸载世界 ${worldData.worldName.lowercase(Locale.getDefault())}")
+                val world = Bukkit.getWorld(worldData.worldName.lowercase(Locale.getDefault()) +"/world")
                 if (world != null) {
+                    Bukkit.getConsoleSender().sendMessage("Bukkit卸载世界 ${worldData.worldName.lowercase(Locale.getDefault())}")
                     future.complete(unloadWorld(world))
+                    future.thenApply {
+                        if (!it){
+                            if (!Bukkit.unloadWorld(world, true)) {
+                                Bukkit.getConsoleSender()
+                                    .sendMessage("Bukkit卸载世界 ${worldData.worldName.lowercase(Locale.getDefault())} 失败")
+                            }
+                        }
+                    }
                     return future
                 } else {
+                    Bukkit.getConsoleSender().sendMessage("Bukkit无法找到世界 ${worldData.worldName.lowercase(Locale.getDefault())}")
                     unloadWorldList.add(uuid)
 
                     var i = 0
@@ -296,11 +288,14 @@ object WorldImpl : WorldApi {
                 return future
             }
         } else {
+            Bukkit.getConsoleSender().sendMessage("卸载世界${worldData.worldName}")
             val world = Bukkit.getWorld(worldData.worldName+"/world")
             return if (world != null) {
+                Bukkit.getConsoleSender().sendMessage("Bukkit无法找到世界 ${worldData.worldName}")
                 future.complete(unloadWorld(world))
                 future
             } else {
+                Bukkit.getConsoleSender().sendMessage("Bukkit卸载世界 ${worldData.worldName}")
                 future.complete(true)
                 future
             }
@@ -336,7 +331,7 @@ object WorldImpl : WorldApi {
 
     override fun loadWorld(uuid: UUID, serverName: String?): CompletableFuture<Boolean> {
         val future = CompletableFuture<Boolean>()
-        if (serverName == null || serverName == PixelWorldPro.instance.config.getString("ServerName")) {
+        if (serverName == null || serverName == Server.getLocalServer().realName) {
             future.complete(loadWorldLocal(uuid))
             return future
         } else {
@@ -447,11 +442,11 @@ object WorldImpl : WorldApi {
     }
 
     override fun loadWorldGroup(uuid: UUID) {
-        RedisManager.push("loadWorldGroup|,|$uuid|,|${TickListener.getLowestMsptServer()}")
+        com.dongzh1.pixelworldpro.bungee.world.World.loadBungeeWorld(Bukkit.getPlayer(uuid)!!, uuid)
     }
 
     override fun loadWorldGroupTp(world: UUID, player: UUID) {
-        RedisManager.push("loadWorldGroupTp|,|$world|,|$player|,|${TickListener.getLowestMsptServer()}")
+        com.dongzh1.pixelworldpro.bungee.world.World.loadBungeeWorld(Bukkit.getPlayer(player)!!, world)
     }
 
     fun lang(string: String): String {

@@ -10,7 +10,7 @@ import com.dongzh1.pixelworldpro.listener.WorldProtect
 import com.dongzh1.pixelworldpro.migrate.Migrate
 import com.dongzh1.pixelworldpro.migrate.WorldMove
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
-import com.dongzh1.pixelworldpro.tools.Config
+import com.dongzh1.pixelworldpro.dimension.DimensionConfig
 import com.dongzh1.pixelworldpro.tools.JiangCore
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -639,26 +639,6 @@ class Commands {
         }
     }
 
-    private val mspt = command<CommandSender>("mspt") {
-        permission = "pixelworldpro.command.admin"
-        exec {
-            if (!PixelWorldPro.instance.isBungee()) {
-                sender.sendMessage("§cNeed Bungee")
-                return@exec
-            }
-            val msptValue = RedisManager.getMspt()
-            if (msptValue == null) {
-                sender.sendMessage("§cmspt: §cnull")
-            } else {
-                for (server in msptValue.split(",")) {
-                    if (server.split(":")[0] != "") {
-                        sender.sendMessage("§cmspt: §a${server.split(":")[0]} §c${server.split(":")[1]}")
-                    }
-                }
-            }
-        }
-    }
-
     private val create = command<CommandSender>("create") {
         fun createWorld(uuid: UUID, name: String, file: File): CompletableFuture<Boolean> {
             return if (PixelWorldPro.instance.isBungee()) {
@@ -881,7 +861,7 @@ class Commands {
                     RedisManager.push("updateWorldLevel|,|$uuid|,|$nextLevel")
                 } else {
                     //获取世界是否加载
-                    val dimensionData = Config.getWorldDimensionData(worldData.worldName)
+                    val dimensionData = DimensionConfig.getWorldDimensionData(worldData.worldName)
                     val dimensionlist = dimensionData.createlist
                     for (dimension in dimensionlist) {
                         val world = Bukkit.getWorld(worldData.worldName + "/" + dimension)
@@ -920,7 +900,7 @@ class Commands {
                     RedisManager.push("updateWorldLevel|,|$uuid|,|$nextLevel")
                 } else {
                     //获取世界是否加载
-                    val dimensionData = Config.getWorldDimensionData(worldData.worldName)
+                    val dimensionData = DimensionConfig.getWorldDimensionData(worldData.worldName)
                     val dimensionlist = dimensionData.createlist
                     for (dimension in dimensionlist) {
                         val world = Bukkit.getWorld(worldData.worldName + "/" + dimension)
@@ -1218,7 +1198,7 @@ class Commands {
                         sender.sendMessage("设置成功")
                     }
                 }else{
-                    Config.setWorldDimensionData(worldData.worldName, "seed", args[0])
+                    DimensionConfig.setWorldDimensionData(worldData.worldName, "seed", args[0])
                     sender.sendMessage("设置成功")
                 }
             }
@@ -1242,7 +1222,7 @@ class Commands {
                         sender.sendMessage("设置成功")
                     }
                 }else{
-                    Config.setWorldDimensionData(worldData.worldName, "seed", args[0])
+                    DimensionConfig.setWorldDimensionData(worldData.worldName, "seed", args[0])
                     sender.sendMessage("设置成功")
                 }
             }
@@ -1380,7 +1360,6 @@ class Commands {
         sub(invite)
         sub(tp)
         sub(reload)
-        sub(mspt)
         sub(seed)
         sub(unload)
         sub(load)

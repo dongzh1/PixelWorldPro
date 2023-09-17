@@ -6,9 +6,9 @@ import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.api.TeleportApi
 import com.dongzh1.pixelworldpro.bungee.server.Server
 import com.dongzh1.pixelworldpro.bungee.server.ServerData
+import com.dongzh1.pixelworldpro.bungee.world.World
 import com.dongzh1.pixelworldpro.impl.TeleportImpl
 import com.dongzh1.pixelworldpro.impl.WorldImpl
-import com.dongzh1.pixelworldpro.listener.TickListener
 import com.dongzh1.pixelworldpro.tools.Serialize
 import com.xbaimiao.easylib.module.utils.submit
 
@@ -23,19 +23,6 @@ class RedisListener : JedisPubSub() {
     private val push = submit(async = true, period = 20L) {
         RedisManager.push("ServerOnline|,|${PixelWorldPro.instance.config.getString("ServerName")}")
     }
-    private val checkServer = submit(async = true, period = 60L, delay = 60L) {
-        //如果onlineServer没有数据库里的名字就删除
-        if (newOnlineServer.size < onlineServer.size){
-            for (server in onlineServer){
-                try {
-                    if (!newOnlineServer.contains(server)) {
-                        RedisManager.closeServer(server)
-                    }
-                }catch (_:Exception){}
-            }
-        }
-        newOnlineServer.clear()
-    }
     init {
         submit(async = true, delay = 50L) {
             if (onlineServer.size == 1 && onlineServer[0] == PixelWorldPro.instance.config.getString("ServerName")){
@@ -47,7 +34,6 @@ class RedisListener : JedisPubSub() {
     }
     fun stop(){
         push.cancel()
-        checkServer.cancel()
     }
 
     fun getOnlineServer(): List<String> {
@@ -83,9 +69,7 @@ class RedisListener : JedisPubSub() {
                 }
                 "createWorldSuccess" ->{
                     val uuid = UUID.fromString(message.split("|,|")[1])
-                    if (WorldImpl.getCreateWorldList().contains(uuid)){
-                        WorldImpl.removeCreateWorldList(uuid)
-                    }
+                    World.createWorldList.remove(uuid)
                 }
                 "loadWorldGroup" ->{
                     //获取最低mspt服务器
@@ -115,7 +99,7 @@ class RedisListener : JedisPubSub() {
                 }
                 "loadWorldServer" ->{
                     val serverName = message.split("|,|")[2]
-                    if (serverName != PixelWorldPro.instance.config.getString("ServerName")){
+                    if (serverName != Server.getLocalServer().realName){
                         return
                     }
                     val uuid = UUID.fromString(message.split("|,|")[1])
@@ -222,9 +206,9 @@ class RedisListener : JedisPubSub() {
                     val id = message.split("|,|")[1].toInt()
                     val serverData = Server.getLocalServer()
                     val msg = if (serverData.type == null){
-                        "returnServerData|,|${id}|,|${serverData.showName}|,|${serverData.realName}|,|${serverData.mode}|,|none"
+                        "returnServerData|,|${id}|,|${serverData.showName}|,|${serverData.realName}|,|${serverData.mode}|,|${serverData.tps}|,|none"
                     } else {
-                        "returnServerData|,|${id}|,|${serverData.showName}|,|${serverData.realName}|,|${serverData.mode}|,|${serverData.type}"
+                        "returnServerData|,|${id}|,|${serverData.showName}|,|${serverData.realName}|,|${serverData.mode}|,|${serverData.tps}|,|${serverData.type}"
                     }
                     RedisManager.push(msg)
                 }
@@ -233,12 +217,14 @@ class RedisListener : JedisPubSub() {
                     val showName = message.split("|,|")[2]
                     val realName = message.split("|,|")[3]
                     val mode = message.split("|,|")[4]
-                    val type = message.split("|,|")[5]
+                    val tps = message.split("|,|")[5].toDouble()
+                    val type = message.split("|,|")[6]
                     val serverData = if (type == "none"){
                         ServerData(
                             showName,
                             realName,
                             mode,
+                            tps,
                             null
                         )
                     } else {
@@ -246,6 +232,7 @@ class RedisListener : JedisPubSub() {
                             showName,
                             realName,
                             mode,
+                            tps,
                             type
                         )
                     }

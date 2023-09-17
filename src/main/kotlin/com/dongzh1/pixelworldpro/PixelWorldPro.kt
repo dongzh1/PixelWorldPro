@@ -50,6 +50,7 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
     private var redisListener: RedisListener? = null
     private var useLuckPerm = false
     private val onInviterMap = mutableMapOf<UUID, List<UUID>>()
+    private val bungeeConfig = BuiltInConfiguration("BungeeSet.yml")
 
     val dimensionconfig = BuiltInConfiguration("Dimension.yml")
     val expansionconfig = BuiltInConfiguration("Expansion.yml")
@@ -62,8 +63,6 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
     override fun enable() {
         //初始化统计
         KtorPluginsBukkit.init(this,this)
-        //userid是用户id,如果出错代表没有注入
-        //info("${userId}感谢您的购买")
         //统计
         stat()
         if (eula.getBoolean("eula")) {
@@ -110,9 +109,6 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
                         }
                     }
                     RedisManager.setMspt(Bukkit.getTicksPerMonsterSpawns().toDouble())
-                    if (config.getBoolean("buildWorld")) {
-                        registerListener(TickListener)
-                    }
                     Server().commandRoot.register()
                 }
                 //加载数据库

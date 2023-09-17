@@ -2,6 +2,7 @@
 
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.dongzh1.pixelworldpro.impl.WorldImpl
+import com.dongzh1.pixelworldpro.tools.Bungee
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import org.bukkit.Bukkit
 
@@ -18,6 +19,9 @@ object Server {
 
     private fun getNewId():Int{
         val keyList = serverMap.keys
+        if (keyList.isEmpty()){
+            return 1
+        }
         return if (keyList.last() >= 10000){
             1
         }else {
@@ -104,6 +108,7 @@ object Server {
             localServer["showName"]?:bungeeConfig.getString("showName")!!,
             localServer["realName"]?:bungeeConfig.getString("realName")!!,
             localServer["mode"]?:bungeeConfig.getString("mode")!!,
+            Bungee.getTPS(),
             localServer["type"]
         )
     }
