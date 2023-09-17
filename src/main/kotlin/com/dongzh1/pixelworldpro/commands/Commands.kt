@@ -860,14 +860,19 @@ class Commands {
                 if (PixelWorldPro.instance.isBungee()) {
                     RedisManager.push("updateWorldLevel|,|$uuid|,|$nextLevel")
                 } else {
+                    val world = Bukkit.getWorld(worldData.worldName + "/world")
+                    if (world != null) {
+                        //世界边界更新
+                        WorldImpl.setWorldBorder(world, nextLevel)
+                    }
                     //获取世界是否加载
                     val dimensionData = DimensionConfig.getWorldDimensionData(worldData.worldName)
                     val dimensionlist = dimensionData.createlist
                     for (dimension in dimensionlist) {
-                        val world = Bukkit.getWorld(worldData.worldName + "/" + dimension)
-                        if (world != null) {
+                        val worlds = Bukkit.getWorld(worldData.worldName + "/" + dimension)
+                        if (worlds != null) {
                             //世界边界更新
-                            WorldImpl.setWorldBorder(world, nextLevel)
+                            WorldImpl.setWorldBorder(worlds, nextLevel)
                         }
                     }
                 }
@@ -899,14 +904,63 @@ class Commands {
                 if (PixelWorldPro.instance.isBungee()) {
                     RedisManager.push("updateWorldLevel|,|$uuid|,|$nextLevel")
                 } else {
+                    val world = Bukkit.getWorld(worldData.worldName + "/world")
+                    if (world != null) {
+                        //世界边界更新
+                        WorldImpl.setWorldBorder(world, nextLevel)
+                    }
                     //获取世界是否加载
                     val dimensionData = DimensionConfig.getWorldDimensionData(worldData.worldName)
                     val dimensionlist = dimensionData.createlist
                     for (dimension in dimensionlist) {
-                        val world = Bukkit.getWorld(worldData.worldName + "/" + dimension)
-                        if (world != null) {
+                        val worlds = Bukkit.getWorld(worldData.worldName + "/" + dimension)
+                        if (worlds != null) {
                             //世界边界更新
-                            WorldImpl.setWorldBorder(world, nextLevel)
+                            WorldImpl.setWorldBorder(worlds, nextLevel)
+                        }
+                    }
+                }
+                sender.sendMessage(lang("LevelUp"))
+            }
+            if (args.size == 2) {
+                //权限判断
+                if (!sender.hasPermission("pixelworldpro.command.admin")) {
+                    sender.sendMessage(lang("NoPermission"))
+                    return@exec
+                }
+                val uuid = Bukkit.getOfflinePlayer(args[0]).uniqueId
+                val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
+                if (worldData == null) {
+                    sender.sendMessage(lang("WorldNotExist"))
+                    return@exec
+                }
+                val level = worldData.worldLevel
+                val levelList = PixelWorldPro.instance.config.getConfigurationSection("WorldSetting.WorldLevel")!!
+                    .getKeys(false).toMutableList()
+                if (levelList.indexOf(level) == levelList.size - 1) {
+                    sender.sendMessage(lang("LevelMax"))
+                    return@exec
+                }
+                val nextLevel = args[1]
+                //数据库更新
+                val worldDataNew = worldData.copy(worldLevel = nextLevel)
+                PixelWorldPro.databaseApi.setWorldData(uuid, worldDataNew)
+                if (PixelWorldPro.instance.isBungee()) {
+                    RedisManager.push("updateWorldLevel|,|$uuid|,|$nextLevel")
+                } else {
+                    val world = Bukkit.getWorld(worldData.worldName + "/world")
+                    if (world != null) {
+                        //世界边界更新
+                        WorldImpl.setWorldBorder(world, nextLevel)
+                    }
+                    //获取世界是否加载
+                    val dimensionData = DimensionConfig.getWorldDimensionData(worldData.worldName)
+                    val dimensionlist = dimensionData.createlist
+                    for (dimension in dimensionlist) {
+                        val worlds = Bukkit.getWorld(worldData.worldName + "/" + dimension)
+                        if (worlds != null) {
+                            //世界边界更新
+                            WorldImpl.setWorldBorder(worlds, nextLevel)
                         }
                     }
                 }

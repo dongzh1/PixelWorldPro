@@ -4,6 +4,7 @@ import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.impl.WorldImpl
 import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
+import com.dongzh1.pixelworldpro.dimension.DimensionConfig
 import com.xbaimiao.easylib.bridge.economy.PlayerPoints
 import com.xbaimiao.easylib.bridge.economy.Vault
 import org.bukkit.Bukkit
@@ -109,11 +110,20 @@ class WorldEdit(val player: Player) {
                             if (PixelWorldPro.instance.isBungee()) {
                                 RedisManager.push("updateWorldLevel|,|${player.uniqueId}|,|$nextLevel")
                             } else {
-                                //获取世界是否加载
-                                val world = Bukkit.getWorld(worldData.worldName)
+                                val world = Bukkit.getWorld(worldData.worldName + "/world")
                                 if (world != null) {
                                     //世界边界更新
                                     WorldImpl.setWorldBorder(world, nextLevel)
+                                }
+                                //获取世界是否加载
+                                val dimensionData = DimensionConfig.getWorldDimensionData(worldData.worldName)
+                                val dimensionlist = dimensionData.createlist
+                                for (dimension in dimensionlist) {
+                                    val worlds = Bukkit.getWorld(worldData.worldName + "/" + dimension)
+                                    if (worlds != null) {
+                                        //世界边界更新
+                                        WorldImpl.setWorldBorder(worlds, nextLevel)
+                                    }
                                 }
                             }
                             player.sendMessage(lang("LevelUp"))

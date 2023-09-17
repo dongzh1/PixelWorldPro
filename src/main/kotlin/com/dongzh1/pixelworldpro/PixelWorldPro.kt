@@ -1,6 +1,9 @@
 package com.dongzh1.pixelworldpro
 
 import com.dongzh1.pixelworldpro.api.DatabaseApi
+import com.dongzh1.pixelworldpro.bungee.redis.RedisConfig
+import com.dongzh1.pixelworldpro.bungee.redis.RedisListener
+import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.dongzh1.pixelworldpro.commands.Commands
 import com.dongzh1.pixelworldpro.commands.Server
 import com.dongzh1.pixelworldpro.database.MysqlDatabaseApi
@@ -8,13 +11,14 @@ import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
 import com.dongzh1.pixelworldpro.expansion.Expansion
 import com.dongzh1.pixelworldpro.expansion.ExpansionManager.loadExpansion
 import com.dongzh1.pixelworldpro.gui.Gui
-import com.dongzh1.pixelworldpro.listener.*
+import com.dongzh1.pixelworldpro.listener.OnPlayerJoin
+import com.dongzh1.pixelworldpro.listener.OnPlayerLogin
+import com.dongzh1.pixelworldpro.listener.OnWorldUnload
+import com.dongzh1.pixelworldpro.listener.WorldProtect
 import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.papi.Papi
-import com.dongzh1.pixelworldpro.bungee.redis.RedisConfig
-import com.dongzh1.pixelworldpro.bungee.redis.RedisListener
-import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.dongzh1.pixelworldpro.tools.CommentConfig
+import com.mcyzj.bstats.Metrics
 import com.xbaimiao.easylib.EasyPlugin
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.utils.registerListener
@@ -61,6 +65,10 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
 
 
     override fun enable() {
+        val pluginId = 19823 // <-- Replace with the id of your plugin!
+
+        val metrics = Metrics(this, pluginId)
+        metrics.addCustomChart(Metrics.SimplePie("chart_id") { "My value" })
         //初始化统计
         KtorPluginsBukkit.init(this,this)
         //统计
