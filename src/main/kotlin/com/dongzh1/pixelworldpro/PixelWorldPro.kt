@@ -63,7 +63,6 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
     val advancedWorldSettings = BuiltInConfiguration("AdvancedWorldSettings.yml")
     val world = BuiltInConfiguration("World.yml")
     private val eula = BuiltInConfiguration("eula.yml")
-    val user = "mcyzj"
 
 
     override fun enable() {
