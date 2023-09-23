@@ -2,8 +2,10 @@ package com.dongzh1.pixelworldpro.listener
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.database.RedStone
-import com.dongzh1.pixelworldpro.impl.WorldImpl
+import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
+import com.dongzh1.pixelworldpro.world.Config
+import com.dongzh1.pixelworldpro.world.Structure
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.GameRule
@@ -13,12 +15,10 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockRedstoneEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.EntityPortalEvent
 import org.bukkit.event.entity.EntitySpawnEvent
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent
-import org.bukkit.event.player.PlayerChangedWorldEvent
-import org.bukkit.event.player.PlayerInteractEntityEvent
-import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerTeleportEvent
+import org.bukkit.event.player.*
 import org.bukkit.event.world.WorldLoadEvent
 import org.bukkit.event.world.WorldUnloadEvent
 import java.text.SimpleDateFormat
@@ -273,6 +273,8 @@ class WorldProtect : Listener {
         val worldConfig = PixelWorldPro.instance.world
         val world = e.player.world
         val gameMode = worldConfig.getString("worldData.${world.name}.gameMode")
+        if (e.player.isOp)
+            return
         when(val permission = worldConfig.getString("worldData.${world.name}.enableGameMode")){
             "off" ->{}
             "op" ->{}
@@ -309,8 +311,6 @@ class WorldProtect : Listener {
                 }
             }
         }
-        if (e.player.isOp)
-            return
         val worldName = e.to.world.name
         //如果不是玩家世界则返回
         if(isPlayerWorld(worldName, e.player.uniqueId))
@@ -515,6 +515,55 @@ class WorldProtect : Listener {
             UUID.fromString(uuidString)
         }catch (_:Exception){
             null
+        }
+    }
+
+    @EventHandler
+    fun portalEvent(e: PlayerPortalEvent) {
+        if (PixelWorldPro.instance.dimensionconfig.getBoolean("Structure.netherEnable")) {
+            val uuid = getWorldNameUUID(e.from.world.name) ?: return
+            val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
+            val dimensionData = Config.getWorldDimensionData(worldData.worldName)
+            if ("nether" !in dimensionData.createlist) {
+                e.player.sendMessage("你还没有创建地狱")
+                return
+            }
+            if (e.from.world.name.endsWith("/nether")) {
+                Structure.playerJoin(e.player.isJumping, e.player.location, e.to.world, e.player)
+                val worldname = "${worldData.worldName}/world"
+                e.to.world = Bukkit.getWorld(worldname)!!
+                e.to.set(e.from.x, e.from.y, e.from.z - 1)
+            } else {
+                WorldImpl.loadDimension(uuid, e.player, "nether")
+                Structure.playerJoin(e.player.isJumping, e.player.location, e.to.world, e.player)
+                val worldname = "${worldData.worldName}/nether"
+                e.to.world = Bukkit.getWorld(worldname)!!
+                e.to.set(e.from.x, e.from.y, e.from.z - 1)
+            }
+        }
+    }
+
+    @EventHandler
+    fun entityPortalEvent(e: EntityPortalEvent) {
+        if (PixelWorldPro.instance.dimensionconfig.getBoolean("Structure.netherEnable")) {
+            val uuid = getWorldNameUUID(e.from.world.name) ?: return
+            val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
+            val dimensionData = Config.getWorldDimensionData(worldData.worldName)
+            if ("nether" !in dimensionData.createlist) {
+                return
+            }
+            if (e.from.world.name.endsWith("/nether")) {
+                Structure.entityJoin(false, e.entity.location, e.to!!.world)
+                val worldname = "${worldData.worldName}/world"
+                e.to!!.world = Bukkit.getWorld(worldname)!!
+                e.to!!.set(e.from.x, e.from.y, e.from.z - 1)
+            } else {
+                WorldImpl.loadDimension(uuid, Bukkit.getPlayer(uuid)?:return, "nether")
+                Structure.entityJoin(false, e.entity.location, e.to!!.world)
+                val worldname = "${worldData.worldName}/nether"
+                e.to!!.world = Bukkit.getWorld(worldname)!!
+                e.to!!.set(e.from.x, e.from.y, e.from.z - 1)
+            }
         }
     }
 

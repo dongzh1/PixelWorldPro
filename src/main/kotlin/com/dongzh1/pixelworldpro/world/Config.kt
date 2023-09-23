@@ -1,12 +1,13 @@
-﻿package com.dongzh1.pixelworldpro.dimension
+﻿package com.dongzh1.pixelworldpro.world
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.database.WorldDimensionData
-import com.dongzh1.pixelworldpro.tools.Dimension.getDimensionList
+import com.dongzh1.pixelworldpro.world.Dimension.getDimensionList
+import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
 
-object DimensionConfig {
+object Config {
     private fun getWorldDimensionConfig(worldName: String): YamlConfiguration {
         val config = File("${PixelWorldPro.instance.config.getString("WorldPath")}/$worldName", "world.yml")
         val data = YamlConfiguration()
@@ -76,5 +77,13 @@ object DimensionConfig {
         val data = getWorldDimensionConfig(worldName)
         data.set(dimension, finish)
         data.save(config)
+    }
+
+    fun getStructureConfig(name: String): YamlConfiguration?{
+        return try {
+            BuiltInConfiguration("structure/Hellgate.yml")
+        }catch (_:Exception){
+            null
+        }
     }
 }

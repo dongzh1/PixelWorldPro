@@ -4,7 +4,7 @@ import java.util.UUID
 
 data class WorldData (
     val worldName: String,
-    val worldLevel: String,
+    var worldLevel: String,
     val members: List<UUID>,
     val memberName: List<String>,
     val banPlayers: List<UUID>,

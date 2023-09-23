@@ -4,7 +4,9 @@ import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.api.TeleportApi
 import com.dongzh1.pixelworldpro.listener.OnPlayerJoin
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
+import com.dongzh1.pixelworldpro.bungee.server.Bungee
 import com.dongzh1.pixelworldpro.tools.Serialize
+import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -52,6 +54,15 @@ class TeleportImpl: TeleportApi {
                 if (RedisManager.isLock(playerUuid)){
                     //世界已经加载，告诉其他服,uuid要传送到有playeruuid世界的服务器，
                     RedisManager.push("teleportWorld|,|${uuid}|,|${worldData.worldName}/world")
+                    val lockValue = RedisManager.getLock()!!.split(",")
+                    try {
+                        for (value in lockValue) {
+                            val list = value.split(":")
+                            if (list[0] == playerUuid.toString()) {
+                                Bungee.connect(Bukkit.getPlayer(uuid)!!, list[1])
+                            }
+                        }
+                    }catch (_:Exception){}
                 }else{
                     //加载世界再传送玩家
                     WorldImpl.loadWorldGroupTp(playerUuid,uuid)

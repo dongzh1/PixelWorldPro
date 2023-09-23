@@ -3,8 +3,8 @@
 import com.dongzh1.pixelworldpro.api.TeleportApi
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.dongzh1.pixelworldpro.bungee.server.Server
-import com.dongzh1.pixelworldpro.impl.WorldImpl
-import com.dongzh1.pixelworldpro.tools.Bungee
+import com.dongzh1.pixelworldpro.world.WorldImpl
+import com.dongzh1.pixelworldpro.bungee.server.Bungee
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture
 import kotlin.collections.HashMap
 
 object World {
-    private val bungeeConfig = BuiltInConfiguration("BungeeSet.yml")
+    val bungeeConfig = BuiltInConfiguration("BungeeSet.yml")
     private val debug = bungeeConfig.getBoolean("debug")
 
     val createWorldList: MutableList<UUID> = mutableListOf()

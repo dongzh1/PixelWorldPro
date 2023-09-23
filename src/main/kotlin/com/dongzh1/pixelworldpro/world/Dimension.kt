@@ -1,4 +1,4 @@
-﻿package com.dongzh1.pixelworldpro.tools
+﻿package com.dongzh1.pixelworldpro.world
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.database.DimensionData

@@ -1,8 +1,7 @@
 ﻿package com.dongzh1.pixelworldpro.bungee.server
 
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
-import com.dongzh1.pixelworldpro.impl.WorldImpl
-import com.dongzh1.pixelworldpro.tools.Bungee
+import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import org.bukkit.Bukkit
 

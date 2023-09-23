@@ -1,4 +1,4 @@
-﻿version: 1
+﻿version: 2
 Dimension:
   - name: nether
     Create:
@@ -18,3 +18,16 @@ Dimension:
     #是否启用边界？
     #Enable boundaries?
     Barrier: true
+#结构设置
+Structure:
+  #是否启用地狱门结构生成
+  #关闭会出现和主世界地狱门互通情况
+  netherEnable: true
+  #地狱门结构文件
+  netherFile: "Hellgate"
+  #各个维度出生点生成结构
+  #none为不生成
+  firstCreate:
+    world: none
+    nether: none
+    the_end: none

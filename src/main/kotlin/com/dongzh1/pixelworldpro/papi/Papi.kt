@@ -13,7 +13,7 @@ import java.util.*
 
 object Papi: PlaceholderExpansion() {
     override val identifier: String
-        get() = "pixelworldpro"
+        get() = PixelWorldPro.instance.config.getString("mainPapi")!!
     override val version: String
         get() = "1.2.0"
 

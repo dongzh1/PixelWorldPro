@@ -1,0 +1,31 @@
+﻿#地狱门结构文件
+#结构显示名称
+showName: "地狱门"
+#真实名称，建议全英文
+realName: "hellGate"
+#结构xy面截面图
+#顺序按z轴从小到大排列
+xy:
+  #名称随便填，读取顺序还是按照列表顺序
+  # 名称只是为了能支持区别读取
+  first:
+    - "oooo"
+    - "oxxo"
+    - "oxxo"
+    - "oxxo"
+    - "oooo"
+  #按照下列内容依次排列
+  #second:
+  #  - "oooo"
+  #  - "oxxo"
+  #  - "oxxo"
+  #  - "oxxo"
+  #  - "oooo"
+#填充方块
+block:
+  o:
+    #方块名称
+    material: Obsidian
+  x:
+    #方块名称
+    material: Nether_Portal_Block

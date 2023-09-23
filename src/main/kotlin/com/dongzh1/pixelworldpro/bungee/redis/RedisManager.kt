@@ -2,6 +2,7 @@ package com.dongzh1.pixelworldpro.bungee.redis
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.PixelWorldPro.Companion.channel
+import com.dongzh1.pixelworldpro.bungee.world.World
 import com.dongzh1.pixelworldpro.database.WorldData
 import com.dongzh1.pixelworldpro.tools.Serialize
 import com.xbaimiao.easylib.EasyPlugin
@@ -144,7 +145,7 @@ object RedisManager : Module<EasyPlugin> {
         val lockValue = getLock()
         if (lockValue == null){
             jedisPool.resource.also {
-                it.set("PixelWorldProlock", "${uuid}:${PixelWorldPro.instance.config.getString("ServerName")},")
+                it.set("PixelWorldProlock", "${uuid}:${World.bungeeConfig.getString("realName")},")
                 it.close()
             }
         }else{
@@ -152,7 +153,7 @@ object RedisManager : Module<EasyPlugin> {
                 return
             }
             jedisPool.resource.also {
-                it.set("PixelWorldProlock", "${lockValue}${uuid}:${PixelWorldPro.instance.config.getString("ServerName")},")
+                it.set("PixelWorldProlock", "${lockValue}${uuid}:${World.bungeeConfig.getString("realName")},")
                 it.close()
             }
         }
@@ -162,7 +163,7 @@ object RedisManager : Module<EasyPlugin> {
         val lockValue = getLock()
         return lockValue?.contains("$uuid") ?: false
     }
-    private fun getLock(): String?{
+    fun getLock(): String?{
         jedisPool.resource.also {
             val value = it.get("PixelWorldProlock")
             it.close()

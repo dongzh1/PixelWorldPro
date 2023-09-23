@@ -1,6 +1,6 @@
 #配置文件版本号,用于更新配置文件，请勿修改
 #Configuration file version number, used to update the configuration file, please do not modify
-version: 7
+version: 8
 #密钥
 token: ""
 #可以在lang文件夹查看已有的语言文件，如果你想要新增语言文件，请联系我
@@ -123,5 +123,9 @@ Papi:
 lobby: "lobby"
 #PWP主命令
 mainCommand: "pwp"
+#PWP变量开头
+mainPapi: "pixelworldpro"
+#开启后控制台会输出更多debug信息，有助于错误排查
+debug: false
 
 

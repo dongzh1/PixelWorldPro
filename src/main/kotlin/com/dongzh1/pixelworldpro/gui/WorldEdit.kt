@@ -1,14 +1,16 @@
 package com.dongzh1.pixelworldpro.gui
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
-import com.dongzh1.pixelworldpro.impl.WorldImpl
+import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
-import com.dongzh1.pixelworldpro.dimension.DimensionConfig
+import com.dongzh1.pixelworldpro.world.Config
+import com.dongzh1.pixelworldpro.world.Level
 import com.xbaimiao.easylib.bridge.economy.PlayerPoints
 import com.xbaimiao.easylib.bridge.economy.Vault
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import java.util.*
 
 class WorldEdit(val player: Player) {
     private fun build(gui:String = "WorldEdit.yml"):BasicCharMap{
@@ -31,102 +33,7 @@ class WorldEdit(val player: Player) {
                     }
                     when (guiData.value.type) {
                         "LevelUp" -> {
-                            when (guiData.value.value) {
-                                "both" -> {
-                                    if (Vault().has(player, Gui.getWorldEditConfig().getDouble("LevelUp.Money"))
-                                        &&
-                                        PlayerPoints().has(
-                                            player,
-                                            Gui.getWorldCreateConfig().getDouble("LevelUp.Points")
-                                        )
-                                    ) {
-                                        Vault().take(
-                                            player,
-                                            Gui.getWorldCreateConfig().getDouble("LevelUp.Money")
-                                        )
-                                        PlayerPoints().take(
-                                            player,
-                                            Gui.getWorldCreateConfig().getDouble("LevelUp.Points")
-                                        )
-                                    } else {
-                                        player.sendMessage(lang("MoneyNotEnough"))
-                                        player.closeInventory()
-                                        return@onClick
-                                    }
-                                }
-
-                                "money" -> {
-                                    if (Vault().has(player, Gui.getWorldEditConfig().getDouble("LevelUp.Money"))) {
-                                        Vault().take(
-                                            player,
-                                            Gui.getWorldCreateConfig().getDouble("LevelUp.Money")
-                                        )
-                                    } else {
-                                        player.sendMessage(lang("MoneyNotEnough"))
-                                        player.closeInventory()
-                                        return@onClick
-                                    }
-                                }
-
-                                "points" -> {
-                                    if (PlayerPoints().has(
-                                            player,
-                                            Gui.getWorldCreateConfig().getDouble("LevelUp.Points")
-                                        )
-                                    ) {
-                                        PlayerPoints().take(
-                                            player,
-                                            Gui.getWorldCreateConfig().getDouble("LevelUp.Points")
-                                        )
-                                    } else {
-                                        player.sendMessage(lang("MoneyNotEnough"))
-                                        player.closeInventory()
-                                        return@onClick
-                                    }
-                                }
-
-                                else -> {
-                                }
-                            }
-                            val worldData = PixelWorldPro.databaseApi.getWorldData(player.uniqueId)
-                            if (worldData == null) {
-                                player.sendMessage(lang("WorldNotExist"))
-                                player.closeInventory()
-                                return@onClick
-                            }
-                            val level = worldData.worldLevel
-                            val levelList =
-                                PixelWorldPro.instance.config.getConfigurationSection("WorldSetting.WorldLevel")!!
-                                    .getKeys(false).toMutableList()
-                            if (levelList.indexOf(level) == levelList.size - 1) {
-                                player.sendMessage(lang("LevelMax"))
-                                player.closeInventory()
-                                return@onClick
-                            }
-                            val nextLevel = levelList[levelList.indexOf(level) + 1]
-                            //数据库更新
-                            val worldDataNew = worldData.copy(worldLevel = nextLevel)
-                            PixelWorldPro.databaseApi.setWorldData(player.uniqueId, worldDataNew)
-                            if (PixelWorldPro.instance.isBungee()) {
-                                RedisManager.push("updateWorldLevel|,|${player.uniqueId}|,|$nextLevel")
-                            } else {
-                                val world = Bukkit.getWorld(worldData.worldName + "/world")
-                                if (world != null) {
-                                    //世界边界更新
-                                    WorldImpl.setWorldBorder(world, nextLevel)
-                                }
-                                //获取世界是否加载
-                                val dimensionData = DimensionConfig.getWorldDimensionData(worldData.worldName)
-                                val dimensionlist = dimensionData.createlist
-                                for (dimension in dimensionlist) {
-                                    val worlds = Bukkit.getWorld(worldData.worldName + "/" + dimension)
-                                    if (worlds != null) {
-                                        //世界边界更新
-                                        WorldImpl.setWorldBorder(worlds, nextLevel)
-                                    }
-                                }
-                            }
-                            player.sendMessage(lang("LevelUp"))
+                            player.sendMessage(Level.levelUp(player.uniqueId))
                             player.closeInventory()
                         }
 

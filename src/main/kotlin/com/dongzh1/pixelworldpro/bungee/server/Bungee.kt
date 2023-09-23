@@ -1,4 +1,4 @@
-﻿package com.dongzh1.pixelworldpro.tools
+﻿package com.dongzh1.pixelworldpro.bungee.server
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration

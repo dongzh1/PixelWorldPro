@@ -1,6 +1,6 @@
 package com.dongzh1.pixelworldpro.api
 
-import com.dongzh1.pixelworldpro.impl.WorldImpl
+import com.dongzh1.pixelworldpro.world.WorldImpl
 import org.bukkit.World
 import org.bukkit.entity.Player
 import java.io.File

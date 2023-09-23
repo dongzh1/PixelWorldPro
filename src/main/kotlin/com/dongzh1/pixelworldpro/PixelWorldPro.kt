@@ -18,6 +18,7 @@ import com.dongzh1.pixelworldpro.listener.WorldProtect
 import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.papi.Papi
 import com.dongzh1.pixelworldpro.tools.CommentConfig
+import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.mcyzj.bstats.Metrics
 import com.xbaimiao.easylib.EasyPlugin
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
@@ -62,6 +63,7 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
     val advancedWorldSettings = BuiltInConfiguration("AdvancedWorldSettings.yml")
     val world = BuiltInConfiguration("World.yml")
     private val eula = BuiltInConfiguration("eula.yml")
+    val user = "mcyzj"
 
 
     override fun enable() {
@@ -152,11 +154,9 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
                 if (Bukkit.getPluginManager().isPluginEnabled("jiangfriends")) {
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测到JiangFriends，自动挂勾")
                 }
-                //Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 启用清理闲置世界")
-                //Thread {
-                //    Thread.sleep((config.getLong("WorldSetting.unloadTime") * 60 * 1000))
-                //    WorldImpl.unloadtimeoutworld()
-                //}.start()
+                if (PixelWorldPro.instance.config.getLong("WorldSetting.unloadTime") != (-1).toLong()) {
+                    WorldImpl.unloadtimeoutworld()
+                }
                 //加载世界
                 val worldList = world.getStringList("loadWorldList")
                 for (worldName in worldList) {

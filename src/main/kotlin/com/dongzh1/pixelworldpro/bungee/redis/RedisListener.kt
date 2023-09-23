@@ -8,7 +8,7 @@ import com.dongzh1.pixelworldpro.bungee.server.Server
 import com.dongzh1.pixelworldpro.bungee.server.ServerData
 import com.dongzh1.pixelworldpro.bungee.world.World
 import com.dongzh1.pixelworldpro.impl.TeleportImpl
-import com.dongzh1.pixelworldpro.impl.WorldImpl
+import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.dongzh1.pixelworldpro.tools.Serialize
 import com.xbaimiao.easylib.module.utils.submit
 
