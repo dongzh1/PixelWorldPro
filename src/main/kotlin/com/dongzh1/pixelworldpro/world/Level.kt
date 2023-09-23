@@ -123,10 +123,10 @@ object Level {
             }
             for (key in itemMap.keys) {
                 val itemData = getItemData(key)
-                val items = ItemStack(Material.getMaterial(itemData.material)!!)
-                player.inventory.takeItem({
-                    this.itemMeta == items.itemMeta
-                }, itemMap[key]!!)
+                //val items = ItemStack(Material.getMaterial(itemData.material)!!)
+                player.inventory.takeItem(itemMap[key]!!,{
+                    return@takeItem this.type == Material.getMaterial(itemData.material)!!
+                })
             }
         }
         worldData.worldLevel = nextLevel.toString()
