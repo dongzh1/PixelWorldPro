@@ -1,9 +1,12 @@
 package com.dongzh1.pixelworldpro.tools
 
+import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.database.WorldData
+import com.dongzh1.pixelworldpro.world.Level
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import top.shadowpixel.shadowlevels.api.ShadowLevelsAPI
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -63,9 +66,31 @@ object Serialize {
                 }
             }
         }
+        val worldLevel = if (Level.config.getBoolean("shadowLevels.enable")){
+            try {
+                val realName = list[0].split("/")[1]
+                val uuidString: String? =
+                    Regex(pattern = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-z]{12}")
+                        .find(realName)?.value
+                //uuidString?.let { Bukkit.getConsoleSender().sendMessage(it) }
+                val uuid = UUID.fromString(uuidString)
+                val data = ShadowLevelsAPI.getPlayerData(uuid)
+                val levelData = data.getLevelData(Level.config.getString("shadowLevels.levelName"))
+                if (levelData == null) {
+                    Bukkit.getConsoleSender()
+                        .sendMessage("§aPixelWorldPro 无法从ShadowLevels内找到等级 ${Level.config.getString("shadowLevels.levelName")}")
+                    return null
+                }
+                levelData.levels.toString()
+            }catch (e:Exception){
+                list[1]
+            }
+        }else{
+            list[1]
+        }
         return WorldData(
             worldName = list[0],
-            worldLevel = list[1],
+            worldLevel = worldLevel,
             members = members,
             memberName = memberName,
             banPlayers = banPlayers,

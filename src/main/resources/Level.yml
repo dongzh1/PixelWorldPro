@@ -1,5 +1,5 @@
 ﻿#配置版本，勿动
-version: 1
+version: 2
 #等级配置
 level:
   #示例
@@ -85,3 +85,12 @@ item:
     #物品的特殊lore，none为关闭
     lore:
       - "none"
+#ShadowLevels联动配置
+shadowLevels:
+  #是否启用
+  enable: false
+  #shadowLevels接管模式
+  #all 接管玩家世界全部等级，同时pwp的level将不可用
+  mode: "all"
+  #shadowLevels等级名称
+  levelName: "universe"

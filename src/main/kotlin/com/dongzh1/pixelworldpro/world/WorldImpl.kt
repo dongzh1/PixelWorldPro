@@ -500,7 +500,8 @@ object WorldImpl : WorldApi {
     fun setWorldBorder(world: World, level: String) {
         when(PixelWorldPro.instance.worldBorder.getString("enable")) {
             "McBorder" ->{
-                val borderRange = Level.buildLevel()[level.toInt()]!!.barrier
+                val buildLevel = Level.buildLevel()
+                val borderRange = buildLevel[level.toInt()]!!.barrier
                 if (borderRange == 0) {
                     submit {
                         world.worldBorder.center = world.spawnLocation
@@ -514,8 +515,9 @@ object WorldImpl : WorldApi {
                 }
             }
             "WorldBorder" ->{
-                val borderRange = Level.buildLevel()[level.toInt()]!!.barrier
-                if (borderRange == -1) {
+                val buildLevel = Level.buildLevel()
+                val borderRange = buildLevel[level.toInt()]!!.barrier
+                if (borderRange == 0) {
                     submit {
                         Config.setBorder(world.name, 60000000, 60000000, world.spawnLocation.x, world.spawnLocation.z)
                     }
@@ -526,8 +528,9 @@ object WorldImpl : WorldApi {
                 }
             }
             else ->{
-                val borderRange = Level.buildLevel()[level.toInt()]!!.barrier
-                if (borderRange == -1) {
+                val buildLevel = Level.buildLevel()
+                val borderRange = buildLevel[level.toInt()]!!.barrier
+                if (borderRange == 0) {
                     submit {
                         world.worldBorder.center = world.spawnLocation
                         world.worldBorder.size = 60000000.0

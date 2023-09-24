@@ -1,6 +1,7 @@
 package com.dongzh1.pixelworldpro.tools
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
+import com.dongzh1.pixelworldpro.world.Level
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
 
@@ -64,6 +65,16 @@ object CommentConfig : YamlConfiguration() {
                         PixelWorldPro.instance.config.set("mainPapi", "pixelworldpro")
                         PixelWorldPro.instance.config.set("debug", false)
                         PixelWorldPro.instance.saveConfig()
+                    }
+                }
+                when (Level.config.getInt("version")) {
+                    1 -> {
+                        Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新Level配置文件")
+                        Level.config.set("version", 2)
+                        Level.config.set("shadowLevels.enable", false)
+                        Level.config.set("shadowLevels.mode", "all")
+                        Level.config.set("shadowLevels.levelName", "universe")
+                        Level.config.saveToFile()
                     }
                 }
                 when (PixelWorldPro.instance.dimensionconfig.getInt("version")) {

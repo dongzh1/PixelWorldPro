@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "com.dongzh1.pixelworldpro"
-version = "1.2.0-pre2"
+version = "1.2.0-pre3"
 
 easylib {
     version = "2.3.9"
@@ -30,7 +30,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.xbaimiao.ktor:ktor-plugins-bukkit:1.0.6")
+    implementation("com.xbaimiao.ktor:ktor-plugins-bukkit:1.0.7")
     implementation(kotlin("stdlib-jdk8"))
     implementation("redis.clients:jedis:3.7.0")
     implementation("com.google.code.gson:gson:2.10")

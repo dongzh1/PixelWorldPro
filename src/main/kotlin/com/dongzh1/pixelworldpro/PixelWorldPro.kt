@@ -18,6 +18,7 @@ import com.dongzh1.pixelworldpro.listener.WorldProtect
 import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.papi.Papi
 import com.dongzh1.pixelworldpro.tools.CommentConfig
+import com.dongzh1.pixelworldpro.world.Level
 import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.mcyzj.bstats.Metrics
 import com.xbaimiao.easylib.EasyPlugin
@@ -57,12 +58,16 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
     private val onInviterMap = mutableMapOf<UUID, List<UUID>>()
     private val bungeeConfig = BuiltInConfiguration("BungeeSet.yml")
 
+    val enableShadowLevels = false
+
     val dimensionconfig = BuiltInConfiguration("Dimension.yml")
     val expansionconfig = BuiltInConfiguration("Expansion.yml")
     val worldBorder = BuiltInConfiguration("WorldBorder.yml")
     val advancedWorldSettings = BuiltInConfiguration("AdvancedWorldSettings.yml")
     val world = BuiltInConfiguration("World.yml")
     private val eula = BuiltInConfiguration("eula.yml")
+
+    private val user = "mcyzj"
 
 
     override fun enable() {
@@ -141,6 +146,7 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
                 submit(delay = 60) {
                     unregisterListener(initListener)
                 }
+                //从1.0.x更新
                 val file = File("./PixelWorldPro_old")
                 if (file.exists() && !file.isDirectory) {
                     val files = file.listFiles()!!
@@ -150,10 +156,22 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
                         f.copyRecursively(nfile)
                     }
                 }
+                //绑定联动
+                //绑定JiangFriends联动
                 if (Bukkit.getPluginManager().isPluginEnabled("jiangfriends")) {
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测到JiangFriends，自动挂勾")
                 }
-                if (PixelWorldPro.instance.config.getLong("WorldSetting.unloadTime") != (-1).toLong()) {
+                //绑定ShadowLevels联动
+                if (Level.config.getBoolean("shadowLevels.enable")) {
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 启用ShadowLevels联动，尝试挂钩")
+                    if (Bukkit.getPluginManager().isPluginEnabled("ShadowLevels")) {
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测到ShadowLevels，自动挂勾")
+                    }else{
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 无法检测到ShadowLevels，挂钩失败")
+                    }
+                }
+                //启用定时卸载
+                if (config.getLong("WorldSetting.unloadTime") != (-1).toLong()) {
                     WorldImpl.unloadtimeoutworld()
                 }
                 //加载世界

@@ -15,7 +15,7 @@ import com.dongzh1.pixelworldpro.tools.JiangCore
 import com.dongzh1.pixelworldpro.world.Level
 import com.google.gson.Gson
 import com.google.gson.JsonObject
-import com.mcyzj.jiangfriends.api.Friends
+//import com.mcyzj.jiangfriends.api.Friends
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.command.ArgNode
 import com.xbaimiao.easylib.module.command.command
@@ -1027,7 +1027,7 @@ class Commands {
                 return@exec
             }
             val player = sender as Player
-            val friendList = Friends.getfriendslist(player.uniqueId)
+            /*val friendList = Friends.getfriendslist(player.uniqueId)
             if (friendList == null) {
                 player.sendMessage("无法寻找到你的好友列表")
                 return@exec
@@ -1070,6 +1070,8 @@ class Commands {
                     f.sendMessage("${player.name}向你发出了一份邀请函")
                 }
             }
+
+             */
         }
     }
 

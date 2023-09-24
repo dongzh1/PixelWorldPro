@@ -2,22 +2,20 @@
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.world.WorldImpl.lang
-import com.xbaimiao.easylib.bridge.economy.PlayerPoints
-import com.xbaimiao.easylib.bridge.economy.Vault
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.item.hasItem
 import com.xbaimiao.easylib.module.item.takeItem
-import net.minecraft.server.v1_16_R3.im
+import com.xbaimiao.template.shadow.easylib.bridge.economy.PlayerPoints
+import com.xbaimiao.template.shadow.easylib.bridge.economy.Vault
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import java.util.*
-import java.util.regex.Matcher
 import kotlin.collections.HashMap
 
 
 object Level {
-    private val config = BuiltInConfiguration("Leavel.yml")
+    val config = BuiltInConfiguration("Level.yml")
     fun buildLevel(): HashMap<Int, LevelData>{
         val levelMap = HashMap<Int, LevelData>()
         val configLevelList = config.getConfigurationSection("level")!!.getKeys(false)
@@ -47,13 +45,14 @@ object Level {
                     permissionUpList
                 )
                 levelMap[level] = levelData
+                level += 1
                 configLevelSizeStart += 1
             }else{
                 val levelData = levelMap[lastConfigLevel]!!
                 levelData.level = level
                 levelMap[level] = levelData
+                level += 1
             }
-            level += 1
         }
         return levelMap
     }
@@ -123,10 +122,10 @@ object Level {
             }
             for (key in itemMap.keys) {
                 val itemData = getItemData(key)
-                //val items = ItemStack(Material.getMaterial(itemData.material)!!)
-                player.inventory.takeItem(itemMap[key]!!,{
+                val items = ItemStack(Material.getMaterial(itemData.material)!!)
+                player.inventory.takeItem(itemMap[key]!!) {
                     return@takeItem this.type == Material.getMaterial(itemData.material)!!
-                })
+                }
             }
         }
         worldData.worldLevel = nextLevel.toString()

@@ -2,7 +2,7 @@ name: ${name}
 main: ${main}
 version: '${version}'
 author: dong&mcyzj
-softdepend: [ Vault, PlaceholderAPI, PlayerPoints, PixelPlayerWorld, jiangfriends]
+softdepend: [ Vault, PlaceholderAPI, PlayerPoints, PixelPlayerWorld, jiangfriends, ShadowLevels]
 api-version: 1.13
 folia-supported: true
 

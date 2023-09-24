@@ -5,6 +5,7 @@ import com.dongzh1.pixelworldpro.database.RedStone
 import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.dongzh1.pixelworldpro.world.Config
+import com.dongzh1.pixelworldpro.world.Level
 import com.dongzh1.pixelworldpro.world.Structure
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
@@ -21,6 +22,7 @@ import org.bukkit.event.entity.EntityTargetLivingEntityEvent
 import org.bukkit.event.player.*
 import org.bukkit.event.world.WorldLoadEvent
 import org.bukkit.event.world.WorldUnloadEvent
+import top.shadowpixel.shadowlevels.api.events.PlayerLevelsModifiedEvent
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -563,6 +565,26 @@ class WorldProtect : Listener {
                 val worldname = "${worldData.worldName}/nether"
                 e.to!!.world = Bukkit.getWorld(worldname)!!
                 e.to!!.set(e.from.x, e.from.y, e.from.z - 1)
+            }
+        }
+    }
+
+    @EventHandler
+    fun shadowLevelUp(e: PlayerLevelsModifiedEvent) {
+        if (Level.config.getBoolean("shadowLevels.enable")){
+            val player = e.player
+            val level = e.levelSystem.getLevelData(player).levels
+            val worldData = PixelWorldPro.databaseApi.getWorldData(player.uniqueId)?: return
+            worldData.worldLevel = level.toString()
+            PixelWorldPro.databaseApi.setWorldData(player.uniqueId, worldData)
+            val dimensionData = Config.getWorldDimensionData(worldData.worldName)
+            val dimensionlist = dimensionData.createlist
+            for (dimension in dimensionlist) {
+                val worlds = Bukkit.getWorld(worldData.worldName.lowercase(Locale.getDefault()) + "/" + dimension)
+                if (worlds != null) {
+                    //世界边界更新
+                    WorldImpl.setWorldBorder(worlds, level.toString())
+                }
             }
         }
     }
