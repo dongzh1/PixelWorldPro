@@ -67,8 +67,6 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
     val world = BuiltInConfiguration("World.yml")
     private val eula = BuiltInConfiguration("eula.yml")
 
-    private val user = "mcyzj"
-
 
     override fun enable() {
         val pluginId = 19823 // <-- Replace with the id of your plugin!
