@@ -29,12 +29,16 @@ class WorldList(val player: Player) {
     //获取list对应的格子
     private var intList = mutableListOf<Int>()
     private fun build(page: Int = 1, isTrust: Boolean = false, gui: String = "WorldList.yml"): BasicCharMap {
+        if (PixelWorldPro.instance.config.getBoolean("debug")){
+            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 构建玩家世界列表菜单")
+        }
         val basicCharMap = Gui.buildBaseGui(gui, player)
         val basic = basicCharMap.basic
         val charMap = basicCharMap.charMap
         val configCustom = BuiltInConfiguration("gui/$gui")
         var listChar: Char? = null
         //获取intList
+        intList = mutableListOf()
         for (guiData in charMap) {
             if (guiData.value.type == "List") {
                 listChar = guiData.key
@@ -159,12 +163,18 @@ class WorldList(val player: Player) {
     }
 
     fun open(page: Int = 1, isTrust: Boolean = false, gui: String = "WorldList.yml") {
+        if (PixelWorldPro.instance.config.getBoolean("debug")){
+            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 打开第 $page 页玩家世界列表菜单")
+        }
         val basicCharMap = build(page, isTrust, gui)
         val basic = basicCharMap.basic
         val charMap = basicCharMap.charMap
         basic.openAsync()
         basic.onClick {
             it.isCancelled = true
+        }
+        if (PixelWorldPro.instance.config.getBoolean("debug")){
+            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 打开玩家世界列表菜单")
         }
         for (guiData in charMap) {
             basic.onClick(guiData.key) {
@@ -183,18 +193,33 @@ class WorldList(val player: Player) {
                         TeleportImpl().teleport(player.uniqueId, uuid)
                     }
                     "Page" -> {
+                        if (PixelWorldPro.instance.config.getBoolean("debug")){
+                            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 判断翻页类型")
+                        }
                         when (guiData.value.value) {
                             "next" -> {
                                 if (!isLastPage) {
+                                    if (PixelWorldPro.instance.config.getBoolean("debug")){
+                                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 打开下一页玩家世界列表菜单")
+                                    }
                                     start = intList.size * page
                                     open(page + 1, isTrust, gui)
+                                }else{
+                                    if (PixelWorldPro.instance.config.getBoolean("debug")){
+                                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 打开下一页玩家世界列表菜单失败：已经是最后一页了")
+                                    }
                                 }
-
                             }
 
                             "back" -> {
                                 if (page == 1) {
+                                    if (PixelWorldPro.instance.config.getBoolean("debug")){
+                                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 打开前一页玩家世界列表菜单失败：已经是第一页了")
+                                    }
                                     return@onClick
+                                }
+                                if (PixelWorldPro.instance.config.getBoolean("debug")){
+                                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 打开前一页玩家世界列表菜单")
                                 }
                                 start = intList.size * (page - 2)
                                 open(page - 1, isTrust, gui)
@@ -219,8 +244,11 @@ class WorldList(val player: Player) {
                 var i = 0
                 for (uuid in joinedWorld) {
                     if (i < start) {
-                        i++
+                        i += 1
                         continue
+                    }
+                    if (PixelWorldPro.instance.config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 添加uuid $uuid")
                     }
                     uuidList.add(uuid)
                 }
@@ -233,6 +261,10 @@ class WorldList(val player: Player) {
                     isLastPage = false
                 } else {
                     //数据没超过这一页能显示的内容
+                    if (PixelWorldPro.instance.config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 构建世界列表尾页：数据量无法超过菜单显示数量 Trust")
+                        Bukkit.getConsoleSender().sendMessage("uuidList长度：${uuidList.size}  菜单长度：${intList.size}")
+                    }
                     isLastPage = true
                     for (slot in intList) {
                         listMap[slot] = uuidList.first()
@@ -243,12 +275,18 @@ class WorldList(val player: Player) {
                     }
                 }
             } else {
+                if (PixelWorldPro.instance.config.getBoolean("debug")){
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 构建世界列表尾页：没有加入任何世界")
+                }
                 //没有加入任何世界
                 isLastPage = true
             }
         } else {
-            val worldList = PixelWorldPro.databaseApi.getWorldList(start, intList.size) as MutableList<UUID>
+            val worldList = PixelWorldPro.databaseApi.getWorldList(start, intList.size+1) as MutableList<UUID>
             if (worldList.isEmpty()) {
+                if (PixelWorldPro.instance.config.getBoolean("debug")){
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 构建世界列表尾页：worldlist为空")
+                }
                 isLastPage = true
                 return
             }
@@ -261,6 +299,10 @@ class WorldList(val player: Player) {
                 isLastPage = false
             } else {
                 //数据没超过这一页能显示的内容
+                if (PixelWorldPro.instance.config.getBoolean("debug")){
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 构建世界列表尾页：数据量无法超过菜单显示数量")
+                    Bukkit.getConsoleSender().sendMessage("uuidList长度：${worldList.size}  菜单长度：${intList.size}")
+                }
                 isLastPage = true
                 listMap.clear()
                 for (slot in intList) {

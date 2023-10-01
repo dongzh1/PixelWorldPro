@@ -2,11 +2,11 @@
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.world.WorldImpl.lang
+import com.xbaimiao.easylib.bridge.economy.PlayerPoints
+import com.xbaimiao.easylib.bridge.economy.Vault
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.item.hasItem
 import com.xbaimiao.easylib.module.item.takeItem
-import com.xbaimiao.template.shadow.easylib.bridge.economy.PlayerPoints
-import com.xbaimiao.template.shadow.easylib.bridge.economy.Vault
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
@@ -84,6 +84,22 @@ object Level {
                 if (hasPermission) {
                     worldData.worldLevel = nextLevel.toString()
                     PixelWorldPro.databaseApi.setWorldData(uuid, worldData)
+                    val dimensionData = Config.getWorldDimensionData(worldData.worldName)
+                    val dimensionlist = dimensionData.createlist
+                    for (dimension in dimensionlist) {
+                        if (PixelWorldPro.instance.config.getBoolean("debug")){
+                            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 扩展世界 ${worldData.worldName.lowercase(Locale.getDefault()) + "/" + dimension} 的边界")
+                        }
+                        val worlds = Bukkit.getWorld(worldData.worldName.lowercase(Locale.getDefault()) + "/" + dimension)
+                        if (worlds != null) {
+                            //世界边界更新
+                            WorldImpl.setWorldBorder(worlds, level.toString())
+                        }else{
+                            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 扩展世界 ${worldData.worldName.lowercase(Locale.getDefault()) + "/" + dimension} 的边界失败：世界不存在")
+                            }
+                        }
+                    }
                     return lang("LevelUp")
                 }
             }
@@ -94,7 +110,7 @@ object Level {
         }else{
             true
         }
-        val hasMoney = if (levelData.points != 0){
+        val hasMoney = if (levelData.money != 0){
             Vault().has(Bukkit.getOfflinePlayer(uuid), levelData.money.toDouble())
         }else{
             true
@@ -102,8 +118,12 @@ object Level {
         if ((!hasPoints).or(!hasMoney)){
             return "点券/金币不足"
         }else{
-            PlayerPoints().take(Bukkit.getOfflinePlayer(uuid), levelData.points.toDouble())
-            Vault().take(Bukkit.getOfflinePlayer(uuid), levelData.money.toDouble())
+            if (levelData.points != 0) {
+                PlayerPoints().take(Bukkit.getOfflinePlayer(uuid), levelData.points.toDouble())
+            }
+            if (levelData.money != 0) {
+                Vault().take(Bukkit.getOfflinePlayer(uuid), levelData.money.toDouble())
+            }
         }
         if ("none" !in levelData.item){
             val player = Bukkit.getPlayer(uuid)?: return "设置了消耗物品升级的等级，需要玩家在线以升级世界"
@@ -122,7 +142,6 @@ object Level {
             }
             for (key in itemMap.keys) {
                 val itemData = getItemData(key)
-                val items = ItemStack(Material.getMaterial(itemData.material)!!)
                 player.inventory.takeItem(itemMap[key]!!) {
                     return@takeItem this.type == Material.getMaterial(itemData.material)!!
                 }
@@ -134,10 +153,17 @@ object Level {
         val dimensionData = Config.getWorldDimensionData(worldData.worldName)
         val dimensionlist = dimensionData.createlist
         for (dimension in dimensionlist) {
+            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 扩展世界 ${worldData.worldName.lowercase(Locale.getDefault()) + "/" + dimension} 的边界")
+            }
             val worlds = Bukkit.getWorld(worldData.worldName.lowercase(Locale.getDefault()) + "/" + dimension)
             if (worlds != null) {
                 //世界边界更新
                 WorldImpl.setWorldBorder(worlds, level.toString())
+            }else{
+                if (PixelWorldPro.instance.config.getBoolean("debug")){
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 扩展世界 ${worldData.worldName.lowercase(Locale.getDefault()) + "/" + dimension} 的边界失败：世界不存在")
+                }
             }
         }
         return lang("LevelUp")

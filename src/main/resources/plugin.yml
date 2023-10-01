@@ -18,3 +18,26 @@ permissions:
   pixelworldpro.command.dimension:
     description: Can Use PixelWorldPro dimension
     default: not op
+runtime-libraries:
+  libraries-folder: '@Server:libraries'  # 存放依赖的位置
+  libraries:
+    gson:
+      groupId: com.google.code.gson
+      artifactId: gson
+      version: "2.10"
+    slf4j-api:
+      groupId: org.slf4j
+      artifactId: slf4j-api
+      version: "1.7.22"
+    slf4j-simple:
+      groupId: org.slf4j
+      artifactId: slf4j-simple
+      version: "1.7.22"
+    jedis:
+      groupId: redis.clients
+      artifactId: jedis
+      version: "3.7.0"
+    bcprov-lts8on:
+      groupId: org.bouncycastle
+      artifactId: bcprov-lts8on
+      version: "2.73.3"

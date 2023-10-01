@@ -1,6 +1,6 @@
 #配置文件版本号,用于更新配置文件，请勿修改
 #Configuration file version number, used to update the configuration file, please do not modify
-version: 8
+version: 9
 #密钥
 token: ""
 #可以在lang文件夹查看已有的语言文件，如果你想要新增语言文件，请联系我
@@ -92,6 +92,8 @@ WorldSetting:
   Inviter:
     #设置邀请者的权限
     permission: "anyone"
+  #自动保存世界时间，默认单位为分钟,0关闭
+  saveTime: 5
 
 #插件提供papi变量的一些格式
 #Some formats of papi variables provided by the plugin

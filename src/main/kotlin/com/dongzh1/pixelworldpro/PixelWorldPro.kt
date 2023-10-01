@@ -11,16 +11,14 @@ import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
 import com.dongzh1.pixelworldpro.expansion.Expansion
 import com.dongzh1.pixelworldpro.expansion.ExpansionManager.loadExpansion
 import com.dongzh1.pixelworldpro.gui.Gui
-import com.dongzh1.pixelworldpro.listener.OnPlayerJoin
-import com.dongzh1.pixelworldpro.listener.OnPlayerLogin
-import com.dongzh1.pixelworldpro.listener.OnWorldUnload
-import com.dongzh1.pixelworldpro.listener.WorldProtect
+import com.dongzh1.pixelworldpro.listener.*
 import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.papi.Papi
 import com.dongzh1.pixelworldpro.tools.CommentConfig
 import com.dongzh1.pixelworldpro.world.Level
 import com.dongzh1.pixelworldpro.world.WorldImpl
-import com.mcyzj.bstats.Metrics
+import com.mcyzj.libs.JiangLib
+import com.mcyzj.libs.Metrics
 import com.xbaimiao.easylib.EasyPlugin
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.utils.registerListener
@@ -68,7 +66,9 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
     private val eula = BuiltInConfiguration("eula.yml")
 
 
+
     override fun enable() {
+        JiangLib.loadLibs()
         val pluginId = 19823 // <-- Replace with the id of your plugin!
 
         val metrics = Metrics(this, pluginId)
@@ -99,6 +99,9 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
                 Bukkit.getConsoleSender().sendMessage("§a有疑问请加群咨询789731437")
                 loadExpansion()
                 //注册全局监听
+                if (config.getBoolean("debug")){
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 注册全局监听")
+                }
                 Bukkit.getPluginManager().registerEvents(OnPlayerJoin(), this)
                 Bukkit.getPluginManager().registerEvents(OnWorldUnload(), this)
                 Bukkit.getPluginManager().registerEvents(WorldProtect(), this)
@@ -108,13 +111,22 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
                     isBungee = true
                     Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord")
                     val redisConfig = RedisConfig(config)
+                    if (config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 连接redis库")
+                    }
                     Bukkit.getConsoleSender().sendMessage("RedisInfo: " + redisConfig.host + ":" + redisConfig.port)
                     jedisPool = if (redisConfig.password != null) {
                         JedisPool(redisConfig, redisConfig.host, redisConfig.port, 1000, redisConfig.password)
                     } else {
                         JedisPool(redisConfig, redisConfig.host, redisConfig.port)
                     }
+                    if (config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 创建redis监听")
+                    }
                     redisListener = RedisListener()
+                    if (config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 初始化redis")
+                    }
                     subscribeTask = submit(async = true) {
                         jedisPool.resource.use { jedis ->
                             jedis.subscribe(redisListener, channel)
@@ -124,19 +136,37 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
                     Server().commandRoot.register()
                 }
                 //加载数据库
+                if (config.getBoolean("debug")){
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载数据")
+                }
                 if (config.getString("Database").equals("db", true)) {
+                    if (config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载sqlite数据库")
+                    }
                     databaseApi = SQLiteDatabaseApi()
                 }
                 if (config.getString("Database").equals("mysql", true)) {
+                    if (config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载MySQL数据库")
+                    }
                     databaseApi = MysqlDatabaseApi()
 
                 }
                 //提取到内存
+                if (config.getBoolean("debug")){
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 提取数据库数据至内存")
+                }
                 databaseApi.importWorldData()
                 //注册指令
+                if (config.getBoolean("debug")){
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 注册全局指令")
+                }
                 Commands().commandRoot.register()
 
                 //避免数据库未初始化玩家进入
+                if (config.getBoolean("debug")){
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 初始化数据库")
+                }
                 val initListener = OnPlayerLogin()
                 registerListener(initListener)
                 Papi.register()
@@ -155,6 +185,9 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
                     }
                 }
                 //绑定联动
+                if (config.getBoolean("debug")){
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测联动插件并挂钩")
+                }
                 //绑定JiangFriends联动
                 if (Bukkit.getPluginManager().isPluginEnabled("jiangfriends")) {
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测到JiangFriends，自动挂勾")
@@ -164,6 +197,7 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 启用ShadowLevels联动，尝试挂钩")
                     if (Bukkit.getPluginManager().isPluginEnabled("ShadowLevels")) {
                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测到ShadowLevels，自动挂勾")
+                        Bukkit.getPluginManager().registerEvents(ShadowLevels(), this)
                     }else{
                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 无法检测到ShadowLevels，挂钩失败")
                     }
@@ -172,6 +206,8 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
                 if (config.getLong("WorldSetting.unloadTime") != (-1).toLong()) {
                     WorldImpl.unloadtimeoutworld()
                 }
+                //启用定时保存
+                WorldImpl.autoWorldSave()
                 //加载世界
                 val worldList = world.getStringList("loadWorldList")
                 for (worldName in worldList) {

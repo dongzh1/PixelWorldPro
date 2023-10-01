@@ -119,24 +119,30 @@ object World {
                     consoleSender.sendMessage("pwp选中服务器${buildLargeTPS}进行创建操作")
                     player.sendMessage("pwp选中服务器${buildLargeTPS}进行创建操作")
                 }
-                //查询是否创建成功
-                var i = 0
-                submit(async = true, period = 2L, maxRunningNum = 600, delay = 0L) {
+                if (buildLargeTPS == Server.getLocalServer().realName){
+                    submit {
+                        future.complete(WorldImpl.createWorldLocal(player.uniqueId, template, player.name))
+                    }
+                }else {
+                    //查询是否创建成功
+                    var i = 0
+                    submit(async = true, period = 2L, maxRunningNum = 600, delay = 0L) {
 
-                    if (i == 0) {
-                        RedisManager.push("createWorld|,|${player.uniqueId}|,|${template}|,|${player.name}|,|${buildLargeTPS}")
-                    }
-                    i++
-                    if (!createWorldList.contains(player.uniqueId)) {
-                        future.complete(true)
-                        this.cancel()
-                        return@submit
-                    }
-                    if (i >= 500) {
-                        createWorldList.remove(player.uniqueId)
-                        future.complete(false)
-                        this.cancel()
-                        return@submit
+                        if (i == 0) {
+                            RedisManager.push("createWorld|,|${player.uniqueId}|,|${template}|,|${player.name}|,|${buildLargeTPS}")
+                        }
+                        i++
+                        if (!createWorldList.contains(player.uniqueId)) {
+                            future.complete(true)
+                            this.cancel()
+                            return@submit
+                        }
+                        if (i >= 500) {
+                            createWorldList.remove(player.uniqueId)
+                            future.complete(false)
+                            this.cancel()
+                            return@submit
+                        }
                     }
                 }
             } else {
@@ -147,23 +153,29 @@ object World {
                     consoleSender.sendMessage("pwp选中服务器${loadLargeTPS}进行创建操作")
                     player.sendMessage("pwp选中服务器${loadLargeTPS}进行创建操作")
                 }
-                //查询是否创建成功
-                var i = 0
-                submit(async = true, period = 2L, maxRunningNum = 600, delay = 0L) {
-                    if (i == 0) {
-                        RedisManager.push("createWorld|,|${player.uniqueId}|,|${template}|,|${player.name}|,|${loadLargeTPS}")
+                if (loadLargeTPS == Server.getLocalServer().realName) {
+                    submit {
+                        future.complete(WorldImpl.createWorldLocal(player.uniqueId, template, player.name))
                     }
-                    i++
-                    if (!createWorldList.contains(player.uniqueId)) {
-                        future.complete(true)
-                        this.cancel()
-                        return@submit
-                    }
-                    if (i >= 500) {
-                        createWorldList.remove(player.uniqueId)
-                        future.complete(false)
-                        this.cancel()
-                        return@submit
+                } else {
+                    //查询是否创建成功
+                    var i = 0
+                    submit(async = true, period = 2L, maxRunningNum = 600, delay = 0L) {
+                        if (i == 0) {
+                            RedisManager.push("createWorld|,|${player.uniqueId}|,|${template}|,|${player.name}|,|${loadLargeTPS}")
+                        }
+                        i++
+                        if (!createWorldList.contains(player.uniqueId)) {
+                            future.complete(true)
+                            this.cancel()
+                            return@submit
+                        }
+                        if (i >= 500) {
+                            createWorldList.remove(player.uniqueId)
+                            future.complete(false)
+                            this.cancel()
+                            return@submit
+                        }
                     }
                 }
             }

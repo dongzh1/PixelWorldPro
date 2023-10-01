@@ -727,8 +727,8 @@ class Commands {
                     }
                     dimensionList.add("world")
                     var name = player.world.name
-                    if (name.startsWith("Pixelworldpro/")) {
-                        name = name.replace("Pixelworldpro/", "")
+                    if (name.startsWith("pixelworldpro/")) {
+                        name = name.replace("pixelworldpro/", "")
                         for (d in dimensionList) {
                             if (name.contains(d)) {
                                 name = name.substring(0, name.length - d.length)

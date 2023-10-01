@@ -3,13 +3,13 @@ package com.dongzh1.pixelworldpro.world
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.api.MessageApi
 import com.dongzh1.pixelworldpro.api.WorldApi
+import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
+import com.dongzh1.pixelworldpro.bungee.server.Bungee
+import com.dongzh1.pixelworldpro.bungee.server.Server
 import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.database.WorldData
 import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.listener.WorldProtect.Companion.getWorldNameUUID
-import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
-import com.dongzh1.pixelworldpro.bungee.server.Server
-import com.dongzh1.pixelworldpro.bungee.server.Bungee
 import com.dongzh1.pixelworldpro.world.Config.getWorldDimensionData
 import com.dongzh1.pixelworldpro.world.Config.setWorldDimensionData
 import com.wimbli.WorldBorder.Config
@@ -19,9 +19,12 @@ import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.*
 import org.bukkit.entity.Player
 import java.io.File
+import java.lang.Thread.sleep
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CompletableFuture
+import java.util.regex.Pattern
+import kotlin.concurrent.thread
 
 
 object WorldImpl : WorldApi {
@@ -33,6 +36,21 @@ object WorldImpl : WorldApi {
     private val seedMap = mutableMapOf<UUID, String>()
     val worldMap = mutableMapOf<UUID, WorldData>()
 
+
+    fun autoWorldSave(){
+        val saveThread = thread{
+            val saveTime = PixelWorldPro.instance.config.getInt("WorldSetting.saveTime")
+            if (saveTime > 0) {
+                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 启用世界自动保存")
+                while (true) {
+                    sleep(saveTime.toLong())
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 自动保存世界")
+                    WorldFile.saveWorld(localWorldList)
+                }
+            }
+        }
+        saveThread.start()
+    }
 
     /**
      * 根据模板文件夹名新建世界,如果玩家在线则传送
@@ -81,6 +99,11 @@ object WorldImpl : WorldApi {
     }
 
     private fun createWorldLocal(uuid: UUID, file: File, playerName: String): Boolean {
+        if(Thread.currentThread().name != "Server thread"){
+            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 非Server thread发起的世界创建，这会导致服务器崩溃！")
+            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 当前使用的线程：${Thread.currentThread().name}")
+            return false
+        }
         val time = System.currentTimeMillis()
         val createTime = time.toString()
         val date = Date(time)
@@ -182,31 +205,10 @@ object WorldImpl : WorldApi {
 
     override fun restartWorld(uuid: UUID, templateName: String): CompletableFuture<Boolean> {
         val future = CompletableFuture<Boolean>()
-        deleteWorld(uuid).thenApply {
-            if (it) {
-                val file = File(PixelWorldPro.instance.config.getString("WorldTemplatePath"), templateName)
-                val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
-                file.copyRecursively(File(worldData.worldName))
-                val worldcreator = WorldCreator(worldData.worldName+"/world")
-                if (PixelWorldPro.instance.config.getString("WorldSetting.Creator.World") != "null") {
-                    worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.World"))
-                }
-                val world = Bukkit.createWorld(worldcreator)
-                if (world == null) {
-                    future.complete(false)
-                } else {
-                    //设置世界规则
-                    setGameRule(world)
-                    //设置世界难度
-                    world.difficulty =
-                        Difficulty.valueOf(PixelWorldPro.instance.config.getString("WorldSetting.WorldDifficulty")!!)
-                    //设置世界时间
-                    setTime(world)
-                    //设置世界边界
-                    setWorldBorder(world, worldData.worldLevel)
-                    world.keepSpawnInMemory = false
-                    world.save()
-                    future.complete(true)
+        deleteWorld(uuid).thenApply { value ->
+            if (value) {
+                WorldApi.Factory.worldApi!!.createWorld(uuid, templateName).thenApply {
+                    future.complete(it)
                 }
             } else {
                 future.complete(false)
@@ -374,6 +376,11 @@ object WorldImpl : WorldApi {
     }
 
     fun loadWorldLocal(uuid: UUID): Boolean {
+        if(Thread.currentThread().name != "Server thread"){
+            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 非Server thread发起的世界加载！这会导致服务器崩溃！")
+            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 当前使用的线程：${Thread.currentThread().name}")
+            return false
+        }
         val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
         //val dimensionData = getWorldDimensionData(worldData.worldName)
         if (PixelWorldPro.instance.isBungee()) {
@@ -527,19 +534,28 @@ object WorldImpl : WorldApi {
                     }
                 }
             }
+            "None" ->{}
             else ->{
-                val buildLevel = Level.buildLevel()
-                val borderRange = buildLevel[level.toInt()]!!.barrier
-                if (borderRange == 0) {
-                    submit {
-                        world.worldBorder.center = world.spawnLocation
-                        world.worldBorder.size = 60000000.0
+                try {
+                    val buildLevel = Level.buildLevel()
+                    val regEx = "[^0-9]"
+                    val p =  Pattern.compile(regEx)
+                    val m = p.matcher(level)
+                    val result: String = m.replaceAll("").trim()
+                    val borderRange = buildLevel[result.toInt()]!!.barrier
+                    if (borderRange == 0) {
+                        submit {
+                            world.worldBorder.center = world.spawnLocation
+                            world.worldBorder.size = 60000000.0
+                        }
+                    } else {
+                        submit {
+                            world.worldBorder.center = world.spawnLocation
+                            world.worldBorder.size = borderRange.toDouble()
+                        }
                     }
-                } else {
-                    submit {
-                        world.worldBorder.center = world.spawnLocation
-                        world.worldBorder.size = borderRange.toDouble()
-                    }
+                }catch (_:NoSuchMethodError){
+                    Bukkit.getConsoleSender().sendMessage("加载世界边界出错-Bukkit内核没有这个方法")
                 }
             }
         }

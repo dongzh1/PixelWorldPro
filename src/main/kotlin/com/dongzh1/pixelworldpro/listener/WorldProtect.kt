@@ -5,7 +5,6 @@ import com.dongzh1.pixelworldpro.database.RedStone
 import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.dongzh1.pixelworldpro.world.Config
-import com.dongzh1.pixelworldpro.world.Level
 import com.dongzh1.pixelworldpro.world.Structure
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
@@ -22,7 +21,6 @@ import org.bukkit.event.entity.EntityTargetLivingEntityEvent
 import org.bukkit.event.player.*
 import org.bukkit.event.world.WorldLoadEvent
 import org.bukkit.event.world.WorldUnloadEvent
-import top.shadowpixel.shadowlevels.api.events.PlayerLevelsModifiedEvent
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -157,88 +155,165 @@ class WorldProtect : Listener {
 
     @EventHandler
     fun worldChange(e: PlayerChangedWorldEvent) {
+        if (PixelWorldPro.instance.config.getBoolean("debug")){
+            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 监听世界改变")
+        }
         if (e.player.isOp) {
+            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变对象为op，监听结束")
+            }
             return
         }
         val worldName = e.player.world.name
+        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)
+        if (worldData == null){
+            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 世界数据获取为空，监听结束")
+            }
+            return
+        }
         //如果不是玩家世界则返回
-        if (!isPlayerWorld(worldName, e.player.uniqueId)) {
+        if (isPlayerWorld(worldName, e.player.uniqueId)) {
+            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变对象为世界主人，改变游戏模式")
+            }
             when (PixelWorldPro.instance.config.getString("WorldSetting.Gamemode.owner")) {
                 "ADVENTURE" -> {
+                    if (PixelWorldPro.instance.config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变游戏模式为冒险")
+                    }
                     e.player.gameMode = GameMode.ADVENTURE
                     return
                 }
 
                 "SURVIVAL" -> {
+                    if (PixelWorldPro.instance.config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变游戏模式为生存")
+                    }
                     e.player.gameMode = GameMode.SURVIVAL
                     return
                 }
 
                 "CREATIVE" -> {
+                    if (PixelWorldPro.instance.config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变游戏模式为创造")
+                    }
                     e.player.gameMode = GameMode.CREATIVE
                     return
                 }
 
                 "SPECTATOR" -> {
+                    if (PixelWorldPro.instance.config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变游戏模式为观察者")
+                    }
                     e.player.gameMode = GameMode.SPECTATOR
                     return
                 }
 
                 "AUTO" -> {
+                    if (PixelWorldPro.instance.config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 不改变游戏模式")
+                    }
                     return
                 }
             }
-
         }
-        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName) ?: return
         if (e.player.uniqueId in worldData.members) {
             when (PixelWorldPro.instance.config.getString("WorldSetting.Gamemode.member")) {
                 "ADVENTURE" -> {
+                    if (PixelWorldPro.instance.config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变游戏模式为冒险")
+                    }
                     e.player.gameMode = GameMode.ADVENTURE
                     return
                 }
 
                 "SURVIVAL" -> {
+                    if (PixelWorldPro.instance.config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变游戏模式为生存")
+                    }
                     e.player.gameMode = GameMode.SURVIVAL
                     return
                 }
 
                 "CREATIVE" -> {
+                    if (PixelWorldPro.instance.config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变游戏模式为创造")
+                    }
                     e.player.gameMode = GameMode.CREATIVE
                     return
                 }
 
                 "SPECTATOR" -> {
+                    if (PixelWorldPro.instance.config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变游戏模式为观察者")
+                    }
                     e.player.gameMode = GameMode.SPECTATOR
+                    return
+                }
+
+                "AUTO" -> {
+                    if (PixelWorldPro.instance.config.getBoolean("debug")){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 不改变游戏模式")
+                    }
                     return
                 }
             }
         }
         //如果玩家是黑名单,则传送回原来的世界
         if (worldData.banPlayers.contains(e.player.uniqueId)) {
+            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 玩家为对应宇宙的黑名单，不作更改")
+            }
             return
         }
-        if (e.player.uniqueId in PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!)!!) {
+        val invent = PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!)
+        if (invent == null){
+            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 无法获取宇宙邀请列表，事件结束")
+            }
+            return
+        }
+        if (e.player.uniqueId in invent) {
             when (PixelWorldPro.instance.config.getString("WorldSetting.Inviter.permission")) {
                 "member" ->{
                     when (PixelWorldPro.instance.config.getString("WorldSetting.Gamemode.member")) {
                         "ADVENTURE" -> {
+                            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变游戏模式为冒险")
+                            }
                             e.player.gameMode = GameMode.ADVENTURE
                             return
                         }
 
                         "SURVIVAL" -> {
+                            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变游戏模式为生存")
+                            }
                             e.player.gameMode = GameMode.SURVIVAL
                             return
                         }
 
                         "CREATIVE" -> {
+                            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变游戏模式为创造")
+                            }
                             e.player.gameMode = GameMode.CREATIVE
                             return
                         }
 
                         "SPECTATOR" -> {
+                            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变游戏模式为观察者")
+                            }
                             e.player.gameMode = GameMode.SPECTATOR
+                            return
+                        }
+
+                        "AUTO" -> {
+                            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 不改变游戏模式")
+                            }
                             return
                         }
                     }
@@ -246,26 +321,66 @@ class WorldProtect : Listener {
                 else ->{
                     when (PixelWorldPro.instance.config.getString("WorldSetting.Gamemode.anyone")) {
                         "ADVENTURE" -> {
+                            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变游戏模式为冒险")
+                            }
                             e.player.gameMode = GameMode.ADVENTURE
                             return
                         }
 
                         "SURVIVAL" -> {
+                            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变游戏模式为生存")
+                            }
                             e.player.gameMode = GameMode.SURVIVAL
                             return
                         }
 
                         "CREATIVE" -> {
+                            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变游戏模式为创造")
+                            }
                             e.player.gameMode = GameMode.CREATIVE
                             return
                         }
 
                         "SPECTATOR" -> {
+                            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 改变游戏模式为观察者")
+                            }
                             e.player.gameMode = GameMode.SPECTATOR
+                            return
+                        }
+
+                        "AUTO" -> {
+                            if (PixelWorldPro.instance.config.getBoolean("debug")){
+                                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 不改变游戏模式")
+                            }
                             return
                         }
                     }
                 }
+            }
+        }
+        when (PixelWorldPro.instance.config.getString("WorldSetting.Gamemode.anyone")) {
+            "ADVENTURE" -> {
+                e.player.gameMode = GameMode.ADVENTURE
+                return
+            }
+
+            "SURVIVAL" -> {
+                e.player.gameMode = GameMode.SURVIVAL
+                return
+            }
+
+            "CREATIVE" -> {
+                e.player.gameMode = GameMode.CREATIVE
+                return
+            }
+
+            "SPECTATOR" -> {
+                e.player.gameMode = GameMode.SPECTATOR
+                return
             }
         }
     }
@@ -510,7 +625,7 @@ class WorldProtect : Listener {
         if (realNamelist < 2) {
             return null
         }
-        val realName = worldName.split("/")[realNamelist - 2]
+        val realName = worldName.split("/")[1]
         val uuidString: String? = Regex(pattern = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-z]{12}")
             .find(realName)?.value
         return try{
@@ -565,26 +680,6 @@ class WorldProtect : Listener {
                 val worldname = "${worldData.worldName}/nether"
                 e.to!!.world = Bukkit.getWorld(worldname)!!
                 e.to!!.set(e.from.x, e.from.y, e.from.z - 1)
-            }
-        }
-    }
-
-    @EventHandler
-    fun shadowLevelUp(e: PlayerLevelsModifiedEvent) {
-        if (Level.config.getBoolean("shadowLevels.enable")){
-            val player = e.player
-            val level = e.levelSystem.getLevelData(player).levels
-            val worldData = PixelWorldPro.databaseApi.getWorldData(player.uniqueId)?: return
-            worldData.worldLevel = level.toString()
-            PixelWorldPro.databaseApi.setWorldData(player.uniqueId, worldData)
-            val dimensionData = Config.getWorldDimensionData(worldData.worldName)
-            val dimensionlist = dimensionData.createlist
-            for (dimension in dimensionlist) {
-                val worlds = Bukkit.getWorld(worldData.worldName.lowercase(Locale.getDefault()) + "/" + dimension)
-                if (worlds != null) {
-                    //世界边界更新
-                    WorldImpl.setWorldBorder(worlds, level.toString())
-                }
             }
         }
     }

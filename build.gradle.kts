@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "com.dongzh1.pixelworldpro"
-version = "1.2.0-pre3"
+version = "1.2.0-pre4"
 
 easylib {
     version = "2.3.9"
@@ -32,10 +32,10 @@ repositories {
 dependencies {
     implementation("com.xbaimiao.ktor:ktor-plugins-bukkit:1.0.7")
     implementation(kotlin("stdlib-jdk8"))
-    implementation("redis.clients:jedis:3.7.0")
-    implementation("com.google.code.gson:gson:2.10")
-    implementation("org.bouncycastle:bcprov-lts8on:2.73.3")
-    implementation("org.json:json:20230227")
+    compileOnly("redis.clients:jedis:3.7.0")
+    compileOnly("com.google.code.gson:gson:2.10")
+    compileOnly("org.bouncycastle:bcprov-lts8on:2.73.3")
+    implementation(fileTree("shadowLibs"))
     compileOnly(fileTree("libs"))
     compileOnly("public:paper:1.16.5")
 }
@@ -54,19 +54,8 @@ tasks {
     shadowJar {
         arrayListOf(
             "io.papermc.lib=papermc.lib",
-            "com.cryptomorin.xseries=xseries",
-            "com.zaxxer.hikari=hikari",
             "com.xbaimiao.easylib=easylib",
-            "com.j256.ormlite=ormlite",
-            "de.tr7zw=nbtapi",
-            "de.tr7zw.changeme.nbtapi=nbtapi",
-            "kotlin=kotlin",
-            "org.jetbrains.annotations=jetbrains",
-            "com.google.code.gson=gson",
-            "redis.clients.jedis=jedis",
-            "org.json=json",
-            "org.bouncycastle=bouncycastle",
-            "org.apache.commons=common"
+            "kotlin=kotlin"
         ).forEach {
             val args = it.split("=")
             relocate(args[0], "${project.group}.shadow.${args[1]}")

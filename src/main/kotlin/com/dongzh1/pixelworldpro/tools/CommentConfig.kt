@@ -66,6 +66,12 @@ object CommentConfig : YamlConfiguration() {
                         PixelWorldPro.instance.config.set("debug", false)
                         PixelWorldPro.instance.saveConfig()
                     }
+                    8 -> {
+                        Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新Config配置文件")
+                        PixelWorldPro.instance.config.set("version", 9)
+                        PixelWorldPro.instance.config.set("WorldSetting.saveTime", 5)
+                        PixelWorldPro.instance.saveConfig()
+                    }
                 }
                 when (Level.config.getInt("version")) {
                     1 -> {
