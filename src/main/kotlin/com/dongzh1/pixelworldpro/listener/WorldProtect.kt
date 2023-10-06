@@ -83,6 +83,7 @@ class WorldProtect : Listener {
                     }
                 }
             }
+            e.damager.sendMessage("攻击无效：没有世界权限")
             e.isCancelled = true
         }
         //如果被攻击者是玩家且不是成员，则取消事件
@@ -101,6 +102,7 @@ class WorldProtect : Listener {
                     }
                 }
             }
+            e.damager.sendMessage("伤害无效：没有世界权限")
             e.isCancelled = true
         }
     }
@@ -128,6 +130,7 @@ class WorldProtect : Listener {
                 }
             }
         }
+        e.player.sendMessage("你没有权限与这个物品交互")
         e.isCancelled = true
     }
 
@@ -150,6 +153,7 @@ class WorldProtect : Listener {
                 }
             }
         }
+        e.player.sendMessage("你没有权限与这个物品交互")
         e.isCancelled = true
     }
 

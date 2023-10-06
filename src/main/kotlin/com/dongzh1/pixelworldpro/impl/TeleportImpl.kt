@@ -5,6 +5,7 @@ import com.dongzh1.pixelworldpro.api.TeleportApi
 import com.dongzh1.pixelworldpro.listener.OnPlayerJoin
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.dongzh1.pixelworldpro.bungee.server.Bungee
+import com.dongzh1.pixelworldpro.bungee.server.Server
 import com.dongzh1.pixelworldpro.tools.Serialize
 import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.xbaimiao.easylib.module.utils.submit
@@ -60,6 +61,11 @@ class TeleportImpl: TeleportApi {
                             val list = value.split(":")
                             if (list[0] == playerUuid.toString()) {
                                 Bungee.connect(Bukkit.getPlayer(uuid)!!, list[1])
+                                if (list[1] == Server.getLocalServer().realName){
+                                    val world = Bukkit.getWorld("${worldData.worldName}/world")?:return@submit
+                                    val player = Bukkit.getPlayer(uuid)?:return@submit
+                                    player.teleport(world.spawnLocation)
+                                }
                             }
                         }
                     }catch (_:Exception){}

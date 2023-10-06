@@ -2,6 +2,7 @@ package com.dongzh1.pixelworldpro.tools
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.world.Level
+import com.dongzh1.pixelworldpro.world.WorldFile
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
 
@@ -81,6 +82,21 @@ object CommentConfig : YamlConfiguration() {
                         Level.config.set("shadowLevels.mode", "all")
                         Level.config.set("shadowLevels.levelName", "universe")
                         Level.config.saveToFile()
+                    }
+                }
+                when (WorldFile.worldSetting.getInt("version")) {
+                    1 -> {
+                        Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新AdvancedWorldSettings配置文件")
+                        WorldFile.worldSetting.set("version", 2)
+                        WorldFile.worldSetting.set("location.enable", false)
+                        WorldFile.worldSetting.set("location.max", 50)
+                        WorldFile.worldSetting.set("location.x.set", 0.0)
+                        WorldFile.worldSetting.set("location.x.shifting", false)
+                        WorldFile.worldSetting.set("location.y.set", 0.0)
+                        WorldFile.worldSetting.set("location.y.shifting", true)
+                        WorldFile.worldSetting.set("location.z.set", 0.0)
+                        WorldFile.worldSetting.set("location.z.shifting", false)
+                        WorldFile.worldSetting.saveToFile()
                     }
                 }
                 when (PixelWorldPro.instance.dimensionconfig.getInt("version")) {

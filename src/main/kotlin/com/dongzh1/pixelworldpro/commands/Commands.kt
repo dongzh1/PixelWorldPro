@@ -712,39 +712,44 @@ class Commands {
     private val dimensiontp = command<CommandSender>("tp") {
         permission = "pixelworldpro.command.dimension.tp"
         exec {
-            if (args.isNotEmpty()) {
-                if (sender is Player) {
+            when (args.size){
+                0 -> {
+                    sender.sendMessage("传送维度不能为空")
+                }
+                1 -> {
+                    if (sender !is Player){
+                        sender.sendMessage("需要玩家执行该命令")
+                        return@exec
+                    }
                     val player = sender as Player
-                    //try {
-                    val config = PixelWorldPro.instance.dimensionconfig
-                    val dimensionlist = config.getList("Dimension")!!
-                    val dimensionList = ArrayList<String>()
-                    for (d in dimensionlist) {
-                        val g = Gson()
-                        val json: JsonObject = g.fromJson(d.toString(), JsonObject::class.java)
-                        val name = json.get("name").asString
-                        dimensionList.add(name)
+                    val uuid = WorldProtect.getWorldNameUUID(player.world.name)
+                    if (uuid == null){
+                        sender.sendMessage("无法获取当前世界对应创建者的uuid")
+                        return@exec
                     }
-                    dimensionList.add("world")
-                    var name = player.world.name
-                    if (name.startsWith("pixelworldpro/")) {
-                        name = name.replace("pixelworldpro/", "")
-                        for (d in dimensionList) {
-                            if (name.contains(d)) {
-                                name = name.substring(0, name.length - d.length)
-                                name = name.substring(0, name.length - 21)
-                                break
-                            }
-                        }
-                        val uuid = UUID.fromString(name)
-                        val world = PixelWorldPro.databaseApi.getWorldData(uuid)
-                        if (world != null) {
-                            TeleportApi.Factory.teleportApi?.teleportDimension(uuid, player.uniqueId, args[0])
-                        }
+                    val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
+                    if (worldData == null){
+                        sender.sendMessage("无法获取 $uuid 的世界数据")
+                        return@exec
                     }
-                    //}catch (e:Exception){
-
-                    //}
+                    val dimensionData = Config.getWorldDimensionData(worldData.worldName)
+                    if (args[0] !in dimensionData.createlist){
+                        sender.sendMessage("$uuid 没有创建维度$args[0]")
+                        return@exec
+                    }
+                    val world = Bukkit.getWorld("${worldData.worldName}/${args[0]}")
+                    if (world == null){
+                        player.sendMessage("维度未加载，尝试加载维度")
+                        val back = WorldImpl.loadDimension(uuid, player, args[0])
+                        if (!back) {
+                            player.sendMessage("加载维度失败")
+                        }else{
+                            player.sendMessage("加载维度成功")
+                        }
+                    }else{
+                        player.teleport(world.spawnLocation)
+                        player.sendMessage("传送至指定维度")
+                    }
                 }
             }
         }
@@ -759,6 +764,8 @@ class Commands {
                     val back = WorldImpl.loadDimension(player.uniqueId, player, args[0])
                     if (!back) {
                         player.sendMessage("加载维度失败")
+                    }else{
+                        player.sendMessage("加载维度成功")
                     }
                 }
             }

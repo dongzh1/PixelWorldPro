@@ -2,6 +2,7 @@ package com.dongzh1.pixelworldpro.bungee.redis
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.PixelWorldPro.Companion.channel
+import com.dongzh1.pixelworldpro.bungee.server.Server
 import com.dongzh1.pixelworldpro.bungee.world.World
 import com.dongzh1.pixelworldpro.database.WorldData
 import com.dongzh1.pixelworldpro.tools.Serialize
@@ -73,32 +74,6 @@ object RedisManager : Module<EasyPlugin> {
         }
     }
 
-    fun setMspt(mspt: Double) {
-        if (PixelWorldPro.instance.config.getBoolean("buildWorld")) {
-            var value = getMspt()
-            if (value != null) {
-                var isFound = false
-                for (server in value!!.split(",")) {
-                    if (server.split(":")[0] == PixelWorldPro.instance.config.getString("ServerName")) {
-                        value = value.replace(server, "${PixelWorldPro.instance.config.getString("ServerName")}:$mspt")
-                        isFound = true
-                        break
-                    }
-                }
-                if (!isFound) {
-                    value += "${PixelWorldPro.instance.config.getString("ServerName")}:$mspt,"
-                }
-            } else {
-                value = "${PixelWorldPro.instance.config.getString("ServerName")}:$mspt,"
-            }
-            jedisPool.resource.also {
-                it.del("PixelWorldPromspt")
-                it.set("PixelWorldPromspt", value)
-                it.close()
-            }
-        }
-    }
-
     fun setSeed(uuid: UUID, seed:String){
         push("setSeed|,|${uuid}|,|${seed}")
     }
@@ -126,19 +101,6 @@ object RedisManager : Module<EasyPlugin> {
             it.del("PixelWorldProlock")
             it.close()
         }
-    }
-    fun getMsptServerList(): List<String>? {
-        val value = getMspt() ?: return null
-        val list = mutableListOf<String>()
-        for (server in value.split(",")){
-            val serverName = server.split(":")[0]
-            if(list.contains(serverName)){
-                continue
-            }else{
-                list.add(serverName)
-            }
-        }
-        return list
     }
 
     fun setLock(uuid: UUID) {
@@ -237,28 +199,7 @@ object RedisManager : Module<EasyPlugin> {
     }
 
     fun closeServer(){
-        closeServer(PixelWorldPro.instance.config.getString("ServerName")!!)
-    }
-    fun closeServer(serverName:String) {
-        //删除本服mspt
-        if (PixelWorldPro.instance.config.getBoolean("buildWorld")) {
-            var msptValue = getMspt()
-            if (msptValue != null) {
-                for (server in msptValue!!.split(",")) {
-                    if (server.contains(":")) {
-                        if (server.split(":")[0] == serverName) {
-                            msptValue = msptValue.replace("$server,", "")
-                            break
-                        }
-                    }
-                }
-                jedisPool.resource.also {
-                    it.set("PixelWorldPromspt", msptValue)
-                    it.close()
-                }
-            }
-        }
-        //删除本服所有加载的世界lock
+        val serverName = Server.getLocalServer().realName
         removeLock(serverName)
     }
 }

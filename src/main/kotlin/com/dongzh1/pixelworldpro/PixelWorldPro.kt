@@ -65,7 +65,7 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
     val world = BuiltInConfiguration("World.yml")
     private val eula = BuiltInConfiguration("eula.yml")
 
-
+    val user = "mcyzj"
 
     override fun enable() {
         JiangLib.loadLibs()
@@ -132,7 +132,6 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
                             jedis.subscribe(redisListener, channel)
                         }
                     }
-                    RedisManager.setMspt(Bukkit.getTicksPerMonsterSpawns().toDouble())
                     Server().commandRoot.register()
                 }
                 //加载数据库
@@ -207,6 +206,7 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
                     WorldImpl.unloadtimeoutworld()
                 }
                 //启用定时保存
+                Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测世界自动保存")
                 WorldImpl.autoWorldSave()
                 //加载世界
                 val worldList = world.getStringList("loadWorldList")

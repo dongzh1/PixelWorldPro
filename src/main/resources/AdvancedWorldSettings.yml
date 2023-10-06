@@ -1,5 +1,5 @@
 ﻿#版本号，请勿修改
-version: 1
+version: 2
 
 #高级世界设置
 #生物设置
@@ -18,3 +18,27 @@ redStone:
   LimitHighFrequency: false
   #在一秒内红石信号更改多少次判定为高频
   frequency: 300
+#世界生成设置
+#世界出身点
+location:
+  #是否启用自定义出生点
+  enable: false
+  #偏移检索最大次数，小于1关闭
+  max: 50
+  #x轴设置
+  x:
+    #指定数值
+    set: 0.0
+    #当坐标无法传送时，是否进行偏移
+    shifting: false
+  #y轴设置
+  y:
+    #指定数值
+    set: 100.0
+    #当坐标无法传送时，是否进行偏移
+    shifting: true
+  z:
+    #指定数值
+    set: 100.0
+    #当坐标无法传送时，是否进行偏移
+    shifting: false

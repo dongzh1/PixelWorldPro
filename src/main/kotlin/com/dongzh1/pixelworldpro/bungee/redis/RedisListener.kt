@@ -14,6 +14,7 @@ import com.xbaimiao.easylib.module.utils.submit
 
 import org.bukkit.Bukkit
 import redis.clients.jedis.JedisPubSub
+import java.lang.Thread.sleep
 import java.util.UUID
 
 class RedisListener : JedisPubSub() {
@@ -23,21 +24,8 @@ class RedisListener : JedisPubSub() {
     private val push = submit(async = true, period = 20L) {
         RedisManager.push("ServerOnline|,|${PixelWorldPro.instance.config.getString("ServerName")}")
     }
-    init {
-        submit(async = true, delay = 50L) {
-            if (onlineServer.size == 1 && onlineServer[0] == PixelWorldPro.instance.config.getString("ServerName")){
-                RedisManager.removeMspt()
-                RedisManager.removeLock()
-                RedisManager.setMspt(100.0)
-            }
-        }
-    }
     fun stop(){
         push.cancel()
-    }
-
-    fun getOnlineServer(): List<String> {
-        return onlineServer
     }
 
     override fun onMessage(channel: String?, message: String?) {
@@ -237,6 +225,33 @@ class RedisListener : JedisPubSub() {
                         )
                     }
                     Server.setServerData(id, serverData)
+                }
+                "BungeeWorldTp" ->{
+                    val uuid = UUID.fromString(message.split("|,|")[1])
+                    val worldName = message.split("|,|")[2]
+                    val server = message.split("|,|")[3]
+                    val serverData = Server.getLocalServer()
+                    if (server != serverData.realName){
+                        return
+                    }
+                    val world = Bukkit.getWorld("$worldName/world")
+                    if (world == null){
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro Bungee传送出错啦：无法找到世界 $worldName/world")
+                        return
+                    }
+                    val location = world.spawnLocation
+                    var times = 0
+                    Thread{
+                        while (times < 500){
+                            val player = Bukkit.getPlayer(uuid)
+                            if (player != null){
+                                player.teleport(location)
+                                return@Thread
+                            }
+                            sleep(500)
+                            times += 1
+                        }
+                    }
                 }
                 else ->{
                     Bukkit.getLogger().warning("未知的redis消息类型")

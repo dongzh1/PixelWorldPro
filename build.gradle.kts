@@ -12,7 +12,7 @@ plugins {
 }
 
 group = "com.dongzh1.pixelworldpro"
-version = "1.2.0-pre4"
+version = "1.2.0"
 
 easylib {
     version = "2.3.9"

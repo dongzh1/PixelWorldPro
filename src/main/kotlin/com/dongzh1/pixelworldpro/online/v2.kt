@@ -183,8 +183,6 @@ object V2 {
                 bin.close()
                 ncryption.close()
                 val charset = Charset.forName("UTF8")
-                val old = FileOutputStream("./plugins/PixelWorldPro/e.jar")
-                old.write(ncryption.toByteArray())
                 val out = decrypt(
                     Base64.getDecoder().decode(ncryption.toString()),
                     key.toByteArray(charset),

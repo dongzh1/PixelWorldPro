@@ -61,16 +61,18 @@ object Server {
                 }
             }else{
                 val type = localServer["type"]
-                if (type != null){
-                    val list = type.split("||") as ArrayList<String>
-                    if (("noLoad" in list).and("leastTps" !in list)){
-                        list.remove("noLoad")
+                try {
+                    if (type != null) {
+                        val list = type.split("||") as ArrayList<String>
+                        if (("noLoad" in list).and("leastTps" !in list)) {
+                            list.remove("noLoad")
+                        }
+                        if ("worldMax" in list) {
+                            list.remove("worldMax")
+                        }
+                        localServer["type"] = list.joinToString("||")
                     }
-                    if ("worldMax" in list){
-                        list.remove("worldMax")
-                    }
-                    localServer["type"] = list.joinToString("||")
-                }
+                }catch (_:Exception){}
             }
             if (((bungeeConfig.getDouble("leastTps")) > Bukkit.getTPS().first()).and(bungeeConfig.getInt("leastTps") != -1)){
                 val type = localServer["type"]
@@ -91,16 +93,18 @@ object Server {
                 }
             }else{
                 val type = localServer["type"]
-                if (type != null){
-                    val list = type.split("||") as ArrayList<String>
-                    if (("noLoad" in list).and("worldMax" !in list)){
-                        list.remove("noLoad")
+                try {
+                    if (type != null) {
+                        val list = type.split("||") as ArrayList<String>
+                        if (("noLoad" in list).and("worldMax" !in list)) {
+                            list.remove("noLoad")
+                        }
+                        if ("leastTps" in list) {
+                            list.remove("leastTps")
+                        }
+                        localServer["type"] = list.joinToString("||")
                     }
-                    if ("leastTps" in list){
-                        list.remove("leastTps")
-                    }
-                    localServer["type"] = list.joinToString("||")
-                }
+                }catch (_:Exception){}
             }
         }
         return ServerData(

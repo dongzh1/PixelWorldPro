@@ -1,5 +1,6 @@
 ﻿package com.dongzh1.pixelworldpro.bungee.world
 
+import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.api.TeleportApi
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.dongzh1.pixelworldpro.bungee.server.Server
@@ -180,41 +181,43 @@ object World {
                 }
             }
             future.thenApply { createSuccess ->
-                if (createSuccess) {
-                    if (debug) {
-                        consoleSender.sendMessage("pwp世界创建成功")
-                        player.sendMessage("pwp世界创建成功")
-                    }
-                    sleep(1000)
-                    if (debug) {
-                        consoleSender.sendMessage("pwp选中服务器${loadLargeTPS}进行加载操作")
-                        player.sendMessage("pwp选中服务器${loadLargeTPS}进行加载操作")
-                    }
-                    val load = WorldImpl.loadWorld(player.uniqueId, loadLargeTPS)
-                    load.thenApply { loadSuccess ->
-                        if (loadSuccess) {
-                            if (debug) {
-                                consoleSender.sendMessage("pwp世界加载成功")
-                                player.sendMessage("pwp世界加载成功")
-                            }
-                            player.sendMessage("世界加载成功，正在传送")
-                            Bungee.connect(player, loadLargeTPS)
-                            TeleportApi.Factory.teleportApi?.teleport(player.uniqueId)
-                        } else {
-                            if (debug) {
-                                consoleSender.sendMessage("pwp世界加载失败")
-                                player.sendMessage("pwp世界加载失败")
-                            }
-                            player.sendMessage("世界加载失败")
+                submit {
+                    if (createSuccess) {
+                        if (debug) {
+                            consoleSender.sendMessage("pwp世界创建成功")
+                            player.sendMessage("pwp世界创建成功")
                         }
+                        sleep(1000)
+                        if (debug) {
+                            consoleSender.sendMessage("pwp选中服务器${loadLargeTPS}进行加载操作")
+                            player.sendMessage("pwp选中服务器${loadLargeTPS}进行加载操作")
+                        }
+                        val load = WorldImpl.loadWorld(player.uniqueId, loadLargeTPS)
+                        load.thenApply { loadSuccess ->
+                            if (loadSuccess) {
+                                if (debug) {
+                                    consoleSender.sendMessage("pwp世界加载成功")
+                                    player.sendMessage("pwp世界加载成功")
+                                }
+                                player.sendMessage("世界加载成功，正在传送")
+                                Bungee.connect(player, loadLargeTPS)
+                                TeleportApi.Factory.teleportApi?.teleport(player.uniqueId)
+                            } else {
+                                if (debug) {
+                                    consoleSender.sendMessage("pwp世界加载失败")
+                                    player.sendMessage("pwp世界加载失败")
+                                }
+                                player.sendMessage("世界加载失败")
+                            }
+                        }
+                    } else {
+                        if (debug) {
+                            consoleSender.sendMessage("pwp世界创建服务器超时未响应")
+                            player.sendMessage("pwp世界创建服务器超时未响应")
+                        }
+                        player.sendMessage("世界创建失败")
+                        return@submit
                     }
-                } else {
-                    if (debug) {
-                        consoleSender.sendMessage("pwp世界创建服务器超时未响应")
-                        player.sendMessage("pwp世界创建服务器超时未响应")
-                    }
-                    player.sendMessage("世界创建失败")
-                    return@thenApply
                 }
             }
         }.start()
@@ -320,22 +323,26 @@ object World {
                 consoleSender.sendMessage("pwp选中服务器${loadLargeTPS}进行加载操作")
                 player.sendMessage("pwp选中服务器${loadLargeTPS}进行加载操作")
             }
-            val load = WorldImpl.loadWorld(uuid, loadLargeTPS)
-            load.thenApply { loadSuccess ->
-                if (loadSuccess) {
-                    if (debug) {
-                        consoleSender.sendMessage("pwp世界加载成功")
-                        player.sendMessage("pwp世界加载成功")
+            submit {
+                val load = WorldImpl.loadWorld(uuid, loadLargeTPS)
+                load.thenApply { loadSuccess ->
+                    if (loadSuccess) {
+                        if (debug) {
+                            consoleSender.sendMessage("pwp世界加载成功")
+                            player.sendMessage("pwp世界加载成功")
+                        }
+                        val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
+                        player.sendMessage("世界加载成功，正在传送")
+                        RedisManager.push("BungeeWorldTp|,|${player.uniqueId}|,|${worldData.worldName}|,|${loadLargeTPS}")
+                        Bungee.connect(player, loadLargeTPS)
+
+                    } else {
+                        if (debug) {
+                            consoleSender.sendMessage("pwp世界加载失败")
+                            player.sendMessage("pwp世界加载失败")
+                        }
+                        player.sendMessage("世界加载失败")
                     }
-                    player.sendMessage("世界加载成功，正在传送")
-                    Bungee.connect(player, loadLargeTPS)
-                    TeleportApi.Factory.teleportApi?.teleport(player.uniqueId)
-                } else {
-                    if (debug) {
-                        consoleSender.sendMessage("pwp世界加载失败")
-                        player.sendMessage("pwp世界加载失败")
-                    }
-                    player.sendMessage("世界加载失败")
                 }
             }
         }.start()
