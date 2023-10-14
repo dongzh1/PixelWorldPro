@@ -242,10 +242,12 @@ class RedisListener : JedisPubSub() {
                     val location = world.spawnLocation
                     var times = 0
                     Thread{
-                        while (times < 500){
+                        while (times < 1000){
                             val player = Bukkit.getPlayer(uuid)
                             if (player != null){
-                                player.teleport(location)
+                                submit {
+                                    player.teleport(location)
+                                }
                                 return@Thread
                             }
                             sleep(500)

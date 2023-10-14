@@ -13,6 +13,7 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.block.BlockDamageEvent
 import org.bukkit.event.block.BlockRedstoneEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityPortalEvent
@@ -136,6 +137,28 @@ class WorldProtect : Listener {
 
     @EventHandler
     fun rightClickEntity(e: PlayerInteractEntityEvent) {
+        if (e.player.isOp)
+            return
+        val worldName = e.player.world.name
+        //如果不是玩家世界则返回
+        if(isPlayerWorld(worldName, e.player.uniqueId))
+            return
+        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)?: return
+        //如果玩家不是成员，则取消事件
+        if (worldData.members.contains(e.player.uniqueId))
+            return
+        if (e.player.uniqueId in PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!)!!) {
+            when (PixelWorldPro.instance.config.getString("WorldSetting.Inviter.permission")) {
+                "member" -> {
+                    return
+                }
+            }
+        }
+        e.player.sendMessage("你没有权限与这个物品交互")
+        e.isCancelled = true
+    }
+    @EventHandler
+    fun blockDamage(e: BlockDamageEvent) {
         if (e.player.isOp)
             return
         val worldName = e.player.world.name

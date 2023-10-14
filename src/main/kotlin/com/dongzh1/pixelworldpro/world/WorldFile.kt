@@ -2,6 +2,7 @@ package com.dongzh1.pixelworldpro.world
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
+import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
 import org.bukkit.World
 import java.io.File
@@ -26,7 +27,9 @@ object WorldFile {
                 for (dimension in dimensionData.createlist) {
                     val world = Bukkit.getWorld("${worldData.worldName}/$dimension")
                     if (world != null){
-                        world.save()
+                        submit {
+                            world.save()
+                        }
                     }
                 }
             }

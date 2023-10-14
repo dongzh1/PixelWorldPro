@@ -252,7 +252,8 @@ object WorldImpl : WorldApi {
         if (PixelWorldPro.instance.isBungee()) {
             if (RedisManager.isLock(uuid)) {
                 Bukkit.getConsoleSender().sendMessage("开始卸载世界 ${worldData.worldName.lowercase(Locale.getDefault())}")
-                val world = Bukkit.getWorld(worldData.worldName.lowercase(Locale.getDefault()) +"/world")
+                val worldName = worldData.worldName + "/world"
+                val world = Bukkit.getWorld(worldName.lowercase(Locale.getDefault()))
                 if (world != null) {
                     Bukkit.getConsoleSender().sendMessage("Bukkit卸载世界 ${worldData.worldName.lowercase(Locale.getDefault())}")
                     future.complete(unloadWorld(world))
@@ -729,7 +730,7 @@ object WorldImpl : WorldApi {
     override fun unloadtimeoutworld() {
         val future = CompletableFuture<Boolean>()
         Thread {
-            Thread.sleep((PixelWorldPro.instance.config.getLong("WorldSetting.unloadTime") * 60 * 1000))
+            sleep((PixelWorldPro.instance.config.getLong("WorldSetting.unloadTime") * 60 * 1000))
             future.complete(true)
         }.start()
         future.thenApply {
@@ -747,18 +748,20 @@ object WorldImpl : WorldApi {
                     }
                     if (numbers == 0) {
                         if (worldData.worldName in timeOutWorldList) {
-                            timeOutWorldList.remove(worldData.worldName)
-                            Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 将${worldData.worldName}卸载")
-                            val dimensionList = Dimension.getDimensionList()
-                            dimensionList.add("world")
-                            for (dimension in dimensionList){
-                                val worldName = worldData.worldName + "/" + dimension
-                                val world = Bukkit.getWorld(worldName.lowercase(Locale.getDefault()))
-                                if (world != null){
-                                    Bukkit.unloadWorld(world, true)
+                            submit {
+                                timeOutWorldList.remove(worldData.worldName)
+                                Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 将${worldData.worldName}卸载")
+                                val dimensionList = Dimension.getDimensionList()
+                                dimensionList.add("world")
+                                for (dimension in dimensionList) {
+                                    val worldName = worldData.worldName + "/" + dimension
+                                    val world = Bukkit.getWorld(worldName.lowercase(Locale.getDefault()))
+                                    if (world != null) {
+                                        Bukkit.unloadWorld(world, true)
+                                    }
                                 }
+                                RedisManager.removeLock(uuid)
                             }
-                            RedisManager.removeLock(uuid)
                         } else {
                             timeOutWorldList.add(worldData.worldName)
                             Bukkit.getConsoleSender()

@@ -70,7 +70,6 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
     override fun enable() {
         JiangLib.loadLibs()
         val pluginId = 19823 // <-- Replace with the id of your plugin!
-
         val metrics = Metrics(this, pluginId)
         metrics.addCustomChart(Metrics.SimplePie("chart_id") { "My value" })
         //初始化统计
@@ -149,7 +148,6 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载MySQL数据库")
                     }
                     databaseApi = MysqlDatabaseApi()
-
                 }
                 //提取到内存
                 if (config.getBoolean("debug")){
