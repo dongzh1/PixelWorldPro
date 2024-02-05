@@ -33,7 +33,7 @@ Member:
   name: '&a&l%player_name%'
   skull: '%player_name%'
   lore:
-    - '&f点击删除并拉黑'
+    - '&f点击删除'
 UnMember:
   material: BARREL
   name: '&c&l解锁槽位'

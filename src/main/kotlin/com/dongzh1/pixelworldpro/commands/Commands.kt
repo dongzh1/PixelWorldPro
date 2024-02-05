@@ -878,7 +878,7 @@ class Commands {
                     val dimensionData = Config.getWorldDimensionData(worldData.worldName)
                     val dimensionlist = dimensionData.createlist
                     for (dimension in dimensionlist) {
-                        val worlds = Bukkit.getWorld(worldData.worldName.toLowerCase() + "/" + dimension)
+                        val worlds = Bukkit.getWorld(worldData.worldName + "/" + dimension)
                         if (worlds != null) {
                             //世界边界更新
                             WorldImpl.setWorldBorder(worlds, nextLevel)

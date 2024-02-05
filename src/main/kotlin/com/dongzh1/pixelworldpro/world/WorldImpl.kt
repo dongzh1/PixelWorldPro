@@ -2,6 +2,7 @@ package com.dongzh1.pixelworldpro.world
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.api.MessageApi
+import com.dongzh1.pixelworldpro.api.TeleportApi
 import com.dongzh1.pixelworldpro.api.WorldApi
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.dongzh1.pixelworldpro.bungee.server.Bungee
@@ -131,7 +132,6 @@ object WorldImpl : WorldApi {
         //复制模板文件夹到world文件夹
         file.copyRecursively(File(PixelWorldPro.instance.config.getString("WorldPath"), worldName))
         //加载世界
-
         val worldcreator = WorldCreator("$realWorldName/world")
         val seed = seedMap[uuid]
         if (seed != null){
@@ -156,17 +156,12 @@ object WorldImpl : WorldApi {
                 Difficulty.valueOf(PixelWorldPro.instance.config.getString("WorldSetting.WorldDifficulty")!!)
             //设置世界时间
             setTime(world)
-            //设置世界边界
-            setWorldBorder(world, "1")
-            world.keepSpawnInMemory = false
-            world.save()
             //数据库操作
             PixelWorldPro.databaseApi.setWorldData(
                 uuid,
                 WorldData(
                     worldName = "PixelWorldPro/$worldName",
-                    worldLevel = PixelWorldPro.instance.config.getConfigurationSection("WorldSetting.WorldLevel")!!
-                        .getKeys(false).first(),
+                    worldLevel = "1",
                     arrayListOf(uuid),
                     arrayListOf(playerName),
                     arrayListOf(),
@@ -199,10 +194,14 @@ object WorldImpl : WorldApi {
                     PixelWorldPro.databaseApi.setPlayerData(uuid, playerData)
                 }
             }
-        }
-        loadWorldList.add(uuid)
-        if (Server.getLocalServer().mode == "build"){
-            unloadWorld(uuid)
+            //设置世界边界
+            submit {
+                setWorldBorder(world, "1")
+            }
+            loadWorldList.add(uuid)
+            if (Server.getLocalServer().mode == "build"){
+                unloadWorld(uuid)
+            }
         }
         return true
     }
@@ -516,12 +515,10 @@ object WorldImpl : WorldApi {
                 val borderRange = buildLevel[level.toInt()]!!.barrier
                 if (borderRange == 0) {
                     submit {
-                        world.worldBorder.center = world.spawnLocation
                         world.worldBorder.size = 60000000.0
                     }
                 } else {
                     submit {
-                        world.worldBorder.center = world.spawnLocation
                         world.worldBorder.size = borderRange.toDouble()
                     }
                 }
@@ -548,9 +545,9 @@ object WorldImpl : WorldApi {
                     val m = p.matcher(level)
                     val result: String = m.replaceAll("").trim()
                     val borderRange = buildLevel[result.toInt()]!!.barrier
+                    Bukkit.getConsoleSender().sendMessage(borderRange.toString())
                     if (borderRange == 0) {
                         submit {
-                            world.worldBorder.center = world.spawnLocation
                             world.worldBorder.size = 60000000.0
                         }
                     } else {

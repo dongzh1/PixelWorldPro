@@ -234,17 +234,29 @@ class RedisListener : JedisPubSub() {
                     if (server != serverData.realName){
                         return
                     }
-                    val world = Bukkit.getWorld("$worldName/world")
-                    if (world == null){
-                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro Bungee传送出错啦：无法找到世界 $worldName/world")
-                        return
-                    }
-                    val location = world.spawnLocation
-                    var times = 0
-                    Thread{
-                        while (times < 1000){
+                    Thread {
+                        var times = 0
+                        var world = Bukkit.getWorld("$worldName/world")
+                        if (world == null) {
+                            while (times < 1000) {
+                                times += 1
+                                world = Bukkit.getWorld("$worldName/world")
+                                if (world != null) {
+                                    break
+                                }
+                                sleep(500)
+                            }
+                            if (world == null) {
+                                Bukkit.getConsoleSender()
+                                    .sendMessage("§aPixelWorldPro Bungee传送出错啦：无法找到世界 $worldName/world")
+                                return@Thread
+                            }
+                        }
+                        val location = world.spawnLocation
+                        times = 0
+                        while (times < 1000) {
                             val player = Bukkit.getPlayer(uuid)
-                            if (player != null){
+                            if (player != null) {
                                 submit {
                                     player.teleport(location)
                                 }
@@ -253,7 +265,7 @@ class RedisListener : JedisPubSub() {
                             sleep(500)
                             times += 1
                         }
-                    }
+                    }.start()
                 }
                 else ->{
                     Bukkit.getLogger().warning("未知的redis消息类型")

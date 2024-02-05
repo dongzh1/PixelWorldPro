@@ -63,6 +63,7 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
     val worldBorder = BuiltInConfiguration("WorldBorder.yml")
     val advancedWorldSettings = BuiltInConfiguration("AdvancedWorldSettings.yml")
     val world = BuiltInConfiguration("World.yml")
+    val plugin = this
     private val eula = BuiltInConfiguration("eula.yml")
 
     val user = "mcyzj"
@@ -77,7 +78,7 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
         //统计
         stat()
         if (eula.getBoolean("eula")) {
-            //PixelWorldPro全部版本遵循《用户协议-付费插件》
+            //PixelWorldProV1遵循《用户协议-付费插件》
             //https://wiki.mcyzj.cn/#/zh-cn/agreement?id=%e4%bb%98%e8%b4%b9%e6%8f%92%e4%bb%b6
             //购买/反编译/使用 插件即表明您认可我们的协议
             Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro is loading")
@@ -197,6 +198,16 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
                         Bukkit.getPluginManager().registerEvents(ShadowLevels(), this)
                     }else{
                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 无法检测到ShadowLevels，挂钩失败")
+                    }
+                }
+                //绑定RealisticSeasons联动
+                if (advancedWorldSettings.getBoolean("expansion.RealisticSeasons.enable")) {
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 启用RealisticSeasons联动，尝试挂钩")
+                    if (Bukkit.getPluginManager().isPluginEnabled("RealisticSeasons")) {
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测到RealisticSeasons，自动挂勾")
+                        Bukkit.getPluginManager().registerEvents(RealisticSeasons(), this)
+                    }else{
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 无法检测到RealisticSeasons，挂钩失败")
                     }
                 }
                 //启用定时卸载

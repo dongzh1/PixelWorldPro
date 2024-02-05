@@ -11,7 +11,6 @@ import java.io.File
 object Config {
     private fun getWorldDimensionConfig(worldName: String): YamlConfiguration {
         val config = File("${PixelWorldPro.instance.config.getString("WorldPath")}/$worldName", "world.yml")
-        Bukkit.getConsoleSender().sendMessage(config.path)
         val data = YamlConfiguration()
         if (!config.exists()) {
             config.createNewFile()
@@ -47,7 +46,6 @@ object Config {
             val nameList = realWorldName.split("/")
             nameList[0]
         }
-        Bukkit.getConsoleSender().sendMessage(worldName)
         val data = getWorldDimensionConfig(worldName)
         val dimensionList = getDimensionList()
         val createList = ArrayList<String>()

@@ -73,6 +73,15 @@ object CommentConfig : YamlConfiguration() {
                         PixelWorldPro.instance.config.set("WorldSetting.saveTime", 5)
                         PixelWorldPro.instance.saveConfig()
                     }
+                    9 -> {
+                        Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新Config配置文件")
+                        PixelWorldPro.instance.config.set("version", 10)
+                        PixelWorldPro.instance.config.set("Papi.group.owner", "拥有者")
+                        PixelWorldPro.instance.config.set("Papi.group.member", "信任者")
+                        PixelWorldPro.instance.config.set("Papi.group.inviter", "访客")
+                        PixelWorldPro.instance.config.set("Papi.group.owner", "anyone")
+                        PixelWorldPro.instance.saveConfig()
+                    }
                 }
                 when (Level.config.getInt("version")) {
                     1 -> {
@@ -98,6 +107,13 @@ object CommentConfig : YamlConfiguration() {
                         WorldFile.worldSetting.set("location.z.shifting", false)
                         WorldFile.worldSetting.saveToFile()
                     }
+                    2 -> {
+                        Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新AdvancedWorldSettings配置文件")
+                        WorldFile.worldSetting.set("version", 3)
+                        WorldFile.worldSetting.set("expansion.RealisticSeasons.enable", false)
+                        WorldFile.worldSetting.set("expansion.RealisticSeasons.world", "world")
+                        WorldFile.worldSetting.saveToFile()
+                    }
                 }
                 when (PixelWorldPro.instance.dimensionconfig.getInt("version")) {
                     1 -> {
@@ -109,6 +125,17 @@ object CommentConfig : YamlConfiguration() {
                         PixelWorldPro.instance.dimensionconfig.set("Structure.firstCreate.nether", "none")
                         PixelWorldPro.instance.dimensionconfig.set("Structure.firstCreate.the_end", "none")
                         PixelWorldPro.instance.dimensionconfig.saveToFile()
+                    }
+
+                    else -> return@submit
+                }
+
+                when (PixelWorldPro.instance.world.getInt("version")) {
+                    1 -> {
+                        Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新World配置文件")
+                        PixelWorldPro.instance.world.set("version", 2)
+                        PixelWorldPro.instance.world.set("WorldGrade", false)
+                        PixelWorldPro.instance.world.saveToFile()
                     }
 
                     else -> return@submit

@@ -8,7 +8,7 @@ import java.io.DataOutputStream
 import java.io.IOException
 
 object Bungee {
-    private val bungeeConfig = BuiltInConfiguration("BungeeSet.yml")
+    val bungeeConfig = BuiltInConfiguration("BungeeSet.yml")
     fun connect(player: Player, server: String) {
         val bungeeTpShow = bungeeConfig.getBoolean("bungeeTpShow")
         if (bungeeTpShow) {

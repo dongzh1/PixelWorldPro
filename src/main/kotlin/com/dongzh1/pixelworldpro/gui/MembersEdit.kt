@@ -161,14 +161,8 @@ class MembersEdit(val player: Player) {
                             val name = memberNameList[int]
                             memberUUIDList.remove(memberUUID)
                             memberNameList.remove(name)
-                            val banList = worldData.banPlayers as MutableList
-                            val banNameList = worldData.banName as MutableList
-                            banList.add(memberUUID)
-                            banNameList.add(name)
                             PixelWorldPro.databaseApi.setWorldData(player.uniqueId,worldData.copy(members = memberUUIDList,
-                                banPlayers = banList,
-                                memberName = memberNameList,
-                                banName = banNameList))
+                                memberName = memberNameList))
                             submit(async = true) {
                                 var memberData = PixelWorldPro.databaseApi.getPlayerData(memberUUID)
                                 if (memberData != null){

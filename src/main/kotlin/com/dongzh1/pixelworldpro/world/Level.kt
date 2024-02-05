@@ -93,7 +93,7 @@ object Level {
                         val worlds = Bukkit.getWorld(worldData.worldName.lowercase(Locale.getDefault()) + "/" + dimension)
                         if (worlds != null) {
                             //世界边界更新
-                            WorldImpl.setWorldBorder(worlds, level.toString())
+                            WorldImpl.setWorldBorder(worlds, nextLevel.toString())
                         }else{
                             if (PixelWorldPro.instance.config.getBoolean("debug")){
                                 Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 扩展世界 ${worldData.worldName.lowercase(Locale.getDefault()) + "/" + dimension} 的边界失败：世界不存在")
@@ -159,7 +159,7 @@ object Level {
             val worlds = Bukkit.getWorld(worldData.worldName.lowercase(Locale.getDefault()) + "/" + dimension)
             if (worlds != null) {
                 //世界边界更新
-                WorldImpl.setWorldBorder(worlds, level.toString())
+                WorldImpl.setWorldBorder(worlds, nextLevel.toString())
             }else{
                 if (PixelWorldPro.instance.config.getBoolean("debug")){
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 扩展世界 ${worldData.worldName.lowercase(Locale.getDefault()) + "/" + dimension} 的边界失败：世界不存在")

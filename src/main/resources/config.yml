@@ -1,6 +1,6 @@
 #配置文件版本号,用于更新配置文件，请勿修改
 #Configuration file version number, used to update the configuration file, please do not modify
-version: 9
+version: 10
 #密钥
 token: ""
 #可以在lang文件夹查看已有的语言文件，如果你想要新增语言文件，请联系我
@@ -121,6 +121,12 @@ Papi:
     member: '&a成员'
     inviter: '&a邀请'
     owner: '&a不开放'
+  #权限组名称
+  group:
+    owner: "拥有者"
+    member: "信任者"
+    inviter: "访客"
+    anyone: "参观者"
 #PWP默认大厅服务器，仅bungee下有效
 lobby: "lobby"
 #PWP主命令

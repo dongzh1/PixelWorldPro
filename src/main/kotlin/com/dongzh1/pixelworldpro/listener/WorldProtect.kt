@@ -1,15 +1,22 @@
 package com.dongzh1.pixelworldpro.listener
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
-import com.dongzh1.pixelworldpro.database.RedStone
-import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
+import com.dongzh1.pixelworldpro.bungee.server.Bungee
+import com.dongzh1.pixelworldpro.database.RedStone
 import com.dongzh1.pixelworldpro.world.Config
 import com.dongzh1.pixelworldpro.world.Structure
+import com.dongzh1.pixelworldpro.world.WorldImpl
+import com.sk89q.worldedit.math.BlockVector3
+import com.sk89q.worldguard.WorldGuard
+import com.sk89q.worldguard.protection.managers.RemovalStrategy
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion
+import com.xbaimiao.template.expansion.api.world
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.GameRule
 import org.bukkit.Material
+import org.bukkit.World.Environment.*
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -24,8 +31,7 @@ import org.bukkit.event.world.WorldLoadEvent
 import org.bukkit.event.world.WorldUnloadEvent
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
+
 
 class WorldProtect : Listener {
     private val redStone = HashMap<String, RedStone>()
@@ -63,9 +69,8 @@ class WorldProtect : Listener {
     fun damage(e: EntityDamageByEntityEvent) {
         val worldName = e.entity.world.name
         //如果不是玩家世界则返回
-        if(!isPlayerWorld(worldName, UUID.fromString("00000000-0000-0000-0000-000000000000")))
-            return
-        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)?: return
+        val uuid = getWorldNameUUID(worldName) ?: return
+        val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)?: return
         //如果攻击者是玩家且不是成员，则取消事件
         if (e.damager is Player) {
             val damager = e.damager as Player
@@ -199,6 +204,7 @@ class WorldProtect : Listener {
             }
             return
         }
+        WorldImpl.setWorldBorder(e.player.world, worldData.worldLevel)
         //如果不是玩家世界则返回
         if (isPlayerWorld(worldName, e.player.uniqueId)) {
             if (PixelWorldPro.instance.config.getBoolean("debug")){
@@ -464,8 +470,8 @@ class WorldProtect : Listener {
             return
         }
         val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)?: return
+        WorldImpl.setWorldBorder(e.to.world, worldData.worldLevel)
         //如果玩家是黑名单，则取消
-
         if (worldData.banPlayers.contains(e.player.uniqueId)) {
             e.player.sendMessage("你在此世界的黑名单中")
             e.isCancelled = true
@@ -489,6 +495,13 @@ class WorldProtect : Listener {
             "member" ->{
                 if(worldData.members.contains(e.player.uniqueId)) {
                     e.player.sendMessage("传送中")
+                    val worldNameList = e.to.world.name.split("/") as ArrayList<String>
+                    worldNameList.removeLast()
+                    worldNameList.add("world")
+                    val worldWorlds = Bukkit.getWorld(worldNameList.joinToString("/"))
+                    if (worldWorlds != null){
+                        e.player.bedSpawnLocation = worldWorlds.spawnLocation
+                    }
                     return
                 }
                 e.player.sendMessage("此世界无法进入")
@@ -496,10 +509,24 @@ class WorldProtect : Listener {
             }
             "anyone" ->{
                 e.player.sendMessage("传送中")
+                val worldNameList = e.to.world.name.split("/") as ArrayList<String>
+                worldNameList.removeLast()
+                worldNameList.add("world")
+                val worldWorlds = Bukkit.getWorld(worldNameList.joinToString("/"))
+                if (worldWorlds != null){
+                    e.player.bedSpawnLocation = worldWorlds.spawnLocation
+                }
             }
             "inviter" ->{
                 if(e.player.uniqueId in worldData.members){
                     e.player.sendMessage("传送中")
+                    val worldNameList = e.to.world.name.split("/") as ArrayList<String>
+                    worldNameList.removeLast()
+                    worldNameList.add("world")
+                    val worldWorlds = Bukkit.getWorld(worldNameList.joinToString("/"))
+                    if (worldWorlds != null){
+                        e.player.bedSpawnLocation = worldWorlds.spawnLocation
+                    }
                     return
                 }
                 if(e.player.uniqueId in worldData.inviter){
@@ -538,10 +565,20 @@ class WorldProtect : Listener {
     fun worldUnload(e: WorldUnloadEvent) {
         val worldName =e.world.name
         //如果不是玩家世界则返回
-        if(!isPlayerWorld(worldName, UUID.fromString("00000000-0000-0000-0000-000000000000")))
-            return
+        val uuid = getWorldNameUUID(e.world.name) ?: return
         if (PixelWorldPro.instance.config.getBoolean("Bungee")) {
             getWorldNameUUID(worldName)?.let { RedisManager.removeLock(it) }
+        }
+        if (PixelWorldPro.instance.world.getBoolean("WorldGrade")) {
+            val world = e.world as
+                    com.sk89q.worldedit.world.World
+            val container = WorldGuard.getInstance().platform.regionContainer
+            val regions = container[world]
+            if (regions != null) {
+                regions.removeRegion(world.name + "_" + Bungee.bungeeConfig.getString("realName"), RemovalStrategy.UNSET_PARENT_IN_CHILDREN);
+            } else {
+                // The world has no region support or region data failed to load
+            }
         }
     }
 
@@ -633,6 +670,23 @@ class WorldProtect : Listener {
         } catch (_: Exception) {
             Bukkit.getConsoleSender().sendMessage("设置世界规则失败，可能当前服务端版本低于1.13")
         }
+        val uuid = getWorldNameUUID(world.name) ?: return
+        val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
+        if (PixelWorldPro.instance.world.getBoolean("WorldGrade")) {
+            try {
+                val min: BlockVector3 = BlockVector3.at(-60000, -1000, -60000)
+                val max: BlockVector3 = BlockVector3.at(60000, 1000, 60000)
+                val region = ProtectedCuboidRegion(world.name + "_" + Bungee.bungeeConfig.getString("realName"), min, max)
+                for (member in worldData.members){
+                    region.members.addPlayer(member)
+                }
+                val container = WorldGuard.getInstance().platform.regionContainer
+                val regions = container.get(world as com.sk89q.worldedit.world.World)
+                regions!!.addRegion(region)
+            } catch (_: Exception) {
+                Bukkit.getConsoleSender().sendMessage("挂钩WorldEdit/WorldGuard失败")
+            }
+        }
     }
 
     //判断是否为玩家世界
@@ -668,21 +722,59 @@ class WorldProtect : Listener {
             val uuid = getWorldNameUUID(e.from.world.name) ?: return
             val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
             val dimensionData = Config.getWorldDimensionData(worldData.worldName)
-            if ("nether" !in dimensionData.createlist) {
-                e.player.sendMessage("你还没有创建地狱")
-                return
-            }
             if (e.from.world.name.endsWith("/nether")) {
                 Structure.playerJoin(e.player.isJumping, e.player.location, e.to.world, e.player)
                 val worldname = "${worldData.worldName}/world"
                 e.to.world = Bukkit.getWorld(worldname)!!
                 e.to.set(e.from.x, e.from.y, e.from.z - 1)
-            } else {
-                WorldImpl.loadDimension(uuid, e.player, "nether")
-                Structure.playerJoin(e.player.isJumping, e.player.location, e.to.world, e.player)
-                val worldname = "${worldData.worldName}/nether"
+                return
+            }
+            if (e.from.world.name.endsWith("/the_end")) {
+                val worldname = "${worldData.worldName}/world"
                 e.to.world = Bukkit.getWorld(worldname)!!
-                e.to.set(e.from.x, e.from.y, e.from.z - 1)
+                e.to.set(
+                    Bukkit.getWorld(worldname)!!.spawnLocation.x,
+                    Bukkit.getWorld(worldname)!!.spawnLocation.y,
+                    Bukkit.getWorld(worldname)!!.spawnLocation.z
+                )
+                return
+            }
+            when(e.to.world.environment){
+                NETHER -> {
+                    if ("nether" !in dimensionData.createlist) {
+                        e.player.sendMessage("你还没有创建地狱")
+                        return
+                    }
+                    if (!e.from.world.name.endsWith("/nether")) {
+                        WorldImpl.loadDimension(uuid, e.player, "nether")
+                        Structure.playerJoin(e.player.isJumping, e.player.location, e.to.world, e.player)
+                        val worldname = "${worldData.worldName}/nether"
+                        e.to.world = Bukkit.getWorld(worldname)!!
+                        e.to.set(e.from.x, e.from.y, e.from.z - 1)
+                    } else {
+                        Structure.playerJoin(e.player.isJumping, e.player.location, e.to.world, e.player)
+                        val worldname = "${worldData.worldName}/world"
+                        e.to.world = Bukkit.getWorld(worldname)!!
+                        e.to.set(e.from.x, e.from.y, e.from.z - 1)
+                    }
+                }
+                THE_END -> {
+                    if ("the_end" !in dimensionData.createlist) {
+                        e.player.sendMessage("你还没有创建末地")
+                        return
+                    }
+                    if (!e.from.world.name.endsWith("/the_end")) {
+                        Structure.playerJoin(e.player.isJumping, e.player.location, e.to.world, e.player)
+                        val worldname = "${worldData.worldName}/the_end"
+                        e.to.world = Bukkit.getWorld(worldname)!!
+                    } else {
+                        val worldname = "${worldData.worldName}/world"
+                        e.to.world = Bukkit.getWorld(worldname)!!
+                        e.to.set(Bukkit.getWorld(worldname)!!.spawnLocation.x, Bukkit.getWorld(worldname)!!.spawnLocation.y, Bukkit.getWorld(worldname)!!.spawnLocation.z)
+                    }
+                }
+                NORMAL -> {}
+                CUSTOM -> {}
             }
         }
     }
