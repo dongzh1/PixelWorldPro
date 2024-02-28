@@ -7,4 +7,5 @@ class MysqlDatabaseApi : AbstractDatabaseApi(OrmliteMysql(
     PixelWorldPro.instance.config.getConfigurationSection("Mysql")!!,
     PixelWorldPro.instance.config.getBoolean("Mysql.HikariCP")
 )
+
 )

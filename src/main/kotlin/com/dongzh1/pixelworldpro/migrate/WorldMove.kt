@@ -77,7 +77,9 @@ object WorldMove {
                 1,
                 false,
                 isCreateEnd = false,
-                inviter = arrayListOf()
+                inviter = arrayListOf(),
+                fromWorldData.gameRule,
+                fromWorldData.location
             )
         }else{
             toWorldData = WorldData(
@@ -93,7 +95,9 @@ object WorldMove {
                 1,
                 false,
                 isCreateEnd = false,
-                arrayListOf()
+                arrayListOf(),
+                fromWorldData.gameRule,
+                fromWorldData.location
             )
         }
         database.deleteWorldData(from)

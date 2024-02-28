@@ -78,8 +78,8 @@ object CommentConfig : YamlConfiguration() {
                         PixelWorldPro.instance.config.set("version", 10)
                         PixelWorldPro.instance.config.set("Papi.group.owner", "拥有者")
                         PixelWorldPro.instance.config.set("Papi.group.member", "信任者")
-                        PixelWorldPro.instance.config.set("Papi.group.inviter", "访客")
-                        PixelWorldPro.instance.config.set("Papi.group.owner", "anyone")
+                        PixelWorldPro.instance.config.set("Papi.group.inviter", "邀请者")
+                        PixelWorldPro.instance.config.set("Papi.group.anyone", "访客")
                         PixelWorldPro.instance.saveConfig()
                     }
                 }

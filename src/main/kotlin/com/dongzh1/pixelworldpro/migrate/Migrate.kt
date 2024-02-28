@@ -13,6 +13,7 @@ import org.bukkit.entity.Player
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.HashMap
 
 object Migrate {
     fun ppw(player: Player) {
@@ -74,7 +75,9 @@ object Migrate {
                         0,
                         database.getisCreateNether(players),
                         database.getisCreateEnd(players),
-                        arrayListOf()
+                        arrayListOf(),
+                        HashMap(),
+                        HashMap()
                     )
                     val p = ArrayList<UUID>()
                     p.add(players)

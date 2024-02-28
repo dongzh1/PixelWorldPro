@@ -36,6 +36,7 @@ interface DatabaseApi {
      * 获取一个玩家记录，此操作为同步数据库操作
      */
     fun getPlayerData(uuid: UUID): PlayerData?
+    fun getPlayerDataMap(): HashMap<UUID, PlayerData>
     /**
      * 获取所有世界记录,按照在线人数排序
      */

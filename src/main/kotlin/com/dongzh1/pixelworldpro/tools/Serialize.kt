@@ -1,14 +1,16 @@
 package com.dongzh1.pixelworldpro.tools
 
-import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.database.WorldData
 import com.dongzh1.pixelworldpro.world.Level
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.json.simple.JSONObject
 import top.shadowpixel.shadowlevels.api.ShadowLevelsAPI
 import java.util.*
-import kotlin.collections.ArrayList
+
 
 object Serialize {
     //序列化存入的数据
@@ -25,8 +27,9 @@ object Serialize {
                 "${worldData.onlinePlayerNumber},|.|," +
                 "${worldData.isCreateNether},|.|," +
                 "${worldData.isCreateEnd},|.|," +
-                worldData.inviter.joinToString(",")
-
+                "${worldData.inviter.joinToString(", ")},|.|," +
+                JSONObject.toJSONString(worldData.gameRule).toString() + ",|.|," +
+                JSONObject.toJSONString(worldData.location).toString()
     }
     fun deserialize(value: String?): WorldData? {
         if (value == null) {
@@ -66,6 +69,30 @@ object Serialize {
                 }
             }
         }
+        val gameRule = HashMap<String, String>()
+        try {
+            if (list.size >= 14) {
+                val g = Gson()
+                val back: JsonObject = g.fromJson(list[13], JsonObject::class.java)
+                for (key in back.asMap().keys){
+                    gameRule[key] = back.get(key).asString
+                }
+            }
+        } catch (e:Exception){
+            println(e)
+        }
+        val location = HashMap<String, Double>()
+        try {
+            if (list.size >= 15) {
+                val g = Gson()
+                val back: JsonObject = g.fromJson(list[14], JsonObject::class.java)
+                for (key in back.asMap().keys){
+                    location[key] = back.get(key).asDouble
+                }
+            }
+        } catch (e:Exception){
+            println(e)
+        }
         val worldLevel = if (Level.config.getBoolean("shadowLevels.enable")){
             try {
                 val realName = list[0].split("/")[1]
@@ -101,7 +128,9 @@ object Serialize {
             onlinePlayerNumber = list[9].toInt(),
             isCreateNether = list[10].toBoolean(),
             isCreateEnd = list[11].toBoolean(),
-            inviter = inviter
+            inviter = inviter,
+            gameRule = gameRule,
+            location = location
         )
     }
 

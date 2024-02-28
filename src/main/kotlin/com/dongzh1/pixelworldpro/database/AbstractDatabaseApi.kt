@@ -9,6 +9,8 @@ import com.xbaimiao.easylib.module.database.Ormlite
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
 import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
@@ -20,6 +22,19 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
         queryBuilder.where().eq("user", uuid)
         val playerDao = queryBuilder.queryForFirst() ?: return null
         return Serialize.deserializePlayerData(playerDao.data)
+    }
+
+    override fun getPlayerDataMap(): HashMap<UUID, PlayerData> {
+        val dataMap = HashMap<UUID, PlayerData>()
+        val queryBuilder = playerTable.queryBuilder()
+        val list = queryBuilder.query()
+        list.forEach {
+            val data = Serialize.deserializePlayerData(it.data)
+            if (data != null) {
+                dataMap[it.user] = data
+            }
+        }
+        return dataMap
     }
 
     override fun setPlayerData(uuid: UUID, playerData: PlayerData) {
@@ -92,9 +107,16 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
             submit(async = true) {
                 //查询并更新
                 val queryBuilder = dataTable.queryBuilder()
-                val dao = queryBuilder.where().eq("user", uuid).queryForFirst()!!
-                dao.data = Serialize.serialize(worldData)
-                dataTable.update(dao)
+                val dao = queryBuilder.where().eq("user", uuid).queryForFirst()
+                if (dao == null) {
+                    val daos = WorldDao()
+                    daos.user = uuid
+                    daos.data = Serialize.serialize(worldData)
+                    dataTable.create(daos)
+                } else {
+                    dao.data = Serialize.serialize(worldData)
+                    dataTable.update(dao)
+                }
             }
         }
     }

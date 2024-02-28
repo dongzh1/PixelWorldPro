@@ -10,8 +10,11 @@ import com.dongzh1.pixelworldpro.listener.WorldProtect
 import com.dongzh1.pixelworldpro.migrate.Migrate
 import com.dongzh1.pixelworldpro.migrate.WorldMove
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
+import com.dongzh1.pixelworldpro.tools.Check
+import com.dongzh1.pixelworldpro.tools.Install
 import com.dongzh1.pixelworldpro.world.Config
 import com.dongzh1.pixelworldpro.tools.JiangCore
+import com.dongzh1.pixelworldpro.tools.MoveDataBase
 import com.dongzh1.pixelworldpro.world.Level
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -28,6 +31,7 @@ import java.io.File
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 @Suppress("DEPRECATION")
 class Commands {
@@ -103,8 +107,10 @@ class Commands {
                 submit(async = true) {
                     var playerData = PixelWorldPro.databaseApi.getPlayerData(player.uniqueId)
                     if (playerData != null) {
+                        val joinWorld = playerData.joinedWorld as ArrayList<UUID>
+                        joinWorld.remove((sender as Player).uniqueId)
                         playerData =
-                            playerData.copy(joinedWorld = playerData.joinedWorld - (sender as Player).uniqueId)
+                            playerData.copy(joinedWorld = joinWorld)
                         PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData)
                     }
                     sender.sendMessage(lang("Success"))
@@ -144,8 +150,10 @@ class Commands {
                 submit(async = true) {
                     var playerData = PixelWorldPro.databaseApi.getPlayerData(player.uniqueId)
                     if (playerData != null) {
+                        val joinWorld = playerData!!.joinedWorld as ArrayList<UUID>
+                        joinWorld.remove((sender as Player).uniqueId)
                         playerData =
-                            playerData!!.copy(joinedWorld = playerData!!.joinedWorld - worldPlayer.uniqueId)
+                            playerData!!.copy(joinedWorld = joinWorld)
                         PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData!!)
                     }
                     sender.sendMessage(lang("Success"))
@@ -200,8 +208,10 @@ class Commands {
                             )
                             PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData1)
                         } else {
+                            val joinWorld = playerData1.joinedWorld as ArrayList<UUID>
+                            joinWorld.add((sender as Player).uniqueId)
                             playerData1 =
-                                playerData1.copy(joinedWorld = playerData.joinedWorld + (sender as Player).uniqueId)
+                                playerData1.copy(joinedWorld = joinWorld)
                             PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData1)
                         }
                         if (player.isOnline.and(Bukkit.getWorld(player.uniqueId)?.name == worldData!!.worldName)) {
@@ -256,8 +266,10 @@ class Commands {
                         )
                         PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData)
                     } else {
+                        val joinWorld = playerData.joinedWorld as ArrayList<UUID>
+                        joinWorld.add(worldPlayer.uniqueId)
                         playerData =
-                            playerData.copy(joinedWorld = playerData.joinedWorld + worldPlayer.uniqueId)
+                            playerData.copy(joinedWorld = joinWorld)
                         PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData)
                     }
                     sender.sendMessage(lang("Success"))
@@ -1384,6 +1396,127 @@ class Commands {
         sub(worldUnLoad)
     }
 
+    private val gameRule = command<CommandSender>("rule") {
+        permission = "pixelworldpro.command.rule"
+        exec {
+            when (args.size) {
+                2 -> {
+                    if (!sender.hasPermission("pixelworldpro.command.rule")) {
+                        sender.sendMessage(lang("NoPermission"))
+                        return@exec
+                    }
+                    val player = sender as Player
+                    val worldData = PixelWorldPro.databaseApi.getWorldData(player.uniqueId) ?: return@exec
+                    val gameRule = worldData.gameRule
+                    gameRule[args[0]] = args[1]
+                    worldData.gameRule = gameRule
+                    PixelWorldPro.databaseApi.setWorldData(player.uniqueId, worldData)
+                    val world = Bukkit.getWorld(worldData.worldName + "/world") ?: return@exec
+                    WorldApi.Factory.worldApi!!.setDataGameRule(world)
+                }
+
+                3 -> {
+                    if (!sender.hasPermission("pixelworldpro.command.admin")) {
+                        sender.sendMessage(lang("NoPermission"))
+                        return@exec
+                    }
+                    val player = JiangCore.getPlayer(args[0]) ?: return@exec
+                    val worldData = PixelWorldPro.databaseApi.getWorldData(player.uuid) ?: return@exec
+                    val gameRule = worldData.gameRule
+                    gameRule[args[0]] = args[1]
+                    worldData.gameRule = gameRule
+                    PixelWorldPro.databaseApi.setWorldData(player.uuid, worldData)
+                    val world = Bukkit.getWorld(worldData.worldName + "/world") ?: return@exec
+                    WorldApi.Factory.worldApi!!.setDataGameRule(world)
+                }
+
+                else -> {
+                    sender.sendMessage("参数不合法")
+                }
+            }
+        }
+    }
+
+    private val gameLocation = command<CommandSender>("location") {
+        permission = "pixelworldpro.command.location"
+        exec {
+            when (args.size) {
+                0 -> {
+                    if (!sender.hasPermission("pixelworldpro.command.location")) {
+                        sender.sendMessage(lang("NoPermission"))
+                        return@exec
+                    }
+                    val player = sender as Player
+                    val worldData = PixelWorldPro.databaseApi.getWorldData(player.uniqueId) ?: return@exec
+                    if (player.world.name == worldData.worldName + "/world") {
+                        val location = HashMap<String, Double>()
+                        location["x"] = player.location.x
+                        location["y"] = player.location.y
+                        location["z"] = player.location.z
+                        worldData.location = location
+                        PixelWorldPro.databaseApi.setWorldData(player.uniqueId, worldData)
+                    } else {
+                        sender.sendMessage("不在你的世界内")
+                    }
+                }
+
+                1 -> {
+                    if (!sender.hasPermission("pixelworldpro.command.admin")) {
+                        sender.sendMessage(lang("NoPermission"))
+                        return@exec
+                    }
+                    val player = JiangCore.getPlayer(args[0]) ?: return@exec
+                    val send = sender as Player
+                    val worldData = PixelWorldPro.databaseApi.getWorldData(player.uuid) ?: return@exec
+                    if (send.name == worldData.worldName + "/world") {
+                        val location = HashMap<String, Double>()
+                        location["x"] = send.location.x
+                        location["y"] = send.location.y
+                        location["z"] = send.location.z
+                        worldData.location = location
+                        PixelWorldPro.databaseApi.setWorldData(player.uuid, worldData)
+                    } else {
+                        sender.sendMessage("不在指定的世界内")
+                    }
+                }
+
+                else -> {
+                    sender.sendMessage("参数不合法")
+                }
+            }
+        }
+    }
+
+    private val moveToMysql = command<CommandSender>("moveToMysql") {
+        permission = "pixelworldpro.command.admin"
+        exec{
+            if (sender.hasPermission("pixelworldpro.command.admin")) {
+                MoveDataBase().mysql()
+            }else{
+                sender.sendMessage("参数不合法")
+            }
+        }
+    }
+
+    private val checkPlayerData = command<CommandSender>("player") {
+        permission = "pixelworldpro.command.admin"
+        exec {
+            Check.playerData()
+        }
+    }
+
+    private val check = command<CommandSender>("check") {
+        permission = "pixelworldpro.command.admin"
+        sub(checkPlayerData)
+    }
+
+    private val install = command<CommandSender>("install") {
+        permission = "pixelworldpro.command.admin"
+        exec {
+            Install.start()
+        }
+    }
+
     private fun lang(string: String): String {
         return PixelWorldPro.instance.lang().getStringColored(string)
     }
@@ -1407,5 +1540,10 @@ class Commands {
         sub(gui)
         sub(mode)
         sub(world)
+        sub(gameRule)
+        sub(check)
+        sub(install)
+        sub(gameLocation)
+        sub(moveToMysql)
     }
 }

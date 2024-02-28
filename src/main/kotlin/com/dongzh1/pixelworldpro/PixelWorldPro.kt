@@ -15,6 +15,7 @@ import com.dongzh1.pixelworldpro.listener.*
 import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.papi.Papi
 import com.dongzh1.pixelworldpro.tools.CommentConfig
+import com.dongzh1.pixelworldpro.tools.Install
 import com.dongzh1.pixelworldpro.world.Level
 import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.mcyzj.libs.JiangLib

@@ -1,18 +1,18 @@
 import org.gradle.jvm.tasks.Jar
-        import java.net.URI
-        import java.time.LocalDate
-        import java.time.format.DateTimeFormatter
+import java.net.URI
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
-        plugins {
-            java
-            id("com.github.johnrengelman.shadow") version ("7.1.2")
-            kotlin("jvm") version "1.8.0"
-            id("com.xbaimiao.easylib") version ("1.1.0")
-            `maven-publish`
-        }
+plugins {
+    java
+    id("com.github.johnrengelman.shadow") version ("7.1.2")
+    kotlin("jvm") version "1.8.0"
+    id("com.xbaimiao.easylib") version ("1.1.0")
+    `maven-publish`
+}
 
 group = "com.dongzh1.pixelworldpro"
-version = "1.2.3"
+version = "1.3.1"
 
 easylib {
     version = "2.3.9"

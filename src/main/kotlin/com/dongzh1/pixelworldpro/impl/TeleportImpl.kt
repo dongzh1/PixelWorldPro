@@ -64,7 +64,11 @@ class TeleportImpl: TeleportApi {
                                 if (list[1] == Server.getLocalServer().realName){
                                     val world = Bukkit.getWorld("${worldData.worldName}/world")?:return@submit
                                     val player = Bukkit.getPlayer(uuid)?:return@submit
-                                    player.teleport(world.spawnLocation)
+                                    try {
+                                        player.teleport(Location(world, worldData.location["x"]!!, worldData.location["y"]!!, worldData.location["z"]!!))
+                                    }catch (_:Exception) {
+                                        player.teleport(world.spawnLocation)
+                                    }
                                 }
                             }
                         }
@@ -83,11 +87,19 @@ class TeleportImpl: TeleportApi {
                     if (world == null) {
                         return@submit
                     }else{
-                        player.teleport(world.spawnLocation)
+                        try {
+                            player.teleport(Location(world, worldData.location["x"]!!, worldData.location["y"]!!, worldData.location["z"]!!))
+                        }catch (_:Exception) {
+                            player.teleport(world.spawnLocation)
+                        }
                         return@submit
                     }
                 }else{
-                    player.teleport(world.spawnLocation)
+                    try {
+                        player.teleport(Location(world, worldData.location["x"]!!, worldData.location["y"]!!, worldData.location["z"]!!))
+                    }catch (_:Exception) {
+                        player.teleport(world.spawnLocation)
+                    }
                     return@submit
                 }
             }

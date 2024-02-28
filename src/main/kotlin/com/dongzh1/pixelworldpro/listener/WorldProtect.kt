@@ -1,12 +1,14 @@
 package com.dongzh1.pixelworldpro.listener
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
+import com.dongzh1.pixelworldpro.api.WorldApi
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.dongzh1.pixelworldpro.bungee.server.Bungee
 import com.dongzh1.pixelworldpro.database.RedStone
 import com.dongzh1.pixelworldpro.world.Config
 import com.dongzh1.pixelworldpro.world.Structure
 import com.dongzh1.pixelworldpro.world.WorldImpl
+import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldedit.math.BlockVector3
 import com.sk89q.worldguard.WorldGuard
 import com.sk89q.worldguard.protection.managers.RemovalStrategy
@@ -95,8 +97,12 @@ class WorldProtect : Listener {
         //如果被攻击者是玩家且不是成员，则取消事件
         if (e.entity is Player) {
             val entity = e.entity as Player
-            if (worldData.members.contains(entity.uniqueId))
+            if (entity.uniqueId in worldData.members) {
                 return
+            } else {
+                e.damager.sendMessage("伤害无效：没有世界权限")
+                e.isCancelled = true
+            }
             if (PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!) == null){
                 PixelWorldPro.instance.setOnInviter(getWorldNameUUID(worldName)!!, listOf())
             }else{
@@ -422,6 +428,7 @@ class WorldProtect : Listener {
     fun teleport(e: PlayerTeleportEvent) {
         val worldConfig = PixelWorldPro.instance.world
         val world = e.player.world
+        WorldApi.Factory.worldApi!!.setDataGameRule(world)
         val gameMode = worldConfig.getString("worldData.${world.name}.gameMode")
         if (e.player.isOp)
             return
@@ -570,8 +577,7 @@ class WorldProtect : Listener {
             getWorldNameUUID(worldName)?.let { RedisManager.removeLock(it) }
         }
         if (PixelWorldPro.instance.world.getBoolean("WorldGrade")) {
-            val world = e.world as
-                    com.sk89q.worldedit.world.World
+            val world = BukkitAdapter.adapt(e.world)
             val container = WorldGuard.getInstance().platform.regionContainer
             val regions = container[world]
             if (regions != null) {
@@ -681,7 +687,7 @@ class WorldProtect : Listener {
                     region.members.addPlayer(member)
                 }
                 val container = WorldGuard.getInstance().platform.regionContainer
-                val regions = container.get(world as com.sk89q.worldedit.world.World)
+                val regions = container.get(BukkitAdapter.adapt(world))
                 regions!!.addRegion(region)
             } catch (_: Exception) {
                 Bukkit.getConsoleSender().sendMessage("挂钩WorldEdit/WorldGuard失败")

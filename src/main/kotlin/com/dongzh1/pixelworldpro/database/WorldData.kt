@@ -16,7 +16,9 @@ data class WorldData (
     val onlinePlayerNumber: Int,
     val isCreateNether: Boolean,
     val isCreateEnd: Boolean,
-    var inviter: List<UUID>
+    var inviter: List<UUID>,
+    var gameRule: HashMap<String, String>,
+    var location: HashMap<String, Double>
 )
 data class PlayerData (
     val joinedWorld: List<UUID>,

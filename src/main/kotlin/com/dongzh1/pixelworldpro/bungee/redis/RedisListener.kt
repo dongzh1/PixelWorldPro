@@ -13,6 +13,7 @@ import com.dongzh1.pixelworldpro.tools.Serialize
 import com.xbaimiao.easylib.module.utils.submit
 
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import redis.clients.jedis.JedisPubSub
 import java.lang.Thread.sleep
 import java.util.UUID
@@ -253,12 +254,17 @@ class RedisListener : JedisPubSub() {
                             }
                         }
                         val location = world.spawnLocation
+                        val worldData = PixelWorldPro.databaseApi.getWorldData(world.name)!!
                         times = 0
                         while (times < 1000) {
                             val player = Bukkit.getPlayer(uuid)
                             if (player != null) {
                                 submit {
-                                    player.teleport(location)
+                                    try {
+                                        player.teleport(Location(world, worldData.location["x"]!!, worldData.location["y"]!!, worldData.location["z"]!!))
+                                    }catch (_:Exception) {
+                                        player.teleport(location)
+                                    }
                                 }
                                 return@Thread
                             }

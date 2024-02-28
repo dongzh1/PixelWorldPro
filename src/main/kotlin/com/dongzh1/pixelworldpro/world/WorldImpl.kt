@@ -26,6 +26,7 @@ import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.regex.Pattern
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.concurrent.thread
 
 
@@ -172,7 +173,9 @@ object WorldImpl : WorldApi {
                     1,
                     false,
                     isCreateEnd = false,
-                    arrayListOf()
+                    arrayListOf(),
+                    HashMap(),
+                    HashMap()
                 )
             )
             getWorldDimensionData("PixelWorldPro/$worldName")
@@ -210,6 +213,7 @@ object WorldImpl : WorldApi {
         val future = CompletableFuture<Boolean>()
         deleteWorld(uuid).thenApply { value ->
             if (value) {
+                PixelWorldPro.databaseApi.deleteWorldData(uuid)
                 WorldApi.Factory.worldApi!!.createWorld(uuid, templateName).thenApply {
                     future.complete(it)
                 }
@@ -408,6 +412,7 @@ object WorldImpl : WorldApi {
                     RedisManager.removeLock(uuid)
                     false
                 } else {
+                    setDataGameRule(world)
                     setTime(world)
                     setWorldBorder(world, worldData.worldLevel)
                     world.keepSpawnInMemory = false
@@ -441,6 +446,7 @@ object WorldImpl : WorldApi {
                 if (world == null) {
                     false
                 } else {
+                    setDataGameRule(world)
                     Bukkit.getConsoleSender().sendMessage(world.seed.toString())
                     setTime(world)
                     setWorldBorder(world, worldData.worldLevel)
@@ -597,6 +603,7 @@ object WorldImpl : WorldApi {
                         player.sendMessage("维度加载失败")
                         false
                     } else {
+                        setDataGameRule(worlds)
                         setTime(worlds)
                         if (dimensiondata.barrier) {
                             setWorldBorder(worlds, worldData.worldLevel)
@@ -693,6 +700,7 @@ object WorldImpl : WorldApi {
                         player.sendMessage("维度创建失败")
                         false
                     } else {
+                        setDataGameRule(worlds)
                         setTime(worlds)
                         if (PixelWorldPro.instance.config.getBoolean("WorldSetting.Dimension.${dimension}.Barrier")) {
                             setWorldBorder(worlds, worldData.worldLevel)
@@ -774,6 +782,27 @@ object WorldImpl : WorldApi {
                 }
             }
             unloadtimeoutworld()
+        }
+    }
+
+    override fun setDataGameRule(world: World) {
+        try {
+            val uuid = getWorldNameUUID(world.name) ?: return
+            val worldData = PixelWorldPro.databaseApi.getWorldData(uuid) ?: return
+            if (worldData.gameRule.isNotEmpty()) {
+                for (gameRule in worldData.gameRule.keys) {
+                    val value = worldData.gameRule[gameRule]!!
+                    try {
+                        println(gameRule)
+                        println(value)
+                        world.setGameRuleValue(gameRule, value)
+                    } catch (e: Exception) {
+                        Bukkit.getConsoleSender().sendMessage("设置${world.name}世界的自定义规则${gameRule}失败，自定义的值${value}")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Bukkit.getConsoleSender().sendMessage("设置世界规则失败，可能当前服务端版本低于1.13")
         }
     }
 

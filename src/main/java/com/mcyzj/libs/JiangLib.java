@@ -229,7 +229,7 @@ public class JiangLib {
     public static class Builder {
 
         private String url = null;
-        private String group, artifact, version, repository = "https://repo1.maven.org/maven2/";
+        private String group, artifact, version, repository = "https://maven.aliyun.com/repository/public/";
 
         protected Builder() {
         }
