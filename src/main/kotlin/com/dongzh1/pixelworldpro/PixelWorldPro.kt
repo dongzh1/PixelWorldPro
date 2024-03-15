@@ -15,7 +15,6 @@ import com.dongzh1.pixelworldpro.listener.*
 import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.papi.Papi
 import com.dongzh1.pixelworldpro.tools.CommentConfig
-import com.dongzh1.pixelworldpro.tools.Install
 import com.dongzh1.pixelworldpro.world.Level
 import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.mcyzj.libs.JiangLib
@@ -26,8 +25,6 @@ import com.xbaimiao.easylib.module.utils.registerListener
 import com.xbaimiao.easylib.module.utils.submit
 import com.xbaimiao.easylib.module.utils.unregisterListener
 import com.xbaimiao.easylib.task.EasyLibTask
-import com.xbaimiao.ktor.KtorPluginsBukkit
-import com.xbaimiao.ktor.KtorStat
 import org.bukkit.Bukkit
 import org.bukkit.WorldCreator
 import redis.clients.jedis.JedisPool
@@ -36,7 +33,7 @@ import java.util.*
 
 
 @Suppress("unused")
-class PixelWorldPro : EasyPlugin(),KtorStat {
+class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
 
     companion object {
 
@@ -67,17 +64,19 @@ class PixelWorldPro : EasyPlugin(),KtorStat {
     val plugin = this
     private val eula = BuiltInConfiguration("eula.yml")
 
-    val user = "mcyzj"
+    //val user = "mcyzj"
 
     override fun enable() {
+        //加载lib
         JiangLib.loadLibs()
+        //初始化bstats统计
         val pluginId = 19823 // <-- Replace with the id of your plugin!
         val metrics = Metrics(this, pluginId)
         metrics.addCustomChart(Metrics.SimplePie("chart_id") { "My value" })
         //初始化统计
-        KtorPluginsBukkit.init(this,this)
+        //KtorPluginsBukkit.init(this,this)
         //统计
-        stat()
+        //stat()
         if (eula.getBoolean("eula")) {
             //PixelWorldProV1遵循《用户协议-付费插件》
             //https://wiki.mcyzj.cn/#/zh-cn/agreement?id=%e4%bb%98%e8%b4%b9%e6%8f%92%e4%bb%b6

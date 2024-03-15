@@ -25,9 +25,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.regex.Pattern
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
-import kotlin.concurrent.thread
 
 
 object WorldImpl : WorldApi {
@@ -225,11 +223,7 @@ object WorldImpl : WorldApi {
     }
 
     fun worldPath(): String {
-        return if (PixelWorldPro.instance.config.getString("os") == "windows") {
-            "PixelWorldPro"
-        } else {
-            PixelWorldPro.instance.config.getString("WorldPath")!!
-        }
+        return "PixelWorldPro"
     }
 
     /**

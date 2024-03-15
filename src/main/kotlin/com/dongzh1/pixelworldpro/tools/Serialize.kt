@@ -4,7 +4,9 @@ import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.database.WorldData
 import com.dongzh1.pixelworldpro.world.Level
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
+import com.google.gson.reflect.TypeToken
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.json.simple.JSONObject
@@ -73,8 +75,11 @@ object Serialize {
         try {
             if (list.size >= 14) {
                 val g = Gson()
+                val type = object : TypeToken<Map<String, String>>() {}.type
                 val back: JsonObject = g.fromJson(list[13], JsonObject::class.java)
-                for (key in back.asMap().keys){
+                val gson = GsonBuilder().enableComplexMapKeySerialization().create()
+                val map: Map<String, String> = gson.fromJson(back, type)
+                for (key in map.keys){
                     gameRule[key] = back.get(key).asString
                 }
             }
@@ -86,7 +91,10 @@ object Serialize {
             if (list.size >= 15) {
                 val g = Gson()
                 val back: JsonObject = g.fromJson(list[14], JsonObject::class.java)
-                for (key in back.asMap().keys){
+                val type = object : TypeToken<Map<String, String>>() {}.type
+                val gson = GsonBuilder().enableComplexMapKeySerialization().create()
+                val map: Map<String, String> = gson.fromJson(back, type)
+                for (key in map.keys){
                     location[key] = back.get(key).asDouble
                 }
             }

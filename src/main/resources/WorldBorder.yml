@@ -2,4 +2,4 @@
 version: 1
 #启用的世界边界类型
 #目前支持auto[原版],McBorder和WorldBorder
-enable: "WorldBorder"
+enable: "auto"

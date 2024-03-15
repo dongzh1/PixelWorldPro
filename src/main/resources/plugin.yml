@@ -4,7 +4,7 @@ version: '${version}'
 author: dong&mcyzj
 softdepend: [ Vault, PlaceholderAPI, PlayerPoints, PixelPlayerWorld, ShadowLevels, RealisticSeasons, WorldGuard, WorldEdit]
 api-version: 1.13
-folia-supported: true
+folia-supported: false
 
 runtime-libraries:
   libraries-folder: '@Server:libraries'  # 存放依赖的位置
