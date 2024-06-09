@@ -2,6 +2,7 @@
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
@@ -29,7 +30,11 @@ object Bungee {
     }
 
     fun getTPS(): Double {
-        return getTPS(100)
+        return try {
+            Bukkit.getTPS().first()
+        } catch (_: NoClassDefFoundError) {
+            getTPS(100)
+        }
     }
 
     var TICK_COUNT = 0

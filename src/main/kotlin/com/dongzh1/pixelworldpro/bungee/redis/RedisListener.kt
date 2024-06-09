@@ -158,13 +158,12 @@ class RedisListener : JedisPubSub() {
                 }
                 "updateWorldLevel" ->{
                     val uuid = UUID.fromString(message.split("|,|")[1])
-                    val level = message.split("|,|")[2]
                     val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
                     val world = Bukkit.getWorld(worldData!!.worldName)
                     if (world == null){
                         return
                     }else{
-                        WorldImpl.setWorldBorder(world,level)
+                        WorldImpl.setWorldBorder(world,worldData.worldLevel)
                     }
                 }
                 "unloadWorld" ->{

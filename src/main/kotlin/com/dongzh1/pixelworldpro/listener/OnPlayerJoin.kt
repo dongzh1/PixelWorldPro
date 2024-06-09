@@ -2,6 +2,7 @@ package com.dongzh1.pixelworldpro.listener
 
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
+import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -31,6 +32,8 @@ class OnPlayerJoin : Listener {
             PixelWorldPro.databaseApi.setPlayerData(event.player.uniqueId, playerData)
             Bukkit.getConsoleSender().sendMessage("您收到了${inviterMsg.size}个邀请函")
         }
+        val worldData = PixelWorldPro.databaseApi.getWorldData(event.player.world.name) ?: return
+        WorldImpl.setWorldBorder(event.player.world, worldData.worldLevel)
     }
     companion object {
         private val map: MutableMap<UUID, Location> = HashMap()

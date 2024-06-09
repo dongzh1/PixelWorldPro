@@ -74,7 +74,7 @@ object Server {
                     }
                 }catch (_:Exception){}
             }
-            if (((bungeeConfig.getDouble("leastTps")) > Bukkit.getTPS().first()).and(bungeeConfig.getInt("leastTps") != -1)){
+            if (((bungeeConfig.getDouble("leastTps")) > 20.0).and(bungeeConfig.getInt("leastTps") != -1)){
                 val type = localServer["type"]
                 if (type == null){
                     val list = arrayListOf<String>()

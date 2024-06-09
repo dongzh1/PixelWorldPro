@@ -3,10 +3,14 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/EasyTemplate.main.iml" filepath="$PROJECT_DIR$/.idea/modules/EasyTemplate.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PixelWorldPro.iml" filepath="$PROJECT_DIR$/.idea/modules/PixelWorldPro.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/PixelWorldPro.Bukkit.iml" filepath="$PROJECT_DIR$/.idea/modules/PixelWorldPro.Bukkit.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PixelWorldPro.main.iml" filepath="$PROJECT_DIR$/.idea/modules/PixelWorldPro.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PixelWorldPro.test.iml" filepath="$PROJECT_DIR$/.idea/modules/PixelWorldPro.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Project.阿瑞.PixelWorldPro.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Project.阿瑞.PixelWorldPro.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.dongzh1.pixelworldpro.PixelWorldPro.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.dongzh1.pixelworldpro.PixelWorldPro.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/阿瑞.PixelWorldPro.main.iml" filepath="$PROJECT_DIR$/.idea/modules/阿瑞.PixelWorldPro.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/项目.PixelWorldPro.main.iml" filepath="$PROJECT_DIR$/.idea/modules/项目.PixelWorldPro.main.iml" />
     </modules>
   </component>
 </project>

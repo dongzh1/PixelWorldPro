@@ -67,7 +67,9 @@ object Serialize {
         if (list.size >= 13) {
             if(list[12] != "") {
                 for (id in list[12].split(",")) {
-                    inviter.add(UUID.fromString(id))
+                    try {
+                        inviter.add(UUID.fromString(id))
+                    } catch (_:Exception) {}
                 }
             }
         }

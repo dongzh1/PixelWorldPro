@@ -1,6 +1,7 @@
 ﻿package com.dongzh1.pixelworldpro.world
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
+import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.dongzh1.pixelworldpro.world.WorldImpl.lang
 import com.xbaimiao.easylib.bridge.economy.PlayerPoints
 import com.xbaimiao.easylib.bridge.economy.Vault
@@ -149,6 +150,9 @@ object Level {
         }
         worldData.worldLevel = nextLevel.toString()
         PixelWorldPro.databaseApi.setWorldData(uuid, worldData)
+        if (PixelWorldPro.instance.isBungee()) {
+            RedisManager.push("updateWorldLevel|,|$uuid")
+        }
         //获取世界是否加载
         val dimensionData = Config.getWorldDimensionData(worldData.worldName)
         val dimensionlist = dimensionData.createlist

@@ -11,7 +11,7 @@ object Dough {
         if ((p == null).or(l == null)){
             return true
         }
-        val world = l!!.world
+        val world = l!!.world ?: return false
         val uuid = getUUID(world.name) ?: return true
         if (p!!.uniqueId == uuid){
             return true

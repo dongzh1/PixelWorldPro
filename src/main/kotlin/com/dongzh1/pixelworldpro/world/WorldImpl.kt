@@ -637,7 +637,7 @@ object WorldImpl : WorldApi {
                             if (Vault().has(player, dimensiondata.createMoney) &&
                                 PlayerPoints().has(player, dimensiondata.createPoints)
                             ) {
-                                Vault().take(player, Gui.getMembersEditConfig().getDouble("Money"))
+                                Vault().take(player, dimensiondata.createMoney)
                                 PlayerPoints().take(player, dimensiondata.createPoints)
                             } else {
                                 player.sendMessage(lang("MoneyNotEnough"))

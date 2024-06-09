@@ -69,7 +69,7 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
     override fun enable() {
         //加载lib
         JiangLib.loadLibs()
-        //初始化bstats统计
+        //loadLibs()
         val pluginId = 19823 // <-- Replace with the id of your plugin!
         val metrics = Metrics(this, pluginId)
         metrics.addCustomChart(Metrics.SimplePie("chart_id") { "My value" })

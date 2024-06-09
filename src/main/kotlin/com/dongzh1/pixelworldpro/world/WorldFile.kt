@@ -53,30 +53,38 @@ object WorldFile {
                 val block2 = world.getBlockAt(x.toInt(), y.toInt()+1, z.toInt())
                 val block3 = world.getBlockAt(x.toInt(), y.toInt()+2, z.toInt())
                 val block4 = world.getBlockAt(x.toInt(), y.toInt()-1, z.toInt())
-                if ((block1.blockData.material == org.bukkit.Material.AIR).and(block2.blockData.material == org.bukkit.Material.AIR).and(block3.blockData.material == org.bukkit.Material.AIR).and(block4.blockData.material == org.bukkit.Material.AIR)){
-                    world.spawnLocation.set(x, y, z)
-                    if (config.getBoolean("debug")){
-                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 判断出生点 $x $y $z 通过")
+                try {
+                    if ((block1.blockData.material == org.bukkit.Material.AIR).and(block2.blockData.material == org.bukkit.Material.AIR).and(block3.blockData.material == org.bukkit.Material.AIR).and(block4.blockData.material == org.bukkit.Material.AIR)){
+                        world.spawnLocation.x = x
+                        world.spawnLocation.y = y
+                        world.spawnLocation.z = z
+                        if (config.getBoolean("debug")){
+                            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 判断出生点 $x $y $z 通过")
+                        }
+                        return
+                    }else{
+                        if (config.getBoolean("debug")){
+                            Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 判断出生点 $x $y $z 失败")
+                        }
+                        val shifting = Random().nextInt(10) - 5
+                        if (worldSetting.getBoolean("location.x.shifting")){
+                            x += shifting.toDouble()
+                        }
+                        if (worldSetting.getBoolean("location.y.shifting")){
+                            y += shifting.toDouble()
+                        }
+                        if (worldSetting.getBoolean("location.z.shifting")){
+                            z += shifting.toDouble()
+                        }
                     }
-                    return
-                }else{
-                    if (config.getBoolean("debug")){
-                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 判断出生点 $x $y $z 失败")
-                    }
-                    val shifting = Random().nextInt(10) - 5
-                    if (worldSetting.getBoolean("location.x.shifting")){
-                        x += shifting.toDouble()
-                    }
-                    if (worldSetting.getBoolean("location.y.shifting")){
-                        y += shifting.toDouble()
-                    }
-                    if (worldSetting.getBoolean("location.z.shifting")){
-                        z += shifting.toDouble()
-                    }
+                } catch (_: NoSuchMethodError) {
                 }
+
                 times += 1
             }
         }
-        world.spawnLocation.set(x, y, z)
+        world.spawnLocation.x = x
+        world.spawnLocation.y = y
+        world.spawnLocation.z = z
     }
 }

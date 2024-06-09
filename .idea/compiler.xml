@@ -5,6 +5,9 @@
       <module name="com.xbaimiao.template.EasyTemplate.main" target="1.8" />
       <module name="EasyTemplate" target="1.8" />
       <module name="EasyTemplate.test" target="1.8" />
+      <module name="PixelWorldPro" target="1.8" />
+      <module name="PixelWorldPro.test" target="1.8" />
+      <module name="项目.PixelWorldPro.main" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

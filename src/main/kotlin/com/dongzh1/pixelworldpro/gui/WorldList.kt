@@ -54,7 +54,7 @@ class WorldList(val player: Player) {
             for (guiData in charMap) {
                 if (guiData.value.type == "Page") {
                     val item = basic.items[guiData.key]?:continue
-                    val meta = item.itemMeta
+                    val meta = item.itemMeta!!
                     meta.setDisplayName(meta.displayName.replace("{page}", page.toString()))
                     val lore = meta.lore?.map { it.replace("{page}", page.toString()) }?.toMutableList()
                     meta.lore = lore

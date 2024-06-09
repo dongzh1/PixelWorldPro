@@ -36,7 +36,7 @@ import static java.util.Objects.requireNonNull;
 @SuppressWarnings("restriction")
 public class JiangLib {
 
-    private static final List<JiangLib> toInstall = new ArrayList<>();
+    public static final List<JiangLib> toInstall = new ArrayList<>();
     private static final MethodHandle addUrlHandle;
     private static final Object ucp;
     private static final Supplier<LibrariesOptions> librariesOptions = memoize(() -> {
@@ -45,7 +45,7 @@ public class JiangLib {
             return LibrariesOptions.fromMap((yamlConfiguration.getConfigurationSection("runtime-libraries")));
         return null;
     });
-    private static final Supplier<File> libFile = memoize(() -> {
+    public static final Supplier<File> libFile = memoize(() -> {
         YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(new InputStreamReader(requireNonNull(PixelWorldPro.class.getClassLoader().getResourceAsStream("plugin.yml"), "Jar does not contain plugin.yml")));
         String name = yamlConfiguration.getString("name");
         LibrariesOptions options = librariesOptions.get();
@@ -78,12 +78,7 @@ public class JiangLib {
         }
     }
 
-    public static void loadLibs() {
-        libFile.get();
-        for (JiangLib jiangLib : toInstall) {
-            jiangLib.load();
-        }
-    }
+
 
     public final String groupId, artifactId, version, repository;
 
@@ -438,6 +433,13 @@ public class JiangLib {
                 }
             }
             return value;
+        }
+    }
+
+    public static void loadLibs() {
+        libFile.get();
+        for (JiangLib jiangLib : toInstall) {
+            jiangLib.load();
         }
     }
 }

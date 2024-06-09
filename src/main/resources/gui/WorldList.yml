@@ -30,8 +30,7 @@ items:
     value: public
   A:
     type: List
-    material: PLAYER_HEAD
-    skull: '%player_name%'
+    material: GRASS_BLOCK
     name: '&a&l进入该世界'
     lore:
       - '&f你在该世界的身份为'

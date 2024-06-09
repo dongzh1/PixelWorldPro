@@ -49,8 +49,10 @@ object V2 {
         }catch (_:Exception){
         }
         val dummyUrl = URL("https://sh1.plugin.mcyzj.cn:1031/v1/auth/Pixelworldpro")
-        val data = mapOf("token" to token, "macs" to mac)
-        val dummyData = JSONObject(data).toString()
+        val data = JSONObject()
+        data["token"] = token
+        data["macs"] = mac
+        val dummyData = data.toString()
 
         try {
             val httpUrlConnection: HttpURLConnection = dummyUrl.openConnection() as HttpURLConnection
@@ -75,45 +77,18 @@ object V2 {
     }
 
     fun verify(token:String): Boolean {
-        var mac = "0"
-        try {
-            mac = getMacByIP()
-        }catch (_:Exception){
-        }
-        val dummyUrl = URL("https://sh1.plugin.mcyzj.cn:1031/v1/verify/Pixelworldpro")
-        val data = mapOf("token" to token, "macs" to mac)
-        val dummyData = JSONObject(data).toString()
-
-        try {
-            val httpUrlConnection: HttpURLConnection = dummyUrl.openConnection() as HttpURLConnection
-            httpUrlConnection.requestMethod = "POST"
-            httpUrlConnection.doOutput = true
-            httpUrlConnection.setRequestProperty("Content-Type", "application/json")
-            httpUrlConnection.setRequestProperty("accept", "application/json")
-            httpUrlConnection.setRequestProperty("charset", "utf-8")
-            httpUrlConnection.setRequestProperty("Content-Length", dummyData.length.toString())
-            val dataOutputStream = DataOutputStream(httpUrlConnection.outputStream)
-            dataOutputStream.writeBytes(dummyData)
-            val inputStream: InputStream = httpUrlConnection.inputStream
-            val bufferedReader = BufferedReader(InputStreamReader(inputStream))
-            var stringLine: String
-            while (bufferedReader.readLine().also { stringLine = it } != null) {
-                val g = Gson()
-                val back: JsonObject = g.fromJson(stringLine, JsonObject::class.java)
-                val type = back.get("type").asInt
-                return type == 1
-            }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        return false
+        return true
     }
 
     fun applyExpansion(token:String, lib:String, name:String): JsonObject? {
         val mac = getMacByIP()
         val dummyUrl = URL("https://sh1.plugin.mcyzj.cn:1031/v2/Expansion/Pixelworldpro/apply")
-        val data = mapOf("token" to token, "macs" to mac, "lib" to lib, "name" to name)
-        val dummyData = JSONObject(data).toString()
+        val data = JSONObject()
+        data["token"] = token
+        data["macs"] = mac
+        data["lib"] = lib
+        data["name"] = name
+        val dummyData = data.toString()
 
         try {
             val httpUrlConnection: HttpURLConnection = dummyUrl.openConnection() as HttpURLConnection
@@ -148,8 +123,13 @@ object V2 {
     fun getExpansion(token:String, lib:String, afn:String, name:String, key: String, iv: String): ByteArrayOutputStream? {
         val mac = getMacByIP()
         val dummyUrl = URL("https://sh1.plugin.mcyzj.cn:1031/v2/Expansion/Pixelworldpro/get")
-        val data = mapOf("token" to token, "macs" to mac, "afn" to afn, "lib" to lib, "name" to name)
-        val dummyData = JSONObject(data).toString()
+        val data = JSONObject()
+        data["token"] = token
+        data["macs"] = mac
+        data["afn"] = afn
+        data["lib"] = lib
+        data["name"] = name
+        val dummyData = data.toString()
 
         try {
             // 连接类的父类，抽象类
