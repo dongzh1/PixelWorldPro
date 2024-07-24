@@ -421,6 +421,7 @@ class Commands {
         }
     }
     private val setNumber = command<CommandSender>("setnumber") {
+        permission = "pixelworldpro.command.admin"
         exec {
             if (args.size == 0) {
                 sender.sendMessage(lang("ArgNotValid"))
@@ -1468,7 +1469,7 @@ class Commands {
                     val player = JiangCore.getPlayer(args[0]) ?: return@exec
                     val send = sender as Player
                     val worldData = PixelWorldPro.databaseApi.getWorldData(player.uuid) ?: return@exec
-                    if (send.name == worldData.worldName + "/world") {
+                    if (send.world.name == worldData.worldName + "/world") {
                         val location = HashMap<String, Double>()
                         location["x"] = send.location.x
                         location["y"] = send.location.y

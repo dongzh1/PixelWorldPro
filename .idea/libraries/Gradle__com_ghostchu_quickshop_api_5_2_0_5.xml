@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: com.ghostchu:quickshop-api:5.2.0.5" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="com.ghostchu" artifactId="quickshop-api" version="5.2.0.5" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.ghostchu/quickshop-api/5.2.0.5/84f17666b764e84201b9dba56257bb574e3a136b/quickshop-api-5.2.0.5.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

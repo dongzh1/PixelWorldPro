@@ -4,9 +4,9 @@ pluginManagement {
         mavenCentral()
         mavenLocal()
         maven {
-            url = uri("https://plugins.gradle.org/m2/")
+            url = uri("https://maven.aliyun.com/repository/gradle-plugin")
         }
-        maven("https://maven.mcyzj.cn:445/repository/maven-public/")
+        maven("https://maven.aliyun.com/repository/public")
     }
 }
 rootProject.name = "PixelWorldPro"

@@ -1,0 +1,12 @@
+﻿<component name="libraryTable">
+  <library name="Gradle: com.destroystokyo.paper:paper-api:1.16.5-R0.1-20211218.082619-371" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="com.destroystokyo.paper" artifactId="paper-api" version="1.16.5-R0.1-20211218.082619-371" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.destroystokyo.paper/paper-api/1.16.5-R0.1-20211218.082619-371/ea8536d23228b4dee0e822bb23951bcce4d33f47/paper-api-1.16.5-R0.1-20211218.082619-371.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.destroystokyo.paper/paper-api/1.16.5-R0.1-20211218.082619-371/70605209f7c9dc974d0282a7cd7d99108a3bfe27/paper-api-1.16.5-R0.1-20211218.082619-371-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

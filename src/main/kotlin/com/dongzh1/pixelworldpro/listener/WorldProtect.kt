@@ -86,6 +86,34 @@ class WorldProtect : Listener {
         }
     }
 
+    //阻止与盔甲架交互
+    @EventHandler
+    fun rightClickManipulate(e: PlayerArmorStandManipulateEvent) {
+        if (e.player.isOp)
+            return
+        val worldName = e.player.world.name
+        //如果不是玩家世界则返回
+        if(isPlayerWorld(worldName, e.player.uniqueId))
+            return
+        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)?: return
+        //如果玩家不是成员，则取消事件
+        if (worldData.members.contains(e.player.uniqueId))
+            return
+        if (PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!) == null){
+            PixelWorldPro.instance.setOnInviter(getWorldNameUUID(worldName)!!, listOf())
+        }else{
+            if (e.player.uniqueId in PixelWorldPro.instance.getOnInviter(getWorldNameUUID(worldName)!!)!!) {
+                when (PixelWorldPro.instance.config.getString("WorldSetting.Inviter.permission")) {
+                    "member" -> {
+                        return
+                    }
+                }
+            }
+        }
+        e.player.sendMessage("你没有权限与这个物品交互")
+        e.isCancelled = true
+    }
+
     @EventHandler
     //阻止访客玩家被实体伤害以及玩家伤害实体
     fun damage(e: EntityDamageByEntityEvent) {

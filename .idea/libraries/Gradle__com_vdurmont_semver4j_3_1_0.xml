@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: com.vdurmont:semver4j:3.1.0" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="com.vdurmont" artifactId="semver4j" version="3.1.0" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.vdurmont/semver4j/3.1.0/de1248f09dfe8df3b021c84e0642ee222cceb13/semver4j-3.1.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

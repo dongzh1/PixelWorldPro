@@ -1,0 +1,26 @@
+<config>
+    <input>
+        <jar in="../build\libs\PixelWorldPro-1.3.0.jar" out="../build\libs\PixelWorldPro-1.3.0-reobf.jar"/>
+    </input>
+
+    <keep-names>
+        <class access="protected+">
+            <field access="protected+"/>
+            <method access="protected+"/>
+        </class>
+    </keep-names>
+    <ignore-classes>
+        <class template="class *shadow*" />
+        <class template="class com.dongzh1.pixelworldpro.PixelWorldPro"/>
+    </ignore-classes>
+
+    <property name="string-encryption-type" value="strong"/>
+    <!--    a-z排序-->
+    <property name="member-reorder" value="alphabetical"/>
+    <!--    保持报错信息-->
+    <property name="line-numbers" value="keep"/>
+    <property name="fields-naming" value="iii"/>
+    <property name="methods-naming" value="iii"/>
+    <property name="classes-naming" value="iii"/>
+    <property name="log-file" value="log.xml"/>
+</config>

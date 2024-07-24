@@ -1,0 +1,26 @@
+<config>
+    <input>
+        <jar in="{input}" out="{out}"/>
+    </input>
+
+    <keep-names>
+        <class access="protected+">
+            <field access="protected+"/>
+            <method access="protected+"/>
+        </class>
+    </keep-names>
+    <ignore-classes>
+        <class template="class *shadow*" />
+        <class template="class {main}"/>
+    </ignore-classes>
+
+    <property name="string-encryption-type" value="strong"/>
+    <!--    a-z排序-->
+    <property name="member-reorder" value="alphabetical"/>
+    <!--    保持报错信息-->
+    <property name="line-numbers" value="keep"/>
+    <property name="fields-naming" value="iii"/>
+    <property name="methods-naming" value="iii"/>
+    <property name="classes-naming" value="iii"/>
+    <property name="log-file" value="log.xml"/>
+</config>

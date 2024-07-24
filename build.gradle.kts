@@ -11,18 +11,21 @@ plugins {
 }
 
 group = "com.dongzh1.pixelworldpro"
-version = "1.3.4"
+version = "1.3.5"
 
 repositories {
+    maven("https://repo.codemc.io/repository/maven-public/")
     maven("https://oss.sonatype.org/content/groups/public/")
     maven("https://maven.mcyzj.cn:445/repository/maven-public/")
     maven("https://repo.wdsj.io/repository/minecraft/")
+    maven("https://repo.papermc.io/repository/maven-public/")
     mavenCentral()
 }
 
 dependencies {
     //implementation("com.xbaimiao.ktor:ktor-plugins-bukkit:1.0.7")
     implementation(kotlin("stdlib-jdk8"))
+    compileOnly("com.ghostchu:quickshop-api:5.2.0.5")
     compileOnly("com.zaxxer:HikariCP:4.0.3")
     compileOnly("com.j256.ormlite:ormlite-core:6.1")
     compileOnly("com.j256.ormlite:ormlite-jdbc:6.1")

@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: com.j256.ormlite:ormlite-core:6.1" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="com.j256.ormlite" artifactId="ormlite-core" version="6.1" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.j256.ormlite/ormlite-core/6.1/fe63d24f2a6a8d4d8d487b09d769f6ef8ba9aeb0/ormlite-core-6.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://H:/Program Files/GradleRepo/caches/modules-2/files-2.1/com.j256.ormlite/ormlite-core/6.1/c7085f34f4641af7691729463af0ed62c757dee9/ormlite-core-6.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

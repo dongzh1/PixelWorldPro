@@ -11,19 +11,19 @@ import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
 import com.dongzh1.pixelworldpro.expansion.Expansion
 import com.dongzh1.pixelworldpro.expansion.ExpansionManager.loadExpansion
 import com.dongzh1.pixelworldpro.gui.Gui
+import com.dongzh1.pixelworldpro.hook.QuickShop
 import com.dongzh1.pixelworldpro.listener.*
 import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.papi.Papi
 import com.dongzh1.pixelworldpro.tools.CommentConfig
 import com.dongzh1.pixelworldpro.world.Level
 import com.dongzh1.pixelworldpro.world.WorldImpl
+import com.ghostchu.quickshop.api.QuickShopAPI
 import com.mcyzj.libs.JiangLib
 import com.mcyzj.libs.Metrics
 import com.xbaimiao.easylib.EasyPlugin
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
-import com.xbaimiao.easylib.module.utils.registerListener
 import com.xbaimiao.easylib.module.utils.submit
-import com.xbaimiao.easylib.module.utils.unregisterListener
 import com.xbaimiao.easylib.task.EasyLibTask
 import org.bukkit.Bukkit
 import org.bukkit.WorldCreator
@@ -165,13 +165,7 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
                 if (config.getBoolean("debug")){
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 初始化数据库")
                 }
-                val initListener = OnPlayerLogin()
-                registerListener(initListener)
                 Papi.register()
-                //等待3秒后注销事件
-                submit(delay = 60) {
-                    unregisterListener(initListener)
-                }
                 //从1.0.x更新
                 val file = File("./PixelWorldPro_old")
                 if (file.exists() && !file.isDirectory) {
@@ -209,6 +203,11 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
                     }else{
                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 无法检测到RealisticSeasons，挂钩失败")
                     }
+                }
+                //绑定QuickShop联动
+                if (Bukkit.getPluginManager().isPluginEnabled("QuickShop-Hikari")) {
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测到QuickShop-Hikari，自动挂勾")
+                    Bukkit.getPluginManager().registerEvents(QuickShop(), this)
                 }
                 //启用定时卸载
                 if (config.getLong("WorldSetting.unloadTime") != (-1).toLong()) {

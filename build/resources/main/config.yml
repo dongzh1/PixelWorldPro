@@ -1,0 +1,139 @@
+#配置文件版本号,用于更新配置文件，请勿修改
+#Configuration file version number, used to update the configuration file, please do not modify
+version: 10
+#密钥
+token: ""
+#可以在lang文件夹查看已有的语言文件，如果你想要新增语言文件，请联系我
+#You can view the existing language files in the lang folder. If you want to add a new language file, please contact me
+lang: chinese
+#你的操作系统，windows或者linux
+#Your operating system, windows or linux
+os: windows
+#单端可以不用管,使用db即可，bungee群组需要使用mysql
+#If you are a single server, you can use db, if you are a bungee group, you need to use mysql
+Database: db
+#是否在bungee群组中，如果是，那么需要配置redis，且此项改为true
+#Whether in the bungee group, if so, you need to configure redis, and this item is changed to true
+Bungee: false
+#填写此服在bungee配置中的名称，如果不是bungee群组，那么此项可以不管
+#Fill in the name of this server in the bungee configuration. If it is not a bungee group, this item can be ignored
+ServerName: "server1"
+#这个服务器是否会用于创建世界，如果为false,则只有指定该服创建才会在该服创建世界，仅bungee下有效
+#Whether this server will be used to create the world, if false, only the specified server will create the world on this server
+buildWorld: true
+#玩家世界多久没有人就从服务器卸载，单位为秒，填-1为不卸载
+#How long the player world has not been unloaded from the server, in seconds, fill in -1 to not unload
+unloadTime: 1800
+#玩家世界多久没有人就从数据库删除，单位为天，填-1为不删除
+#How long the player world has not been deleted from the database, in seconds, fill in -1 to not delete
+deleteTime: -1
+#如果你不知道数据库对应的配置，那么只需要改host,port,database,user,passwd即可
+#If you don't know the configuration corresponding to the database, you only need to change host, port, database, user, passwd
+Mysql:
+  host: 127.0.0.1
+  port: 3306
+  database: PixelWorldPro
+  user: Adear
+  passwd: '123456'
+  ssl: false
+  HikariCP: true
+#redis数据库配置,Bungee为false可以不管
+#Redis database configuration, Bungee is false can not care
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password: ""
+#世界存放位置，填写绝对路径,禁止出现空格,使用/作为分隔符，路径只能有字母数字和/_-
+#World storage location, fill in the absolute path, no spaces are allowed, use / as a separator, the path can only have letters, numbers and /_-
+#WorldPath: "D:/PixelWorldPro/worlds_test-120"
+WorldPath: ""
+#世界模板存放位置，填写绝对路径,禁止出现空格,使用/作为分隔符，路径只能有英文数字和/_-
+#World template storage location, fill in the absolute path, no spaces are allowed, use / as a separator, the path can only have letters, numbers and /_-
+WorldTemplatePath: ""
+#玩家世界的设置
+#Player world settings
+WorldSetting:
+  # 世界游戏规则,写多少就设置多少，不写就是默认值，1.12以上生效
+  # World game rules, write as many as you want, if you don't write it, it is the default value
+  GameRule:
+    # 死亡不掉落
+    # Keep inventory on death
+    keepInventory: true
+    # 火焰传播
+    # Fire spread
+    doFireTick: false
+  # doImmediate: False
+  # 世界难度
+  # World difficulty
+  # EASY[和平模式] HARD[简单模式] NORMAL[困难模式]
+  WorldDifficulty: HARD
+  # 玩家世界和一个世界同步时间，填写世界名称，如果不需要同步时间，那么此项改为null，如果是bungee群组,时间格式为:世界名称:服务器名
+  # Synchronize the time of the player world with a world, fill in the world name, if you don't need to synchronize the time, then this item is changed to null, if it is a bungee group, the time format is: world name: server name
+  # WorldTime: 'world:server1'
+  # WorldTime: 'world'
+  WorldTime: 'null'
+  # 世界等级和对应的屏障范围大小
+  # World level and corresponding barrier range size
+  WorldLevel:
+    1: 100
+    2: 200
+    # 等级是自定义的文字,按照上下顺序进行升级,屏障范围大小为-1时,不会生成屏障
+    # The level is custom text, and the upgrade is performed in the order of up and down. When the barrier range size is -1, the barrier will not be generated
+    3: -1
+  Gamemode:
+    owner: SURVIVAL
+    member: SURVIVAL
+    anyone: ADVENTURE
+  Creator:
+    World: "auto"
+  #世界空置后卸载等待时间，默认单位为分钟,-1关闭
+  unloadTime: 30
+  #邀请设置
+  Inviter:
+    #设置邀请者的权限
+    permission: "anyone"
+  #自动保存世界时间，默认单位为分钟,0关闭
+  saveTime: 5
+
+#插件提供papi变量的一些格式
+#Some formats of papi variables provided by the plugin
+Papi:
+  #使用%pixelworldpro_showName%可获得此变量,代表玩家所在世界的显示名称,
+  #Use %pixelworldpro_showName% to get this variable，Represents the display name of the world where the player is located,
+  showname: '&a%player_name%`s world'
+  #对于特定世界的显示名称，比如玩家处于world世界，那么显示名称为world
+  #The display name for a specific world, such as the player in the world world, then the display name is world
+  shownameSet:
+    world: '&aworld'
+    world_nether: '&aworld_nether'
+    world_the_end: '&aworld_the_end'
+  #获取此玩家世界的创建时间,此处设置的是时间格式
+  #Get the creation time of this player world, the time format set here
+  createtime: 'yyyy_MM_dd_HH_mm_ss'
+  #当获取世界没有记录时的提示
+  #Prompt when there is no record when getting the world
+  noRecord: 'noRecord'
+  #世界的状态,开放,成员,不开放
+  #World status, open, member, not open
+
+  state:
+    anyone: '&a开放'
+    member: '&a成员'
+    inviter: '&a邀请'
+    owner: '&a不开放'
+  #权限组名称
+  group:
+    owner: "拥有者"
+    member: "信任者"
+    inviter: "访客"
+    anyone: "参观者"
+#PWP默认大厅服务器，仅bungee下有效
+lobby: "lobby"
+#PWP主命令
+mainCommand: "pwp"
+#PWP变量开头
+mainPapi: "pixelworldpro"
+#开启后控制台会输出更多debug信息，有助于错误排查
+debug: false
+
+
