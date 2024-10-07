@@ -153,6 +153,9 @@ class WorldList(val player: Player) {
             })
 
             listConfig.set("skull", listConfig.getString("skull")?.replacePlaceholder(worldOwner).colored())
+            //if (listConfig.getString("skull") == "%player_name%") {
+            //    listConfig.set("skull", null)
+            //}
             val item = XItemStack.deserialize(listConfig)
             listConfig.set("name", name)
             listConfig.set("lore", lore)

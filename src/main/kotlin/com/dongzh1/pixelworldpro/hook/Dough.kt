@@ -1,6 +1,7 @@
 ﻿package com.dongzh1.pixelworldpro.hook
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
+import com.dongzh1.pixelworldpro.listener.WorldProtect.Companion.getWorldNameUUID
 import org.bukkit.Location
 import org.bukkit.OfflinePlayer
 import java.util.*
@@ -20,7 +21,7 @@ object Dough {
         return p.uniqueId in worldData.members
     }
 
-    private fun getUUID(worldName: String): UUID? {
+    fun getUUID(worldName: String): UUID? {
         val realNamelist = worldName.split("/").size
         if (realNamelist < 2) {
             return null
@@ -29,5 +30,10 @@ object Dough {
         val uuidString: String? = Regex(pattern = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-z]{12}")
             .find(realName)?.value
         return UUID.fromString(uuidString)
+    }
+
+    fun isPlayerWorld(worldName:String,player: UUID):Boolean{
+        val worldNameReal = getWorldNameUUID(worldName)
+        return worldNameReal == player
     }
 }

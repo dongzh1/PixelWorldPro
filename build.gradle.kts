@@ -11,14 +11,17 @@ plugins {
 }
 
 group = "com.dongzh1.pixelworldpro"
-version = "1.3.5"
+version = "1.3.7"
 
 repositories {
+    maven("https://repo.william278.net/releases/")
+    maven("https://maven.aliyun.com/nexus/content/groups/public/")
     maven("https://repo.codemc.io/repository/maven-public/")
     maven("https://oss.sonatype.org/content/groups/public/")
-    maven("https://maven.mcyzj.cn:445/repository/maven-public/")
     maven("https://repo.wdsj.io/repository/minecraft/")
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://jitpack.io/")
+    maven("https://repo.olziedev.com/")
     mavenCentral()
 }
 
@@ -36,6 +39,9 @@ dependencies {
     compileOnly(fileTree("libs"))
     compileOnly("com.destroystokyo.paper:paper-api:1.16.5-R0.1-20211218.082619-371")
     compileOnly("com.googlecode.json-simple:json-simple:1.1")
+    compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.1")
+    compileOnly("net.william278.huskhomes:huskhomes-bukkit:4.7")
+    compileOnly("com.olziedev:playerwarps-api:7.6.1")
 }
 
 fun releaseTime() = LocalDate.now().format(DateTimeFormatter.ofPattern("y.M.d"))

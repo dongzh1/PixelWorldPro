@@ -13,7 +13,6 @@ import com.sk89q.worldedit.math.BlockVector3
 import com.sk89q.worldguard.WorldGuard
 import com.sk89q.worldguard.protection.managers.RemovalStrategy
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion
-import com.xbaimiao.template.expansion.api.world
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.GameRule
@@ -480,50 +479,58 @@ class WorldProtect : Listener {
         val gameMode = worldConfig.getString("worldData.${world.name}.gameMode")
         if (e.player.isOp)
             return
-        when(val permission = worldConfig.getString("worldData.${world.name}.enableGameMode")){
-            "off" ->{}
-            "op" ->{}
-            null ->{}
-            else ->{
-                if(e.player.hasPermission(permission)){
-                    when(gameMode){
-                        "ADVENTURE" -> {
-                            e.player.gameMode = GameMode.ADVENTURE
-                            return
-                        }
+        val worldName = e.to.world!!.name
+        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)
+        if (worldData == null) {
+            when(val permission = worldConfig.getString("worldData.${world.name}.enableGameMode")){
+                "off" ->{}
+                "op" ->{}
+                null ->{}
+                else ->{
+                    if(e.player.hasPermission(permission)){
+                        when(gameMode){
+                            "ADVENTURE" -> {
+                                e.player.gameMode = GameMode.ADVENTURE
+                                return
+                            }
 
-                        "SURVIVAL" -> {
-                            e.player.gameMode = GameMode.SURVIVAL
-                            return
-                        }
+                            "SURVIVAL" -> {
+                                e.player.gameMode = GameMode.SURVIVAL
+                                return
+                            }
 
-                        "CREATIVE" -> {
-                            e.player.gameMode = GameMode.CREATIVE
-                            return
-                        }
+                            "CREATIVE" -> {
+                                e.player.gameMode = GameMode.CREATIVE
+                                return
+                            }
 
-                        "SPECTATOR" -> {
-                            e.player.gameMode = GameMode.SPECTATOR
-                            return
-                        }
+                            "SPECTATOR" -> {
+                                e.player.gameMode = GameMode.SPECTATOR
+                                return
+                            }
 
-                        "AUTO" -> {
-                            return
+                            "AUTO" -> {
+                                return
+                            }
                         }
+                    }else{
+                        e.isCancelled = true
                     }
-                }else{
-                    e.isCancelled = true
                 }
             }
+            return
         }
-        val worldName = e.to!!.world!!.name
-        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)?: return
         WorldImpl.setWorldBorder(e.to.world, worldData.worldLevel)
+        //如果玩家没有权限就返回
+        if (!e.player.hasPermission("pixelworldpro.command.tp")) {
+            e.isCancelled = true
+            return
+        }
         //如果不是玩家世界则返回
         if(isPlayerWorld(worldName, e.player.uniqueId))
             return
         //如果是同一世界/不同维度则返回
-        if (getWorldNameUUID(e.from.world!!.name) == getWorldNameUUID(e.to!!.world!!.name)){
+        if (getWorldNameUUID(e.from.world!!.name) == getWorldNameUUID(e.to.world!!.name)){
             return
         }
         WorldImpl.setWorldBorder(e.to!!.world!!, worldData.worldLevel)
@@ -547,6 +554,7 @@ class WorldProtect : Listener {
             "owner" -> {
                 e.player.sendMessage(PixelWorldPro.instance.lang().getString("CouldNotJoin")?: "此世界无法进入")
                 e.isCancelled = true
+                return
             }
             "member" ->{
                 if(worldData.members.contains(e.player.uniqueId)) {

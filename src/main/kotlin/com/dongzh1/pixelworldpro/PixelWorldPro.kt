@@ -11,14 +11,15 @@ import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
 import com.dongzh1.pixelworldpro.expansion.Expansion
 import com.dongzh1.pixelworldpro.expansion.ExpansionManager.loadExpansion
 import com.dongzh1.pixelworldpro.gui.Gui
-import com.dongzh1.pixelworldpro.hook.QuickShop
+import com.dongzh1.pixelworldpro.hook.ItemsAdder
+import com.dongzh1.pixelworldpro.hook.PlayerWarps
+import com.dongzh1.pixelworldpro.hook.QuickShopHikari
 import com.dongzh1.pixelworldpro.listener.*
 import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.papi.Papi
 import com.dongzh1.pixelworldpro.tools.CommentConfig
 import com.dongzh1.pixelworldpro.world.Level
 import com.dongzh1.pixelworldpro.world.WorldImpl
-import com.ghostchu.quickshop.api.QuickShopAPI
 import com.mcyzj.libs.JiangLib
 import com.mcyzj.libs.Metrics
 import com.xbaimiao.easylib.EasyPlugin
@@ -204,11 +205,21 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 无法检测到RealisticSeasons，挂钩失败")
                     }
                 }
-                //绑定QuickShop联动
-                if (Bukkit.getPluginManager().isPluginEnabled("QuickShop-Hikari")) {
-                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测到QuickShop-Hikari，自动挂勾")
-                    Bukkit.getPluginManager().registerEvents(QuickShop(), this)
-                }
+                //绑定QuickShop-Hikari联动
+                try {
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro QuickShop-Hikari尝试挂勾")
+                    Bukkit.getPluginManager().registerEvents(QuickShopHikari(), this)
+                } catch (_:Exception) {}
+                //绑定ItemsAdder联动
+                try {
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro ItemsAdder尝试挂勾")
+                    Bukkit.getPluginManager().registerEvents(ItemsAdder(), this)
+                }catch (_:Exception) {}
+                //绑定PlayerWarps联动
+                try {
+                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro PlayerWarps尝试挂勾")
+                    Bukkit.getPluginManager().registerEvents(PlayerWarps(), this)
+                }catch (_:Exception) {}
                 //启用定时卸载
                 if (config.getLong("WorldSetting.unloadTime") != (-1).toLong()) {
                     WorldImpl.unloadtimeoutworld()

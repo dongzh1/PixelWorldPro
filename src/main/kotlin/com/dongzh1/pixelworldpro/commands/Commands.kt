@@ -826,13 +826,35 @@ class Commands {
                     sender.sendMessage(lang("NeedPlayer"))
                     return@exec
                 }
+                val player = sender as Player
                 //传送到指定玩家的世界
                 val uuid = Bukkit.getOfflinePlayer(args[0]).uniqueId
-                if (PixelWorldPro.databaseApi.getWorldData(uuid) == null) {
-                    sender.sendMessage(lang("WorldNotExist"))
+                val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
+                if (worldData == null) {
+                    player.sendMessage(lang("WorldNotExist"))
                     return@exec
                 }
-                TeleportApi.Factory.teleportApi!!.teleport((sender as Player).uniqueId, uuid)
+
+                if (!sender.hasPermission("pixelworldpro.command.admin")) {
+                    when (worldData.state) {
+                        "owner" -> {
+                            player.sendMessage(
+                                PixelWorldPro.instance.lang().getString("CouldNotJoin") ?: "此世界无法进入"
+                            )
+                            return@exec
+                        }
+
+                        "member" -> {
+                            if (!worldData.members.contains(player.uniqueId)) {
+                                player.sendMessage(
+                                    PixelWorldPro.instance.lang().getString("CouldNotJoin") ?: "此世界无法进入"
+                                )
+                                return@exec
+                            }
+                        }
+                    }
+                }
+                TeleportApi.Factory.teleportApi!!.teleport(player.uniqueId, uuid)
                 sender.sendMessage(lang("Teleport"))
             }
             if (args.size == 2) {

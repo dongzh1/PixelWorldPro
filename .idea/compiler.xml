@@ -1,15 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <option name="BUILD_PROCESS_HEAP_SIZE" value="2048" />
+    <option name="BUILD_PROCESS_HEAP_SIZE" value="4096" />
     <bytecodeTargetLevel target="17">
-      <module name="com.xbaimiao.template.EasyTemplate.main" target="1.8" />
-      <module name="EasyTemplate" target="1.8" />
-      <module name="EasyTemplate.test" target="1.8" />
       <module name="PixelWorldPro" target="1.8" />
       <module name="PixelWorldPro.test" target="1.8" />
       <module name="V1.PixelWorldPro.main" target="1.8" />
-      <module name="项目.PixelWorldPro.main" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
