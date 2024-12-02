@@ -7,7 +7,9 @@ import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.utils.colored
 import com.xbaimiao.easylib.xseries.XItemStack
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import java.util.*
 
 class WorldList(val player: Player) {
@@ -157,6 +159,11 @@ class WorldList(val player: Player) {
             //    listConfig.set("skull", null)
             //}
             val item = XItemStack.deserialize(listConfig)
+            if (skull != null) {
+                val p = Bukkit.getPlayer(skull)
+                val pSkull = ItemStack(Material.PLAYER_HEAD)
+                val mate = pSkull.itemMeta
+            }
             listConfig.set("name", name)
             listConfig.set("lore", lore)
             listConfig.set("skull", skull)

@@ -15,6 +15,7 @@ import com.dongzh1.pixelworldpro.tools.Install
 import com.dongzh1.pixelworldpro.world.Config
 import com.dongzh1.pixelworldpro.tools.JiangCore
 import com.dongzh1.pixelworldpro.tools.MoveDataBase
+import com.dongzh1.pixelworldpro.world.Clean
 import com.dongzh1.pixelworldpro.world.Level
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -1540,6 +1541,22 @@ class Commands {
         }
     }
 
+    private val clean = command<CommandSender>("clean") {
+        permission = "pixelworldpro.command.admin"
+        exec {
+            if (args.size > 2) {
+                if (args[0] != "yes") {
+                    return@exec
+                }
+                if (args[1] == "true") {
+                    Clean.clean(true)
+                } else {
+                    Clean.clean(false)
+                }
+            }
+        }
+    }
+
     private fun lang(string: String): String {
         return PixelWorldPro.instance.lang().getStringColored(string)
     }
@@ -1568,5 +1585,6 @@ class Commands {
         sub(install)
         sub(gameLocation)
         sub(moveToMysql)
+        sub(clean)
     }
 }

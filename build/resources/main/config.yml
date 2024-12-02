@@ -24,9 +24,6 @@ buildWorld: true
 #玩家世界多久没有人就从服务器卸载，单位为秒，填-1为不卸载
 #How long the player world has not been unloaded from the server, in seconds, fill in -1 to not unload
 unloadTime: 1800
-#玩家世界多久没有人就从数据库删除，单位为天，填-1为不删除
-#How long the player world has not been deleted from the database, in seconds, fill in -1 to not delete
-deleteTime: -1
 #如果你不知道数据库对应的配置，那么只需要改host,port,database,user,passwd即可
 #If you don't know the configuration corresponding to the database, you only need to change host, port, database, user, passwd
 Mysql:
@@ -135,5 +132,7 @@ mainCommand: "pwp"
 mainPapi: "pixelworldpro"
 #开启后控制台会输出更多debug信息，有助于错误排查
 debug: false
+#单位：天
+clean: 30
 
 

@@ -50,6 +50,26 @@ class TeleportImpl: TeleportApi {
     override fun teleport(uuid: UUID, playerUuid: UUID) {
         submit {
             val worldData = PixelWorldPro.databaseApi.getWorldData(playerUuid) ?: return@submit
+            val player = Bukkit.getPlayer(uuid)?:return@submit
+            if (!player.hasPermission("pixelworldpro.command.admin")) {
+                when (worldData.state) {
+                    "owner" -> {
+                        player.sendMessage(
+                            PixelWorldPro.instance.lang().getString("CouldNotJoin") ?: "此世界无法进入"
+                        )
+                        return@submit
+                    }
+
+                    "member" -> {
+                        if (!worldData.members.contains(player.uniqueId)) {
+                            player.sendMessage(
+                                PixelWorldPro.instance.lang().getString("CouldNotJoin") ?: "此世界无法进入"
+                            )
+                            return@submit
+                        }
+                    }
+                }
+            }
             if (PixelWorldPro.instance.isBungee()) {
                 //如果是bungee模式则发送消息到bungee
                 if (RedisManager.isLock(playerUuid)){
@@ -63,7 +83,6 @@ class TeleportImpl: TeleportApi {
                                 Bungee.connect(Bukkit.getPlayer(uuid)!!, list[1])
                                 if (list[1] == Server.getLocalServer().realName){
                                     val world = Bukkit.getWorld("${worldData.worldName}/world")?:return@submit
-                                    val player = Bukkit.getPlayer(uuid)?:return@submit
                                     try {
                                         player.teleport(Location(world, worldData.location["x"]!!, worldData.location["y"]!!, worldData.location["z"]!!))
                                     }catch (_:Exception) {

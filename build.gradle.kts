@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.dongzh1.pixelworldpro"
-version = "1.3.7"
+version = "1.3.9"
 
 repositories {
     maven("https://repo.william278.net/releases/")

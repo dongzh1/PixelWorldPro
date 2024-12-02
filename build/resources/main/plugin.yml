@@ -1,6 +1,6 @@
 name: PixelWorldPro
 main: com.dongzh1.pixelworldpro.PixelWorldPro
-version: '1.3.5'
+version: '1.3.7'
 author: dong&mcyzj
 softdepend: [ Vault, PlaceholderAPI, PlayerPoints, PixelPlayerWorld, ShadowLevels, RealisticSeasons, WorldGuard, WorldEdit]
 api-version: 1.13

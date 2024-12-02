@@ -384,6 +384,8 @@ object WorldImpl : WorldApi {
             return false
         }
         val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)!!
+        Clean.load(worldData)
+
         //val dimensionData = getWorldDimensionData(worldData.worldName)
         if (PixelWorldPro.instance.isBungee()) {
             return if (RedisManager.isLock(uuid)) {
