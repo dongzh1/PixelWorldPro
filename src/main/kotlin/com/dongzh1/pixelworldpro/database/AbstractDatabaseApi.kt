@@ -58,7 +58,7 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
             //redis数据是否还在
             if (RedisManager.test()){
                 Bukkit.getConsoleSender().sendMessage("§a[PixelWorldPro] §eRedis data load completed")
-                return
+                //return
             }
         }
         //查询所有数据并传入redis
@@ -102,6 +102,7 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
             submit(async = true) {
                 dataTable.create(dao)
             }
+
         }else {
             //更新数据库
             submit(async = true) {
@@ -151,11 +152,7 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
             .find(realName)?.value
         //uuidString?.let { Bukkit.getConsoleSender().sendMessage(it) }
         val uuid = UUID.fromString(uuidString)
-        val data = if (PixelWorldPro.instance.isBungee()) {
-            RedisManager[uuid]
-        } else {
-            Serialize.deserialize(PixelWorldPro.instance.getData(uuid))
-        }
+        val data = getWorldData(uuid)
         return data
     }
 

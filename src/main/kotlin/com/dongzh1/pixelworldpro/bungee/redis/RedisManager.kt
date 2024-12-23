@@ -9,6 +9,7 @@ import com.dongzh1.pixelworldpro.tools.Serialize
 import com.xbaimiao.easylib.EasyPlugin
 import com.xbaimiao.easylib.module.utils.Module
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 object RedisManager : Module<EasyPlugin> {
@@ -17,7 +18,10 @@ object RedisManager : Module<EasyPlugin> {
 
     operator fun set(uuid: UUID, worldData: String) {
         jedisPool.resource.also {
+            it.del("PixelWorldPro${uuid}")
+            it.save()
             it.set("PixelWorldPro${uuid}", worldData)
+            it.save()
             it.close()
         }
     }
@@ -78,31 +82,6 @@ object RedisManager : Module<EasyPlugin> {
         push("setSeed|,|${uuid}|,|${seed}")
     }
 
-    fun getMspt(): String? {
-        jedisPool.resource.also {
-            val value = it.get("PixelWorldPromspt")
-            it.close()
-            if (value == null) {
-                return null
-            }
-            return value
-        }
-    }
-    fun removeMspt() {
-        if (PixelWorldPro.instance.config.getBoolean("buildWorld")) {
-            jedisPool.resource.also {
-                it.del("PixelWorldPromspt")
-                it.close()
-            }
-        }
-    }
-    fun removeLock() {
-        jedisPool.resource.also {
-            it.del("PixelWorldProlock")
-            it.close()
-        }
-    }
-
     fun setLock(uuid: UUID) {
         val lockValue = getLock()
         if (lockValue == null){
@@ -146,6 +125,24 @@ object RedisManager : Module<EasyPlugin> {
                 }
             }
         }
+    }
+
+    fun getLocks(): ArrayList<UUID> {
+        val locks = ArrayList<UUID>()
+        val lockValue = getLock()
+        if (lockValue == null){
+            return locks
+        }else {
+            for (lock in lockValue.split(",")) {
+                if (lock.contains(":")) {
+                    try {
+                        locks.add(UUID.fromString(lock.split(":")[0]))
+                    } catch (_: Exception) {
+                    }
+                }
+            }
+        }
+        return locks
     }
 
     private fun removeLock(serverName: String){

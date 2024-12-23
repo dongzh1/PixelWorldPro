@@ -15,7 +15,7 @@ object Papi: PlaceholderExpansion() {
     override val identifier: String
         get() = PixelWorldPro.instance.config.getString("mainPapi")!!
     override val version: String
-        get() = "1.2.2"
+        get() = "1.3.10"
 
     override fun onRequest(p: OfflinePlayer, params: String): String? {
         when(params){
@@ -30,6 +30,14 @@ object Papi: PlaceholderExpansion() {
             "showname" -> {
                 //这个玩家对应世界的显示名
                 return PixelWorldPro.instance.config.getString("Papi.showname")!!.colored().replacePlaceholder(p)
+            }
+            "isownworld" -> {
+                if (!p.isOnline) {
+                    return "false"
+                }
+                val player = p.player!!
+                val worldData = PixelWorldPro.databaseApi.getWorldData(player.uniqueId) ?: return "false"
+                return (player.world.name == worldData.worldName + "/world").toString()
             }
             "showname_world" ->{
                 //玩家所在世界的显示名

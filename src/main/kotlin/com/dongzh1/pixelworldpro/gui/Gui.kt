@@ -6,6 +6,7 @@ import com.xbaimiao.easylib.bridge.replacePlaceholder
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.ui.Basic
 import com.xbaimiao.easylib.module.utils.colored
+import com.xbaimiao.easylib.module.utils.submit
 import com.xbaimiao.easylib.xseries.XItemStack
 import org.bukkit.OfflinePlayer
 import org.bukkit.configuration.ConfigurationSection
@@ -56,6 +57,9 @@ object Gui {
                     }
                     "WorldList.yml" ->{
                         WorldList(player).open()
+                    }
+                    "WorldOnlineList.yml" -> {
+                        WorldOnlineList(player).open()
                     }
                     "WorldEdit.yml" ->{
                         WorldEdit(player).open()

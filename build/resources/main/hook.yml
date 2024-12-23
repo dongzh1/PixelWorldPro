@@ -1,0 +1,6 @@
+﻿QuickShop-Hikari:
+  enable: false
+ItemsAdder:
+  enable: false
+PlayerWarps:
+  enable: false

@@ -62,6 +62,7 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
     val worldBorder = BuiltInConfiguration("WorldBorder.yml")
     val advancedWorldSettings = BuiltInConfiguration("AdvancedWorldSettings.yml")
     val world = BuiltInConfiguration("World.yml")
+    val hookConfig = BuiltInConfiguration("hook.yml")
     val plugin = this
     private val eula = BuiltInConfiguration("eula.yml")
 
@@ -206,20 +207,32 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
                     }
                 }
                 //绑定QuickShop-Hikari联动
-                try {
-                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro QuickShop-Hikari尝试挂勾")
-                    Bukkit.getPluginManager().registerEvents(QuickShopHikari(), this)
-                } catch (_:Exception) {}
+                if (hookConfig.getBoolean("QuickShop-Hikari.enable")) {
+                    try {
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro QuickShop-Hikari尝试挂勾")
+                        Bukkit.getPluginManager().registerEvents(QuickShopHikari(), this)
+                    } catch (_: Exception) {
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro QuickShop-Hikari挂钩失败")
+                    }
+                }
                 //绑定ItemsAdder联动
-                try {
-                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro ItemsAdder尝试挂勾")
-                    Bukkit.getPluginManager().registerEvents(ItemsAdder(), this)
-                }catch (_:Exception) {}
+                if (hookConfig.getBoolean("ItemsAdder.enable")) {
+                    try {
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro ItemsAdder尝试挂勾")
+                        Bukkit.getPluginManager().registerEvents(ItemsAdder(), this)
+                    } catch (_: Exception) {
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro ItemsAdder挂钩失败")
+                    }
+                }
                 //绑定PlayerWarps联动
-                try {
-                    Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro PlayerWarps尝试挂勾")
-                    Bukkit.getPluginManager().registerEvents(PlayerWarps(), this)
-                }catch (_:Exception) {}
+                if (hookConfig.getBoolean("PlayerWarps.enable")) {
+                    try {
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro PlayerWarps尝试挂勾")
+                        Bukkit.getPluginManager().registerEvents(PlayerWarps(), this)
+                    } catch (_: Exception) {
+                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro PlayerWarps挂钩失败")
+                    }
+                }
                 //启用定时卸载
                 if (config.getLong("WorldSetting.unloadTime") != (-1).toLong()) {
                     WorldImpl.unloadtimeoutworld()
@@ -339,6 +352,9 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
         }
         if (!File(dataFolder, "gui/WorldList.yml").exists()) {
             saveResource("gui/WorldList.yml", false)
+        }
+        if (!File(dataFolder, "gui/WorldOnlineList.yml").exists()) {
+            saveResource("gui/WorldOnlineList.yml", false)
         }
         if (!File(dataFolder, "gui/custom/customGui.yml").exists()) {
             saveResource("gui/custom/customGui.yml", false)

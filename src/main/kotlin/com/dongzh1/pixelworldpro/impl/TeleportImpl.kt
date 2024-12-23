@@ -80,14 +80,15 @@ class TeleportImpl: TeleportApi {
                         for (value in lockValue) {
                             val list = value.split(":")
                             if (list[0] == playerUuid.toString()) {
-                                Bungee.connect(Bukkit.getPlayer(uuid)!!, list[1])
                                 if (list[1] == Server.getLocalServer().realName){
-                                    val world = Bukkit.getWorld("${worldData.worldName}/world")?:return@submit
+                                    val world = Bukkit.getWorld(worldData.worldName+"/world")?:return@submit
                                     try {
                                         player.teleport(Location(world, worldData.location["x"]!!, worldData.location["y"]!!, worldData.location["z"]!!))
                                     }catch (_:Exception) {
                                         player.teleport(world.spawnLocation)
                                     }
+                                } else {
+                                    Bungee.connect(Bukkit.getPlayer(uuid)!!, list[1])
                                 }
                             }
                         }

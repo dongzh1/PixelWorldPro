@@ -102,7 +102,7 @@ object Migrate {
                 } catch (e: Exception) {
                     player.sendMessage("迁移${worlddata.user}数据失败")
                     Bukkit.getConsoleSender().sendMessage("迁移${worlddata.user}数据失败")
-                    Bukkit.getConsoleSender().sendMessage(e.toString())
+                    e.printStackTrace()
                 }
             }
         }.start()

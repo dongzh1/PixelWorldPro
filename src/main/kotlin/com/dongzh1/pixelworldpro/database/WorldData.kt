@@ -13,7 +13,7 @@ data class WorldData (
     val state: String,
     val createTime: String,
     val lastTime: Long,
-    val onlinePlayerNumber: Int,
+    var onlinePlayerNumber: Int,
     val isCreateNether: Boolean,
     val isCreateEnd: Boolean,
     var inviter: List<UUID>,

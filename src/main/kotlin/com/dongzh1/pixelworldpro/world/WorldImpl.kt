@@ -11,6 +11,7 @@ import com.dongzh1.pixelworldpro.database.PlayerData
 import com.dongzh1.pixelworldpro.database.WorldData
 import com.dongzh1.pixelworldpro.gui.Gui
 import com.dongzh1.pixelworldpro.listener.WorldProtect.Companion.getWorldNameUUID
+import com.dongzh1.pixelworldpro.tools.Serialize
 import com.dongzh1.pixelworldpro.world.Config.getWorldDimensionData
 import com.dongzh1.pixelworldpro.world.Config.setWorldDimensionData
 import com.wimbli.WorldBorder.Config
@@ -32,7 +33,7 @@ object WorldImpl : WorldApi {
     private val unloadWorldList: MutableList<UUID> = mutableListOf()
     private val createWorldList: MutableList<UUID> = mutableListOf()
     private val loadWorldList: MutableList<UUID> = mutableListOf()
-    private val localWorldList: MutableList<UUID> = mutableListOf()
+    val localWorldList: MutableList<UUID> = mutableListOf()
     private val timeOutWorldList: MutableList<String> = mutableListOf()
     private val seedMap = mutableMapOf<UUID, String>()
     val worldMap = mutableMapOf<UUID, WorldData>()
@@ -122,7 +123,6 @@ object WorldImpl : WorldApi {
         val checkString = WorldFile.isBreak(file)
         if (checkString != "ok") {
             MessageApi.Factory.messageApi!!.sendMessage(uuid, checkString)
-            Bukkit.getConsoleSender().sendMessage(checkString)
             return false
         }
         if (PixelWorldPro.instance.isBungee()) {
@@ -404,6 +404,26 @@ object WorldImpl : WorldApi {
                     worldcreator = worldcreator.generator(PixelWorldPro.instance.config.getString("WorldSetting.Creator.World"))
                 }
                 val world = Bukkit.createWorld(worldcreator)
+
+                submit(async = true) {
+                    var worlds = world
+                    var data = worldData
+                    while (worlds != null) {
+                        sleep(5000)
+                        data = PixelWorldPro.databaseApi.getWorldData(uuid)?:continue
+                        worlds = Bukkit.getWorld(data.worldName + "/world")
+                        val players = worlds?.players?.size
+                        if (players != null) {
+                            data.onlinePlayerNumber = players
+                            if (PixelWorldPro.instance.isBungee()) {
+                                RedisManager.set(uuid, Serialize.serialize(data))
+                            } else {
+                                PixelWorldPro.instance.setData(uuid, Serialize.serialize(data))
+                            }
+                        }
+                    }
+                }
+
                 if (world == null) {
                     RedisManager.removeLock(uuid)
                     false
@@ -789,8 +809,6 @@ object WorldImpl : WorldApi {
                 for (gameRule in worldData.gameRule.keys) {
                     val value = worldData.gameRule[gameRule]!!
                     try {
-                        println(gameRule)
-                        println(value)
                         world.setGameRuleValue(gameRule, value)
                     } catch (e: Exception) {
                         Bukkit.getConsoleSender().sendMessage("设置${world.name}世界的自定义规则${gameRule}失败，自定义的值${value}")

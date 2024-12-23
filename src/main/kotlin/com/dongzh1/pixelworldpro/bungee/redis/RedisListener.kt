@@ -174,6 +174,8 @@ class RedisListener : JedisPubSub() {
                         return
                     }else{
                         if (WorldImpl.unloadWorld(world)){
+                            worldData.onlinePlayerNumber = 0
+                            PixelWorldPro.databaseApi.setWorldData(uuid, worldData)
                             RedisManager.push("unloadWorldBack|,|${uuid}")
                         }
                     }
@@ -235,40 +237,52 @@ class RedisListener : JedisPubSub() {
                         return
                     }
                     Thread {
-                        var times = 0
-                        var world = Bukkit.getWorld("$worldName/world")
-                        if (world == null) {
+                        var i = 0
+                        while (i < 5) {
+                            var times = 0
+                            var world = Bukkit.getWorld("$worldName/world")
+                            if (world == null) {
+                                while (times < 1000) {
+                                    times += 1
+                                    world = Bukkit.getWorld("$worldName/world")
+                                    if (world != null) {
+                                        break
+                                    }
+                                    sleep(500)
+                                }
+                                if (world == null) {
+                                    Bukkit.getConsoleSender()
+                                        .sendMessage("§aPixelWorldPro Bungee传送出错啦：无法找到世界 $worldName/world")
+                                    break
+                                }
+                            }
+                            val location = world.spawnLocation
+                            val worldData = PixelWorldPro.databaseApi.getWorldData(world.name)!!
+                            times = 0
                             while (times < 1000) {
-                                times += 1
-                                world = Bukkit.getWorld("$worldName/world")
-                                if (world != null) {
+                                val player = Bukkit.getPlayer(uuid)
+                                if (player != null) {
+                                    submit {
+                                        try {
+                                            player.teleport(
+                                                Location(
+                                                    world,
+                                                    worldData.location["x"]!!,
+                                                    worldData.location["y"]!!,
+                                                    worldData.location["z"]!!
+                                                )
+                                            )
+                                        } catch (_: Exception) {
+                                            player.teleport(location)
+                                        }
+                                        
+                                    }
                                     break
                                 }
                                 sleep(500)
+                                times += 1
                             }
-                            if (world == null) {
-                                Bukkit.getConsoleSender()
-                                    .sendMessage("§aPixelWorldPro Bungee传送出错啦：无法找到世界 $worldName/world")
-                                return@Thread
-                            }
-                        }
-                        val location = world.spawnLocation
-                        val worldData = PixelWorldPro.databaseApi.getWorldData(world.name)!!
-                        times = 0
-                        while (times < 1000) {
-                            val player = Bukkit.getPlayer(uuid)
-                            if (player != null) {
-                                submit {
-                                    try {
-                                        player.teleport(Location(world, worldData.location["x"]!!, worldData.location["y"]!!, worldData.location["z"]!!))
-                                    }catch (_:Exception) {
-                                        player.teleport(location)
-                                    }
-                                }
-                                return@Thread
-                            }
-                            sleep(500)
-                            times += 1
+                            i++
                         }
                     }.start()
                 }
