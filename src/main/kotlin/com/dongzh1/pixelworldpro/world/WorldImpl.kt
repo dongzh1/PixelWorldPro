@@ -408,18 +408,25 @@ object WorldImpl : WorldApi {
                 submit(async = true) {
                     var worlds = world
                     var data = worldData
-                    while (worlds != null) {
+                    while (true) {
                         sleep(5000)
                         data = PixelWorldPro.databaseApi.getWorldData(uuid)?:continue
                         worlds = Bukkit.getWorld(data.worldName + "/world")
-                        val players = worlds?.players?.size
-                        if (players != null) {
-                            data.onlinePlayerNumber = players
+                        if (worlds == null) {
+                            data.onlinePlayerNumber = 0
                             if (PixelWorldPro.instance.isBungee()) {
-                                RedisManager.set(uuid, Serialize.serialize(data))
+                                RedisManager[uuid] = Serialize.serialize(data)
                             } else {
                                 PixelWorldPro.instance.setData(uuid, Serialize.serialize(data))
                             }
+                            break
+                        }
+                        val players = worlds.players.size
+                        data.onlinePlayerNumber = players
+                        if (PixelWorldPro.instance.isBungee()) {
+                            RedisManager[uuid] = Serialize.serialize(data)
+                        } else {
+                            PixelWorldPro.instance.setData(uuid, Serialize.serialize(data))
                         }
                     }
                 }

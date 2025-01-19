@@ -76,7 +76,7 @@ class WorldOnlineList(val player: Player) {
 
     //获取list对应的格子
     private var intList = mutableListOf<Int>()
-    private fun build(page: Int = 1, isTrust: Boolean = false, gui: String = "WorldList.yml"): BasicCharMap {
+    private fun build(page: Int = 1, isTrust: Boolean = false, gui: String = "WorldOnlineList.yml"): BasicCharMap {
         if (PixelWorldPro.instance.config.getBoolean("debug")){
             Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 构建玩家世界列表菜单")
         }
@@ -218,7 +218,7 @@ class WorldOnlineList(val player: Player) {
         return BasicCharMap(basic, charMap)
     }
 
-    fun open(page: Int = 1, isTrust: Boolean = false, gui: String = "WorldList.yml") {
+    fun open(page: Int = 1, isTrust: Boolean = false, gui: String = "WorldOnlineList.yml") {
         if (PixelWorldPro.instance.config.getBoolean("debug")){
             Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 打开第 $page 页玩家世界列表菜单")
         }

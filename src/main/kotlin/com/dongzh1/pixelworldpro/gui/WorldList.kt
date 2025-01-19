@@ -212,6 +212,20 @@ class WorldList(val player: Player) {
                                     if (PixelWorldPro.instance.config.getBoolean("debug")){
                                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 打开下一页玩家世界列表菜单")
                                     }
+                                    while (true) {
+                                        if (guiData.value.type == "Page") {
+                                            val item = basic.items[guiData.key] ?: break
+                                            val meta = item.itemMeta!!
+                                            meta.setDisplayName(meta.displayName.replace("{page}", page.toString()))
+                                            val lore = meta.lore?.map { it.replace("{page}", page.toString()) }
+                                                ?.toMutableList()
+                                            meta.lore = lore
+                                            item.itemMeta = meta
+                                            basic.set(guiData.key, item)
+                                            break
+                                        }
+                                        break
+                                    }
                                     start = intList.size * page
                                     open(page + 1, isTrust, gui)
                                 }else{
