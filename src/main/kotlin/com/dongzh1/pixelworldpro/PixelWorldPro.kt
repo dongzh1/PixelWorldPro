@@ -17,6 +17,7 @@ import com.dongzh1.pixelworldpro.hook.QuickShopHikari
 import com.dongzh1.pixelworldpro.listener.*
 import com.dongzh1.pixelworldpro.online.V2
 import com.dongzh1.pixelworldpro.papi.Papi
+import com.dongzh1.pixelworldpro.tools.CMIAdapt
 import com.dongzh1.pixelworldpro.tools.CommentConfig
 import com.dongzh1.pixelworldpro.world.Level
 import com.dongzh1.pixelworldpro.world.WorldImpl
@@ -24,6 +25,7 @@ import com.mcyzj.libs.JiangLib
 import com.mcyzj.libs.Metrics
 import com.xbaimiao.easylib.EasyPlugin
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
+import com.xbaimiao.easylib.module.utils.info
 import com.xbaimiao.easylib.module.utils.submit
 import com.xbaimiao.easylib.task.EasyLibTask
 import org.bukkit.Bukkit
@@ -64,6 +66,7 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
     val world = BuiltInConfiguration("World.yml")
     val hookConfig = BuiltInConfiguration("hook.yml")
     val plugin = this
+    var cmiAdapt: CMIAdapt? = null
     private val eula = BuiltInConfiguration("eula.yml")
 
     //val user = "mcyzj"
@@ -104,6 +107,8 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
                 if (config.getBoolean("debug")) {
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 注册全局监听")
                 }
+
+                loadCMIAdapt()
                 Bukkit.getPluginManager().registerEvents(OnPlayerJoin(), this)
                 Bukkit.getPluginManager().registerEvents(OnWorldUnload(), this)
                 Bukkit.getPluginManager().registerEvents(WorldProtect(), this)
@@ -282,6 +287,15 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
             } catch (_: Exception) {
 
             }
+        }
+        // 保存CMI的物品
+        cmiAdapt?.save()
+    }
+
+    private fun loadCMIAdapt() {
+        if (Bukkit.getPluginManager().isPluginEnabled("CMI")) {
+            cmiAdapt = CMIAdapt()
+            info("CMI adapt loaded")
         }
     }
 

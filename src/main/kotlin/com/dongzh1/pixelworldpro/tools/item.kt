@@ -1,8 +1,8 @@
 ﻿package com.dongzh1.pixelworldpro.tools
 
+import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.xbaimiao.easylib.bridge.replacePlaceholder
 import com.xbaimiao.easylib.module.chat.colored
-import com.xbaimiao.easylib.module.item.buildItem
 import com.xbaimiao.easylib.module.utils.parseToXMaterial
 import org.bukkit.OfflinePlayer
 import org.bukkit.configuration.ConfigurationSection
@@ -28,19 +28,25 @@ fun ConfigurationSection.convertItem(player: OfflinePlayer, variables: List<Vari
         customModelData = customModelData.replace(variable.key, variable.value)
     }
 
-    val itemStack = this.getString("material", "STONE")!!.parseToXMaterial().parseItem() ?: error("Unknown material")
+    var itemStack = this.getString("material", "STONE")!!.parseToXMaterial().parseItem() ?: error("Unknown material")
 
     val skull = this.getString("skull")
-
-    return buildItem(itemStack) {
-        this.name = name
-        this.damage = this@convertItem.getInt("durability")
-        this.lore.addAll(lore)
-        if (skull != null) {
-            this.skullOwner = skull
-        }
-        customModelData.toIntOrNull()?.let {
-            this.customModelData = it
+    if (skull != null) {
+        val head = PixelWorldPro.instance.cmiAdapt?.loadHead(skull)
+        if (head != null) {
+            itemStack = head
         }
     }
+
+    val meta = itemStack.itemMeta ?: return itemStack
+    meta.setDisplayName(name)
+    meta.lore = (meta.lore ?: ArrayList()).also {
+        it.addAll(lore)
+    }
+    if (customModelData.toIntOrNull() != null) {
+        meta.setCustomModelData(customModelData.toInt())
+    }
+    itemStack.itemMeta = meta
+    itemStack.durability = this.getInt("durability").toShort()
+    return itemStack
 }

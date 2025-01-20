@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.dongzh1.pixelworldpro"
-version = "1.3.10"
+version = "1.3.11"
 
 repositories {
     maven("https://repo.william278.net/releases/")
@@ -49,11 +49,6 @@ fun releaseTime() = LocalDate.now().format(DateTimeFormatter.ofPattern("y.M.d"))
 tasks {
     compileJava {
         options.encoding = "UTF-8"
-    }
-    compileKotlin {
-        kotlinOptions {
-            jvmTarget = "1.8"
-        }
     }
     shadowJar {
         arrayListOf(

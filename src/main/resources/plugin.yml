@@ -2,7 +2,16 @@ name: ${name}
 main: ${main}
 version: '${version}'
 author: dong&mcyzj
-softdepend: [ Vault, PlaceholderAPI, PlayerPoints, PixelPlayerWorld, ShadowLevels, RealisticSeasons, WorldGuard, WorldEdit]
+softdepend:
+  - Vault
+  - PlaceholderAPI
+  - PlayerPoints
+  - PixelPlayerWorld
+  - ShadowLevels
+  - RealisticSeasons
+  - WorldGuard
+  - WorldEdit
+  - CMI
 api-version: 1.13
 folia-supported: true
 
