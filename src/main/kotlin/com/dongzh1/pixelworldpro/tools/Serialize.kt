@@ -33,43 +33,49 @@ object Serialize {
                 JSONObject.toJSONString(worldData.gameRule).toString() + ",|.|," +
                 JSONObject.toJSONString(worldData.location).toString()
     }
+
     fun deserialize(value: String?): WorldData? {
         if (value == null) {
             return null
         }
 
         val list = value.split(",|.|,")
-        val members = if ((list[2].split(",").size == 1 && list[2].split(",")[0] == "")||
-            (list[2].split(",").size == 2 && list[2].split(",")[1] == ""&&list[2].split(",")[0] == "")) {
+        val members = if ((list[2].split(",").size == 1 && list[2].split(",")[0] == "") ||
+            (list[2].split(",").size == 2 && list[2].split(",")[1] == "" && list[2].split(",")[0] == "")
+        ) {
             mutableListOf<UUID>()
         } else {
-            list[2].split(",").dropLast(1).map{ UUID.fromString(it) }
+            list[2].split(",").dropLast(1).map { UUID.fromString(it) }
         }
-        val banPlayers = if ((list[4].split(",").size == 1 && list[4].split(",")[0] == "")||
-            (list[4].split(",").size == 2 && list[4].split(",")[1] == ""&&list[4].split(",")[0] == "")) {
+        val banPlayers = if ((list[4].split(",").size == 1 && list[4].split(",")[0] == "") ||
+            (list[4].split(",").size == 2 && list[4].split(",")[1] == "" && list[4].split(",")[0] == "")
+        ) {
             mutableListOf<UUID>()
         } else {
             list[4].split(",").dropLast(1).map { UUID.fromString(it) }
         }
-        val memberName = if ((list[3].split(",").size == 1 && list[3].split(",")[0] == "")||
-            (list[3].split(",").size == 2 && list[3].split(",")[1] == ""&&list[3].split(",")[0] == "")) {
+        val memberName = if ((list[3].split(",").size == 1 && list[3].split(",")[0] == "") ||
+            (list[3].split(",").size == 2 && list[3].split(",")[1] == "" && list[3].split(",")[0] == "")
+        ) {
             mutableListOf()
         } else {
             list[3].split(",").dropLast(1)
         }
-        val banName = if ((list[5].split(",").size == 1 && list[5].split(",")[0] == "")||
-            (list[5].split(",").size == 2 && list[5].split(",")[1] == ""&&list[5].split(",")[0] == "")) {
+        val banName = if ((list[5].split(",").size == 1 && list[5].split(",")[0] == "") ||
+            (list[5].split(",").size == 2 && list[5].split(",")[1] == "" && list[5].split(",")[0] == "")
+        ) {
             mutableListOf()
         } else {
             list[5].split(",").dropLast(1)
         }
         val inviter = mutableListOf<UUID>()
         if (list.size >= 13) {
-            if(list[12] != "") {
+            if (list[12] != "") {
                 for (id in list[12].split(",")) {
                     try {
                         inviter.add(UUID.fromString(id))
-                    } catch (_:Exception) {}
+                    } catch (_: Exception) {
+                    }
                 }
             }
         }
@@ -81,11 +87,11 @@ object Serialize {
                 val back: JsonObject = g.fromJson(list[13], JsonObject::class.java)
                 val gson = GsonBuilder().enableComplexMapKeySerialization().create()
                 val map: Map<String, String> = gson.fromJson(back, type)
-                for (key in map.keys){
+                for (key in map.keys) {
                     gameRule[key] = back.get(key).asString
                 }
             }
-        } catch (e:Exception){
+        } catch (e: Exception) {
             println(e)
         }
         val location = HashMap<String, Double>()
@@ -96,14 +102,14 @@ object Serialize {
                 val type = object : TypeToken<Map<String, String>>() {}.type
                 val gson = GsonBuilder().enableComplexMapKeySerialization().create()
                 val map: Map<String, String> = gson.fromJson(back, type)
-                for (key in map.keys){
+                for (key in map.keys) {
                     location[key] = back.get(key).asDouble
                 }
             }
-        } catch (e:Exception){
+        } catch (e: Exception) {
             println(e)
         }
-        val worldLevel = if (Level.config.getBoolean("shadowLevels.enable")){
+        val worldLevel = if (Level.config.getBoolean("shadowLevels.enable")) {
             try {
                 val realName = list[0].split("/")[1]
                 val uuidString: String? =
@@ -119,10 +125,10 @@ object Serialize {
                     return null
                 }
                 levelData.levels.toString()
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 list[1]
             }
-        }else{
+        } else {
             list[1]
         }
         return WorldData(
@@ -149,21 +155,23 @@ object Serialize {
                 "${playerData.memberNumber},|.|," +
                 playerData.inviterMsg.joinToString(",")
     }
+
     fun deserializePlayerData(value: String?): PlayerData? {
         if (value == null) {
             return null
         }
         val list = value.split(",|.|,")
-        val joinedWorld = if ((list[0].split(",").size == 1 && list[0].split(",")[0] == "")||
-            (list[0].split(",").size == 2 && list[0].split(",")[1] == ""&&list[0].split(",")[0] == "")) {
+        val joinedWorld = if ((list[0].split(",").size == 1 && list[0].split(",")[0] == "") ||
+            (list[0].split(",").size == 2 && list[0].split(",")[1] == "" && list[0].split(",")[0] == "")
+        ) {
             mutableListOf<UUID>()
         } else {
             //去掉最后一个
             list[0].split(",").dropLast(1).map { UUID.fromString(it) }
         }
         val inviter = mutableListOf<UUID>()
-        if(list.size >= 3){
-            if(list[2] != "") {
+        if (list.size >= 3) {
+            if (list[2] != "") {
                 for (id in list[2].split(",")) {
                     inviter.add(UUID.fromString(id))
                 }
@@ -175,6 +183,7 @@ object Serialize {
             inviter
         )
     }
+
     fun deserializeLocation(location: String): Location {
         val split = location.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         val world = Bukkit.getWorld(split[3])

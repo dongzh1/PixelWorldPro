@@ -9,8 +9,6 @@ import com.xbaimiao.easylib.module.database.Ormlite
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 
 abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
@@ -56,7 +54,7 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
         Bukkit.getConsoleSender().sendMessage("§a[PixelWorldPro] §eLoading data...")
         if (PixelWorldPro.instance.isBungee()) {
             //redis数据是否还在
-            if (RedisManager.test()){
+            if (RedisManager.test()) {
                 Bukkit.getConsoleSender().sendMessage("§a[PixelWorldPro] §eRedis data load completed")
                 //return
             }
@@ -73,9 +71,9 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
             }
             Bukkit.getConsoleSender().sendMessage("§a[PixelWorldPro] §eRedis data load completed")
             Bukkit.getConsoleSender().sendMessage("§a[PixelWorldPro] §eLoaded ${list.size} world data")
-        }else{
+        } else {
             list.forEach {
-                PixelWorldPro.instance.setData(it.user,it.data)
+                PixelWorldPro.instance.setData(it.user, it.data)
             }
             Bukkit.getConsoleSender().sendMessage("§a[PixelWorldPro] §edata load completed")
             Bukkit.getConsoleSender().sendMessage("§a[PixelWorldPro] §eLoaded ${list.size} world data")
@@ -84,16 +82,16 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
 
     }
 
-    override fun setWorldData(uuid: UUID,worldData: WorldData) {
+    override fun setWorldData(uuid: UUID, worldData: WorldData) {
         //查询是否有数据
         val data = hasWorldData(uuid)
         //写入redis或内存
         if (PixelWorldPro.instance.isBungee()) {
             RedisManager[uuid] = Serialize.serialize(worldData)
         } else {
-            PixelWorldPro.instance.setData(uuid,Serialize.serialize(worldData))
+            PixelWorldPro.instance.setData(uuid, Serialize.serialize(worldData))
         }
-        if (data == null){
+        if (data == null) {
             //写入数据库
             val dao = WorldDao()
             dao.user = uuid
@@ -103,7 +101,7 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
                 dataTable.create(dao)
             }
 
-        }else {
+        } else {
             //更新数据库
             submit(async = true) {
                 //查询并更新
@@ -148,7 +146,7 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
             return null
         }
         val realName = name.split("/")[realNamelist - 2]
-        val uuidString :String? = Regex(pattern = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-z]{12}")
+        val uuidString: String? = Regex(pattern = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-z]{12}")
             .find(realName)?.value
         //uuidString?.let { Bukkit.getConsoleSender().sendMessage(it) }
         val uuid = UUID.fromString(uuidString)
@@ -170,59 +168,64 @@ abstract class AbstractDatabaseApi(ormlite: Ormlite) : DatabaseApi {
             dataTable.delete(dao)
             val queryBuilder2 = playerTable.queryBuilder()
             val dao2List = queryBuilder2.where().like("data", "%$uuid%").query()
-            for (dao2 in dao2List){
-                dao2.data = dao2.data.replace("$uuid,","")
+            for (dao2 in dao2List) {
+                dao2.data = dao2.data.replace("$uuid,", "")
                 playerTable.update(dao2)
             }
         }
     }
-    override fun getWorldDataMap(): MutableMap<UUID,WorldData> {
-        var map = mutableMapOf<UUID,WorldData>()
+
+    override fun getWorldDataMap(): MutableMap<UUID, WorldData> {
+        var map = mutableMapOf<UUID, WorldData>()
         if (PixelWorldPro.instance.isBungee()) {
             map = RedisManager.getWorldDataMap()
-        }else{
+        } else {
             val dataMap = PixelWorldPro.instance.getDataMap()
-            for (data in dataMap){
+            for (data in dataMap) {
                 val uuid = UUID.fromString(data.key)
                 val worldData = Serialize.deserialize(data.value)!!
                 map[uuid] = worldData
             }
-            if (map.isEmpty()){
+            if (map.isEmpty()) {
                 return map
             }
             //排序
-            map = map.toList().sortedBy { (_, value) -> value.onlinePlayerNumber }.toMap() as MutableMap<UUID, WorldData>
+            map =
+                map.toList().sortedBy { (_, value) -> value.onlinePlayerNumber }.toMap() as MutableMap<UUID, WorldData>
         }
         return map
     }
-    override fun getWorldList(start:Int,number: Int): List<UUID> {
+
+    override fun getWorldList(start: Int, number: Int): List<UUID> {
         var list = mutableListOf<UUID>()
         if (PixelWorldPro.instance.isBungee()) {
             list = RedisManager.getWorldList()
-        }else{
+        } else {
             val dataMap = PixelWorldPro.instance.getDataMap()
-            for (data in dataMap){
+            for (data in dataMap) {
                 val uuid = UUID.fromString(data.key)
                 list.add(uuid)
             }
         }
-        if (list.size < start){
+        if (list.size < start) {
             return listOf()
         }
-        if (list.size < start + number){
-            return list.subList(start,list.size)
+        if (list.size < start + number) {
+            return list.subList(start, list.size)
         }
-        return list.subList(start,start + number)
+        return list.subList(start, start + number)
     }
+
     override fun getInstance(): DatabaseApi {
         return super.getInstance()
     }
-    private fun redisToMysql(mapData: Map<UUID,String>){
+
+    private fun redisToMysql(mapData: Map<UUID, String>) {
         mapData.forEach {
             //先查询
             val queryBuilder = dataTable.queryBuilder()
             var dao = queryBuilder.where().eq("user", it.key).queryForFirst()
-            if (dao != null){
+            if (dao != null) {
                 //跳过这个数据,继续循环
                 return@forEach
             }

@@ -10,22 +10,27 @@ class WorldDao {
 
     @DatabaseField(generatedId = true)
     var id: Int = 0
+
     //玩家uuid
     @DatabaseField(dataType = DataType.UUID, canBeNull = false, columnName = "user")
     lateinit var user: UUID
+
     //对应数据
-    @DatabaseField(dataType = DataType.LONG_STRING,canBeNull = false, columnName = "data")
+    @DatabaseField(dataType = DataType.LONG_STRING, canBeNull = false, columnName = "data")
     lateinit var data: String
 }
+
 @DatabaseTable(tableName = "PlayerData")
 class PlayerDao {
 
     @DatabaseField(generatedId = true)
     var id: Int = 0
+
     //玩家uuid
     @DatabaseField(dataType = DataType.UUID, canBeNull = false, columnName = "user")
     lateinit var user: UUID
+
     //对应数据
-    @DatabaseField(dataType = DataType.LONG_STRING,canBeNull = false, columnName = "data")
+    @DatabaseField(dataType = DataType.LONG_STRING, canBeNull = false, columnName = "data")
     lateinit var data: String
 }

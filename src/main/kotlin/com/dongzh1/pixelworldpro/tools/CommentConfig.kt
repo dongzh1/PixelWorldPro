@@ -15,11 +15,12 @@ import java.io.InputStreamReader
 
 object CommentConfig : YamlConfiguration() {
 
-    fun updateLang(path:String){
+    fun updateLang(path: String) {
         //获取文件夹的语言文件
         updateYaml("lang/$path.yml")
     }
-    fun updateConfig(){
+
+    fun updateConfig() {
         submit(async = true) {
             while (true) {
                 when (PixelWorldPro.instance.config.getInt("version")) {
@@ -54,12 +55,14 @@ object CommentConfig : YamlConfiguration() {
                         PixelWorldPro.instance.config.set("Papi.state.inviter", "&a邀请")
                         PixelWorldPro.instance.saveConfig()
                     }
+
                     6 -> {
                         Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新Config配置文件")
                         PixelWorldPro.instance.config.set("version", 7)
                         PixelWorldPro.instance.config.set("mainCommand", "pwp")
                         PixelWorldPro.instance.saveConfig()
                     }
+
                     7 -> {
                         Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新Config配置文件")
                         PixelWorldPro.instance.config.set("version", 8)
@@ -67,12 +70,14 @@ object CommentConfig : YamlConfiguration() {
                         PixelWorldPro.instance.config.set("debug", false)
                         PixelWorldPro.instance.saveConfig()
                     }
+
                     8 -> {
                         Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新Config配置文件")
                         PixelWorldPro.instance.config.set("version", 9)
                         PixelWorldPro.instance.config.set("WorldSetting.saveTime", 5)
                         PixelWorldPro.instance.saveConfig()
                     }
+
                     9 -> {
                         Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新Config配置文件")
                         PixelWorldPro.instance.config.set("version", 10)
@@ -107,6 +112,7 @@ object CommentConfig : YamlConfiguration() {
                         WorldFile.worldSetting.set("location.z.shifting", false)
                         WorldFile.worldSetting.saveToFile()
                     }
+
                     2 -> {
                         Bukkit.getConsoleSender().sendMessage("§ePixelWorldPro 更新AdvancedWorldSettings配置文件")
                         WorldFile.worldSetting.set("version", 3)
@@ -143,7 +149,8 @@ object CommentConfig : YamlConfiguration() {
             }
         }
     }
-    private fun updateYaml(path: String){
+
+    private fun updateYaml(path: String) {
         //获取插件文件的文件
         val yamlFile = File(PixelWorldPro.instance.dataFolder, path)
         //获取插件内的语言文件
@@ -160,7 +167,6 @@ object CommentConfig : YamlConfiguration() {
         }
         yamlFileConfig.save(yamlFile)
     }
-
 
 
 }

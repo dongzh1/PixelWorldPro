@@ -101,7 +101,7 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
                 Bukkit.getConsoleSender().sendMessage("§a有疑问请加群咨询789731437")
                 loadExpansion()
                 //注册全局监听
-                if (config.getBoolean("debug")){
+                if (config.getBoolean("debug")) {
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 注册全局监听")
                 }
                 Bukkit.getPluginManager().registerEvents(OnPlayerJoin(), this)
@@ -113,7 +113,7 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
                     isBungee = true
                     Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord")
                     val redisConfig = RedisConfig(config)
-                    if (config.getBoolean("debug")){
+                    if (config.getBoolean("debug")) {
                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 连接redis库")
                     }
                     Bukkit.getConsoleSender().sendMessage("RedisInfo: " + redisConfig.host + ":" + redisConfig.port)
@@ -122,11 +122,11 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
                     } else {
                         JedisPool(redisConfig, redisConfig.host, redisConfig.port)
                     }
-                    if (config.getBoolean("debug")){
+                    if (config.getBoolean("debug")) {
                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 创建redis监听")
                     }
                     redisListener = RedisListener()
-                    if (config.getBoolean("debug")){
+                    if (config.getBoolean("debug")) {
                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 初始化redis")
                     }
                     subscribeTask = submit(async = true) {
@@ -137,34 +137,34 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
                     Server().commandRoot.register()
                 }
                 //加载数据库
-                if (config.getBoolean("debug")){
+                if (config.getBoolean("debug")) {
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载数据")
                 }
                 if (config.getString("Database").equals("db", true)) {
-                    if (config.getBoolean("debug")){
+                    if (config.getBoolean("debug")) {
                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载sqlite数据库")
                     }
                     databaseApi = SQLiteDatabaseApi()
                 }
                 if (config.getString("Database").equals("mysql", true)) {
-                    if (config.getBoolean("debug")){
+                    if (config.getBoolean("debug")) {
                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 加载MySQL数据库")
                     }
                     databaseApi = MysqlDatabaseApi()
                 }
                 //提取到内存
-                if (config.getBoolean("debug")){
+                if (config.getBoolean("debug")) {
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 提取数据库数据至内存")
                 }
                 databaseApi.importWorldData()
                 //注册指令
-                if (config.getBoolean("debug")){
+                if (config.getBoolean("debug")) {
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 注册全局指令")
                 }
                 Commands().commandRoot.register()
 
                 //避免数据库未初始化玩家进入
-                if (config.getBoolean("debug")){
+                if (config.getBoolean("debug")) {
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 初始化数据库")
                 }
                 Papi.register()
@@ -179,7 +179,7 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
                     }
                 }
                 //绑定联动
-                if (config.getBoolean("debug")){
+                if (config.getBoolean("debug")) {
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测联动插件并挂钩")
                 }
                 //绑定JiangFriends联动
@@ -192,7 +192,7 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
                     if (Bukkit.getPluginManager().isPluginEnabled("ShadowLevels")) {
                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测到ShadowLevels，自动挂勾")
                         Bukkit.getPluginManager().registerEvents(ShadowLevels(), this)
-                    }else{
+                    } else {
                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 无法检测到ShadowLevels，挂钩失败")
                     }
                 }
@@ -202,7 +202,7 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
                     if (Bukkit.getPluginManager().isPluginEnabled("RealisticSeasons")) {
                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 检测到RealisticSeasons，自动挂勾")
                         Bukkit.getPluginManager().registerEvents(RealisticSeasons(), this)
-                    }else{
+                    } else {
                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 无法检测到RealisticSeasons，挂钩失败")
                     }
                 }
@@ -259,15 +259,16 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
             } else {
                 Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro Invalid token")
             }
-        }else{
+        } else {
             Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 您需要同意eula才能使用插件")
         }
     }
+
     override fun disable() {
         //卸载扩展
         try {
             expansion.onDisable()
-        }catch (_:Exception){
+        } catch (_: Exception) {
 
         }
 
@@ -278,7 +279,7 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
                 RedisManager.closeServer()
                 jedisPool.close()
                 subscribeTask.cancel()
-            }catch (_:Exception){
+            } catch (_: Exception) {
 
             }
         }
@@ -287,9 +288,11 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
     fun lang(): BuiltInConfiguration {
         return lang
     }
+
     private fun gettoken(): String? {
         return config.getString("token")
     }
+
     private fun saveLang() {
         val langs = listOf(
             "english",
@@ -298,15 +301,17 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
         for (lang in langs) {
             if (!File(dataFolder, "lang/$lang.yml").exists()) {
                 saveResource("lang/$lang.yml", false)
-            }else{
+            } else {
                 CommentConfig.updateLang(lang)
             }
         }
         reloadLang()
     }
+
     private fun reloadLang() {
         lang = BuiltInConfiguration("lang/${config.getString("lang")}.yml")
     }
+
     override fun reloadConfig() {
         super.reloadConfig()
         reloadLang()
@@ -329,12 +334,15 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
     fun getData(uuid: UUID): String? {
         return dataMap[uuid.toString()]
     }
+
     fun getDataMap(): MutableMap<String, String> {
         return dataMap
     }
+
     fun removeData(uuid: UUID) {
         dataMap.remove(uuid.toString())
     }
+
     fun isBungee(): Boolean {
         return isBungee
     }
@@ -342,6 +350,7 @@ class PixelWorldPro : EasyPlugin()/*,KtorStat*/ {
     fun getRedisListener(): RedisListener? {
         return redisListener
     }
+
     private fun saveGui() {
         //遍历插件resources中gui文件夹下所有的.yml文件,并保存在生成的插件文件夹中
         if (!File(dataFolder, "gui/WorldCreate.yml").exists()) {

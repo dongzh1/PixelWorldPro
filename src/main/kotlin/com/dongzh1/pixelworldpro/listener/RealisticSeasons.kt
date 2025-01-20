@@ -10,13 +10,15 @@ import org.bukkit.event.world.WorldLoadEvent
 
 class RealisticSeasons : Listener {
     private val seasons = SeasonsAPI.getInstance()
+
     @EventHandler
-    fun seasonChange(event: SeasonChangeEvent){
+    fun seasonChange(event: SeasonChangeEvent) {
         val world = event.world
-        if (WorldProtect.getWorldNameUUID(world.name) == null){
+        if (WorldProtect.getWorldNameUUID(world.name) == null) {
             return
         }
-        val mainWorld = Bukkit.getWorld(PixelWorldPro.instance.advancedWorldSettings.getString("expansion.RealisticSeasons.world")!!)
+        val mainWorld =
+            Bukkit.getWorld(PixelWorldPro.instance.advancedWorldSettings.getString("expansion.RealisticSeasons.world")!!)
         val mainSeason = seasons.getSeason(mainWorld)
         if (event.newSeason != mainSeason) {
             seasons.setSeason(world, mainSeason)
@@ -26,10 +28,11 @@ class RealisticSeasons : Listener {
     @EventHandler
     fun worldLoad(event: WorldLoadEvent) {
         val world = event.world
-        if (WorldProtect.getWorldNameUUID(world.name) == null){
+        if (WorldProtect.getWorldNameUUID(world.name) == null) {
             return
         }
-        val mainWorld = Bukkit.getWorld(PixelWorldPro.instance.advancedWorldSettings.getString("expansion.RealisticSeasons.world")!!)
+        val mainWorld =
+            Bukkit.getWorld(PixelWorldPro.instance.advancedWorldSettings.getString("expansion.RealisticSeasons.world")!!)
         val mainSeason = seasons.getSeason(mainWorld)
         seasons.setSeason(world, mainSeason)
     }

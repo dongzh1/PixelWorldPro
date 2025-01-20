@@ -2,23 +2,21 @@ package com.dongzh1.pixelworldpro.gui
 
 
 import com.dongzh1.pixelworldpro.tools.OperatorCaster
+import com.dongzh1.pixelworldpro.tools.convertItem
 import com.xbaimiao.easylib.bridge.replacePlaceholder
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.ui.Basic
 import com.xbaimiao.easylib.module.utils.colored
-import com.xbaimiao.easylib.module.utils.submit
-import com.xbaimiao.easylib.xseries.XItemStack
 import org.bukkit.OfflinePlayer
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import java.util.UUID
-import kotlin.collections.HashMap
+import java.util.*
 
 
 object Gui {
-    private val playerMembersMap = HashMap<Player,Map<UUID,OfflinePlayer>>()
-    private val playerBanMap = HashMap<Player,Map<UUID,OfflinePlayer>>()
+    private val playerMembersMap = HashMap<Player, Map<UUID, OfflinePlayer>>()
+    private val playerBanMap = HashMap<Player, Map<UUID, OfflinePlayer>>()
     private var membersEditConfig = BuiltInConfiguration("gui/MembersEdit.yml")
     private var worldCreateConfig = BuiltInConfiguration("gui/WorldCreate.yml")
     private var worldListConfig = BuiltInConfiguration("gui/WorldList.yml")
@@ -26,101 +24,125 @@ object Gui {
     private var worldRestartConfig = BuiltInConfiguration("gui/WorldRestart.yml")
     private var banEditConfig = BuiltInConfiguration("gui/BanEdit.yml")
 
-    fun getPlayerMembersMap(player: Player):Map<UUID,OfflinePlayer>?{
-        if (playerMembersMap.containsKey(player)){
+    fun getPlayerMembersMap(player: Player): Map<UUID, OfflinePlayer>? {
+        if (playerMembersMap.containsKey(player)) {
             return playerMembersMap[player]
         }
         return null
     }
-    fun setPlayerMembersMap(player: Player, map: Map<UUID,OfflinePlayer>){
+
+    fun setPlayerMembersMap(player: Player, map: Map<UUID, OfflinePlayer>) {
         playerMembersMap[player] = map
     }
 
-    fun getPlayerBanMap(player: Player):Map<UUID,OfflinePlayer>?{
-        if (playerBanMap.containsKey(player)){
+    fun getPlayerBanMap(player: Player): Map<UUID, OfflinePlayer>? {
+        if (playerBanMap.containsKey(player)) {
             return playerBanMap[player]
         }
         return null
     }
-    fun setPlayerBanMap(player: Player, map: Map<UUID,OfflinePlayer>){
+
+    fun setPlayerBanMap(player: Player, map: Map<UUID, OfflinePlayer>) {
         playerBanMap[player] = map
     }
-    fun open(player: Player,config: BuiltInConfiguration){
-        when (config.getString("guiType")){
-            null ->{
-                when(config.file.name){
-                    "MembersEdit.yml" ->{
+
+    fun open(player: Player, config: BuiltInConfiguration) {
+        when (config.getString("guiType")) {
+            null -> {
+                when (config.file.name) {
+                    "MembersEdit.yml" -> {
                         MembersEdit(player).open()
                     }
-                    "WorldCreate.yml" ->{
+
+                    "WorldCreate.yml" -> {
                         WorldCreate(player).open()
                     }
-                    "WorldList.yml" ->{
+
+                    "WorldList.yml" -> {
                         WorldList(player).open()
                     }
+
                     "WorldOnlineList.yml" -> {
                         WorldOnlineList(player).open()
                     }
-                    "WorldEdit.yml" ->{
+
+                    "WorldEdit.yml" -> {
                         WorldEdit(player).open()
                     }
-                    "WorldRestart.yml" ->{
+
+                    "WorldRestart.yml" -> {
                         WorldRestart(player).open()
                     }
-                    "BanEdit.yml" ->{
+
+                    "BanEdit.yml" -> {
                         BanEdit(player).open()
                     }
-                    else ->{
-                        player.sendMessage("是否更改了内置菜单的名称:"+config.file.name)
+
+                    else -> {
+                        player.sendMessage("是否更改了内置菜单的名称:" + config.file.name)
                     }
                 }
             }
-            "null" ->{
+
+            "null" -> {
             }
-            "WorldCreate" ->{
+
+            "WorldCreate" -> {
                 WorldCreate(player).open(gui = "custom/${config.file.name}")
             }
-            "WorldList" ->{
+
+            "WorldList" -> {
                 WorldList(player).open(gui = "custom/${config.file.name}")
             }
-            "WorldEdit" ->{
+
+            "WorldEdit" -> {
                 WorldEdit(player).open(gui = "custom/${config.file.name}")
             }
-            "WorldRestart" ->{
+
+            "WorldRestart" -> {
                 WorldRestart(player).open(gui = "custom/${config.file.name}")
             }
-            "MembersEdit" ->{
+
+            "MembersEdit" -> {
                 MembersEdit(player).open(gui = "custom/${config.file.name}")
             }
-            "BanEdit" ->{
+
+            "BanEdit" -> {
                 BanEdit(player).open(gui = "custom/${config.file.name}")
             }
-            else ->{
-                player.sendMessage("菜单guiType填写错误:"+config.getString("guiType"))
+
+            else -> {
+                player.sendMessage("菜单guiType填写错误:" + config.getString("guiType"))
             }
         }
     }
 
     //获取配置
-    fun getMembersEditConfig(): BuiltInConfiguration{
+    fun getMembersEditConfig(): BuiltInConfiguration {
         return membersEditConfig
     }
-    fun getWorldCreateConfig(): BuiltInConfiguration{
+
+    fun getWorldCreateConfig(): BuiltInConfiguration {
         return worldCreateConfig
     }
-    fun getWorldListConfig(): BuiltInConfiguration{
+
+    fun getWorldListConfig(): BuiltInConfiguration {
         return worldListConfig
     }
-    fun getWorldEditConfig(): BuiltInConfiguration{
+
+    fun getWorldEditConfig(): BuiltInConfiguration {
         return worldEditConfig
     }
-    fun getWorldRestartConfig(): BuiltInConfiguration{
+
+    fun getWorldRestartConfig(): BuiltInConfiguration {
         return worldRestartConfig
     }
-    fun getBanEditConfig(): BuiltInConfiguration{
+
+    fun getBanEditConfig(): BuiltInConfiguration {
         return banEditConfig
     }
-    fun reloadConfig(){
+
+    fun reloadConfig() {
         membersEditConfig = BuiltInConfiguration("gui/MembersEdit.yml")
         worldCreateConfig = BuiltInConfiguration("gui/WorldCreate.yml")
         worldListConfig = BuiltInConfiguration("gui/WorldList.yml")
@@ -128,27 +150,28 @@ object Gui {
         worldRestartConfig = BuiltInConfiguration("gui/WorldRestart.yml")
         banEditConfig = BuiltInConfiguration("gui/BanEdit.yml")
     }
-    fun buildBaseGui(gui:String,player: Player): BasicCharMap {
-        val typeValue = getTypeValue(gui,player)
+
+    fun buildBaseGui(gui: String, player: Player): BasicCharMap {
+        val typeValue = getTypeValue(gui, player)
         val config = typeValue.config
-        val basic = Basic(player,config.getStringColored("title").replacePlaceholder(player))
+        val basic = Basic(player, config.getStringColored("title").replacePlaceholder(player))
         basic.map(config.getStringList("slots"))
 
         val charMap = typeValue.charMap
-        for (char in charMap.keys){
-            val item = buildItemBase(config,char,player) ?: continue
-            basic.set(char,item)
+        for (char in charMap.keys) {
+            val item = buildItemBase(config, char, player) ?: continue
+            basic.set(char, item)
         }
-        return BasicCharMap(basic,charMap)
+        return BasicCharMap(basic, charMap)
     }
 
-    private fun getTypeValue(gui:String, player: Player):TypeValue{
+    private fun getTypeValue(gui: String, player: Player): TypeValue {
         val config = BuiltInConfiguration("gui/$gui")
         val charList = config.getConfigurationSection("items")!!.getKeys(false)
-        val map = HashMap<Char,GuiData>()
-        for (char in charList){
+        val map = HashMap<Char, GuiData>()
+        for (char in charList) {
             val guiData = GuiData(type = null, value = null, commands = null)
-            if (config.contains("items.$char.type")){
+            if (config.contains("items.$char.type")) {
                 val type = config.getString("items.$char.type")!!
                 val value = config.getString("items.$char.value")?.replacePlaceholder(player)
                 guiData.type = type
@@ -158,34 +181,36 @@ object Gui {
             guiData.commands = commands
             map[char.first()] = guiData
         }
-        return TypeValue(config,map)
+        return TypeValue(config, map)
     }
 
-    private fun buildItemBase(config:BuiltInConfiguration, char:Char,player: Player):ItemStack?{
+    private fun buildItemBase(config: BuiltInConfiguration, char: Char, player: Player): ItemStack? {
 
         if (config.getString("items.$char.type") == "List"
             || config.getString("items.$char.type") == "MemberList"
-            || config.getString("items.$char.type") == "BanList"){
+            || config.getString("items.$char.type") == "BanList"
+        ) {
             return null
         }
-        val itemConfiguration = config.getConfigurationSection("items.$char")?:return null
+        val itemConfiguration = config.getConfigurationSection("items.$char") ?: return null
         val name = itemConfiguration.getString("name")
         val lore = itemConfiguration.getStringList("lore")
         val skull = itemConfiguration.getString("skull")
         if (itemConfiguration.getString("material") == null)
             return null
         if (itemConfiguration.contains("name"))
-            itemConfiguration.set("name",itemConfiguration.getString("name")!!.replacePlaceholder(player).colored())
+            itemConfiguration.set("name", itemConfiguration.getString("name")!!.replacePlaceholder(player).colored())
         if (itemConfiguration.contains("lore"))
-            itemConfiguration.set("lore",itemConfiguration.getStringList("lore").replacePlaceholder(player).colored())
+            itemConfiguration.set("lore", itemConfiguration.getStringList("lore").replacePlaceholder(player).colored())
         if (itemConfiguration.contains("skull"))
-            itemConfiguration.set("skull",itemConfiguration.getString("skull")!!.replacePlaceholder(player))
-        val item = XItemStack.deserialize(itemConfiguration)
-        itemConfiguration.set("name",name)
-        itemConfiguration.set("lore",lore)
-        itemConfiguration.set("skull",skull)
+            itemConfiguration.set("skull", itemConfiguration.getString("skull")!!.replacePlaceholder(player))
+        val item = itemConfiguration.convertItem(player)
+        itemConfiguration.set("name", name)
+        itemConfiguration.set("lore", lore)
+        itemConfiguration.set("skull", skull)
         return item
     }
+
     fun buildItem(configuration: ConfigurationSection, player: OfflinePlayer): ItemStack? {
         val name = configuration.getString("name")
         val lore = configuration.getStringList("lore")
@@ -193,34 +218,42 @@ object Gui {
         if (configuration.getString("material") == null)
             return null
         if (configuration.contains("name"))
-            configuration.set("name",configuration.getString("name")!!.replacePlaceholder(player).colored())
+            configuration.set("name", configuration.getString("name")!!.replacePlaceholder(player).colored())
         if (configuration.contains("lore"))
-            configuration.set("lore",configuration.getStringList("lore").replacePlaceholder(player).colored())
+            configuration.set("lore", configuration.getStringList("lore").replacePlaceholder(player).colored())
         if (configuration.contains("skull"))
-            configuration.set("skull",configuration.getString("skull")!!.replacePlaceholder(player))
-        val item = XItemStack.deserialize(configuration)
-        configuration.set("name",name)
-        configuration.set("lore",lore)
-        configuration.set("skull",skull)
+            configuration.set("skull", configuration.getString("skull")!!.replacePlaceholder(player))
+        val item = configuration.convertItem(player)
+        configuration.set("name", name)
+        configuration.set("lore", lore)
+        configuration.set("skull", skull)
         return item
     }
+
     fun runCommand(player: Player, commands: List<String>) {
-        for (command in commands){
+        for (command in commands) {
             //取两个[]中间的内容,分别为op和player,console
             //指令格式为[op] 指令
-            when(command.substring(command.indexOf('[')+1,command.indexOf(']'))){
+            when (command.substring(command.indexOf('[') + 1, command.indexOf(']'))) {
                 "op" -> {
-                    OperatorCaster.runCommand(player,command.substring(command.indexOf(']')+2))
+                    OperatorCaster.runCommand(player, command.substring(command.indexOf(']') + 2))
                 }
+
                 "player" -> {
-                    player.performCommand(command.substring(command.indexOf(']')+2))
+                    player.performCommand(command.substring(command.indexOf(']') + 2))
                 }
+
                 "console" -> {
-                    player.server.dispatchCommand(player.server.consoleSender,command.substring(command.indexOf(']')+2))
+                    player.server.dispatchCommand(
+                        player.server.consoleSender,
+                        command.substring(command.indexOf(']') + 2)
+                    )
                 }
-                "close" ->{
+
+                "close" -> {
                     player.closeInventory()
                 }
+
                 else -> {
                     player.sendMessage("指令格式错误:$command")
                 }
@@ -228,16 +261,19 @@ object Gui {
         }
     }
 }
+
 data class GuiData(
-    var type:String?,
-    var value:String?,
-    var commands:List<String>?
+    var type: String?,
+    var value: String?,
+    var commands: List<String>?
 )
+
 data class BasicCharMap(
     var basic: Basic,
-    var charMap:HashMap<Char, GuiData>,
+    var charMap: HashMap<Char, GuiData>,
 )
+
 data class TypeValue(
     var config: BuiltInConfiguration,
-    var charMap:HashMap<Char,GuiData>
+    var charMap: HashMap<Char, GuiData>
 )

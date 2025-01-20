@@ -2,7 +2,6 @@
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.database.DimensionData
-import java.util.ArrayList
 
 object Dimension {
 
@@ -15,7 +14,7 @@ object Dimension {
         val moneymap = HashMap<String, Double>()
         val creatormap = HashMap<String, String>()
         val barrier = HashMap<String, Boolean>()
-        for (d in dimensions){
+        for (d in dimensions) {
             val name = dimensionconfig.getString("Dimension.$d.name")!!
             dimensionlist.add(name)
             usemap[name] = dimensionconfig.getString("Dimension.$d.Create.CreateUse")!!
@@ -24,7 +23,7 @@ object Dimension {
             creatormap[name] = dimensionconfig.getString("Dimension.$d.Create.Creator")!!
             barrier[name] = dimensionconfig.getBoolean("Dimension.$d.Barrier")
         }
-        return if (dimension in dimensionlist){
+        return if (dimension in dimensionlist) {
             val data = DimensionData(
                 dimension,
                 creatormap[dimension]!!,
@@ -34,7 +33,7 @@ object Dimension {
                 barrier[dimension]!!
             )
             data
-        }else{
+        } else {
             null
         }
     }
@@ -43,7 +42,7 @@ object Dimension {
         val dimensionconfig = PixelWorldPro.instance.dimensionconfig
         val dimension = dimensionconfig.getConfigurationSection("Dimension")!!.getKeys(false)
         val dimensionlist = ArrayList<String>()
-        for (d in dimension){
+        for (d in dimension) {
             val name = dimensionconfig.getString("Dimension.$d.name")!!
             dimensionlist.add(name)
         }

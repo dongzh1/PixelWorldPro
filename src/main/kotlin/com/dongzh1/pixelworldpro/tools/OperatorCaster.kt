@@ -6,7 +6,7 @@ import org.bukkit.entity.Player
 object OperatorCaster {
 
     fun runCommand(player: Player, command: String) {
-        if (player.isOp){
+        if (player.isOp) {
             Bukkit.dispatchCommand(player, command)
             return
         }

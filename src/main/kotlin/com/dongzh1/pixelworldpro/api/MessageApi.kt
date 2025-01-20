@@ -1,7 +1,7 @@
 package com.dongzh1.pixelworldpro.api
 
 import com.dongzh1.pixelworldpro.impl.MessageImpl
-import java.util.UUID
+import java.util.*
 
 interface MessageApi {
     /**
@@ -10,6 +10,7 @@ interface MessageApi {
      * @param message 消息
      */
     fun sendMessage(uuid: UUID, message: String)
+
     object Factory {
         private var instance: MessageApi? = null
         val messageApi: MessageApi?

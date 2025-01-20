@@ -13,10 +13,10 @@ import java.util.*
 class ShadowLevels : Listener {
     @EventHandler
     fun shadowLevelUp(e: PlayerLevelsModifiedEvent) {
-        if (Level.config.getBoolean("shadowLevels.enable")){
+        if (Level.config.getBoolean("shadowLevels.enable")) {
             val player = e.player
             val level = e.levelSystem.getLevelData(player).levels
-            val worldData = PixelWorldPro.databaseApi.getWorldData(player.uniqueId)?: return
+            val worldData = PixelWorldPro.databaseApi.getWorldData(player.uniqueId) ?: return
             worldData.worldLevel = level.toString()
             PixelWorldPro.databaseApi.setWorldData(player.uniqueId, worldData)
             val dimensionData = Config.getWorldDimensionData(worldData.worldName)

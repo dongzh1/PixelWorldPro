@@ -8,15 +8,14 @@ import com.dongzh1.pixelworldpro.bungee.server.Server
 import com.dongzh1.pixelworldpro.bungee.server.ServerData
 import com.dongzh1.pixelworldpro.bungee.world.World
 import com.dongzh1.pixelworldpro.impl.TeleportImpl
-import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.dongzh1.pixelworldpro.tools.Serialize
+import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.xbaimiao.easylib.module.utils.submit
-
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import redis.clients.jedis.JedisPubSub
 import java.lang.Thread.sleep
-import java.util.UUID
+import java.util.*
 
 class RedisListener : JedisPubSub() {
 
@@ -25,24 +24,26 @@ class RedisListener : JedisPubSub() {
     private val push = submit(async = true, period = 20L) {
         RedisManager.push("ServerOnline|,|${PixelWorldPro.instance.config.getString("ServerName")}")
     }
-    fun stop(){
+
+    fun stop() {
         push.cancel()
     }
 
     override fun onMessage(channel: String?, message: String?) {
         if (channel == PixelWorldPro.channel) {
-            when(message!!.split("|,|")[0]){
-                "ServerOnline" ->{
+            when (message!!.split("|,|")[0]) {
+                "ServerOnline" -> {
                     val serverName = message.split("|,|")[1]
-                    if (!newOnlineServer.contains(serverName)){
+                    if (!newOnlineServer.contains(serverName)) {
                         newOnlineServer.add(serverName)
                     }
-                    if (newOnlineServer.size > onlineServer.size){
+                    if (newOnlineServer.size > onlineServer.size) {
                         onlineServer.clear()
                         onlineServer.addAll(newOnlineServer)
                     }
                 }
-                "createWorld" ->{
+
+                "createWorld" -> {
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     val template = message.split("|,|")[2]
                     val name = message.split("|,|")[3]
@@ -56,15 +57,17 @@ class RedisListener : JedisPubSub() {
                         }
                     }
                 }
-                "createWorldSuccess" ->{
+
+                "createWorldSuccess" -> {
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     World.createWorldList.remove(uuid)
                 }
-                "loadWorldGroup" ->{
+
+                "loadWorldGroup" -> {
                     //获取最低mspt服务器
                     val serverName = message.split("|,|")[2]
                     //如果当前服务器为最低mspt服务器则加载世界
-                    if (serverName != PixelWorldPro.instance.config.getString("ServerName")){
+                    if (serverName != PixelWorldPro.instance.config.getString("ServerName")) {
                         return
                     }
                     val uuid = UUID.fromString(message.split("|,|")[1])
@@ -73,143 +76,161 @@ class RedisListener : JedisPubSub() {
                     }
 
                 }
+
                 "loadWorldGroupTp" -> {
                     val serverName = message.split("|,|")[3]
-                    if (serverName != PixelWorldPro.instance.config.getString("ServerName")){
+                    if (serverName != PixelWorldPro.instance.config.getString("ServerName")) {
                         return
                     }
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     submit {
-                        if (WorldImpl.loadWorldLocal(uuid)){
+                        if (WorldImpl.loadWorldLocal(uuid)) {
                             val playerUuid = UUID.fromString(message.split("|,|")[2])
-                            TeleportApi.Factory.teleportApi!!.teleport(playerUuid,uuid)
+                            TeleportApi.Factory.teleportApi!!.teleport(playerUuid, uuid)
                         }
                     }
                 }
-                "loadWorldServer" ->{
+
+                "loadWorldServer" -> {
                     val serverName = message.split("|,|")[2]
-                    if (serverName != Server.getLocalServer().realName){
+                    if (serverName != Server.getLocalServer().realName) {
                         return
                     }
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     submit {
-                        if (WorldImpl.loadWorldLocal(uuid)){
+                        if (WorldImpl.loadWorldLocal(uuid)) {
                             RedisManager.push("loadWorldSuccess|,|${uuid}")
                         }
                     }
                 }
-                "loadWorldSuccess" ->{
+
+                "loadWorldSuccess" -> {
                     val uuid = UUID.fromString(message.split("|,|")[1])
-                    if (WorldImpl.getLoadWorldList().contains(uuid)){
+                    if (WorldImpl.getLoadWorldList().contains(uuid)) {
                         WorldImpl.removeLoadWorldList(uuid)
                     }
                 }
-                "teleportUUID" ->{
+
+                "teleportUUID" -> {
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     val serverName = message.split("|,|")[2]
-                    if (Bukkit.getPlayer(uuid) == null){
+                    if (Bukkit.getPlayer(uuid) == null) {
                         return
                     }
-                    TeleportImpl().connect(Bukkit.getPlayer(uuid)!!,serverName)
+                    TeleportImpl().connect(Bukkit.getPlayer(uuid)!!, serverName)
                 }
-                "teleportLocation" ->{
+
+                "teleportLocation" -> {
                     val location = Serialize.deserializeLocation(message.split("|,|")[1])
                     val serverName = message.split("|,|")[2]
                     val uuid = UUID.fromString(message.split("|,|")[3])
-                    if (serverName == PixelWorldPro.instance.config.getString("ServerName")){
-                        TeleportApi.Factory.teleportApi!!.teleport(uuid,location)
+                    if (serverName == PixelWorldPro.instance.config.getString("ServerName")) {
+                        TeleportApi.Factory.teleportApi!!.teleport(uuid, location)
                     }
                 }
-                "teleportWorld" ->{
+
+                "teleportWorld" -> {
                     //找到加载了对应世界的服务器
                     val world = Bukkit.getWorld(message.split("|,|")[2]) ?: return
                     //让玩家传送过来
-                    TeleportApi.Factory.teleportApi!!.teleport(UUID.fromString(message.split("|,|")[1]),world.spawnLocation)
+                    TeleportApi.Factory.teleportApi!!.teleport(
+                        UUID.fromString(message.split("|,|")[1]),
+                        world.spawnLocation
+                    )
                 }
-                "sendMessage" ->{
+
+                "sendMessage" -> {
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     val msg = message.split("|,|")[2]
-                    if (Bukkit.getPlayer(uuid) == null){
+                    if (Bukkit.getPlayer(uuid) == null) {
                         return
                     }
                     Bukkit.getPlayer(uuid)!!.sendMessage(msg)
                 }
-                "setTime" ->{
+
+                "setTime" -> {
                     val serverName = message.split("|,|")[1]
-                    if (serverName != PixelWorldPro.instance.config.getString("ServerName")){
+                    if (serverName != PixelWorldPro.instance.config.getString("ServerName")) {
                         return
                     }
                     val timeWorld = Bukkit.getWorld(message.split("|,|")[2])
-                    if (timeWorld == null){
+                    if (timeWorld == null) {
                         Bukkit.getConsoleSender().sendMessage(lang("WorldTimeWorldNotExist"))
                         return
                     }
                     RedisManager.push("setTimeBack|,|${timeWorld.time}|,|${message.split("|,|")[3]}")
                 }
-                "setTimeBack" ->{
+
+                "setTimeBack" -> {
                     val time = message.split("|,|")[1].toLong()
                     val worldName = message.split("|,|")[2]
                     val world = Bukkit.getWorld(worldName)
-                    if (world == null){
+                    if (world == null) {
                         Bukkit.getConsoleSender().sendMessage(lang("WorldTimeWorldNotExist"))
                         return
                     }
                     world.time = time
                 }
-                "updateWorldLevel" ->{
+
+                "updateWorldLevel" -> {
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
                     val world = Bukkit.getWorld(worldData!!.worldName)
-                    if (world == null){
+                    if (world == null) {
                         return
-                    }else{
-                        WorldImpl.setWorldBorder(world,worldData.worldLevel)
+                    } else {
+                        WorldImpl.setWorldBorder(world, worldData.worldLevel)
                     }
                 }
-                "unloadWorld" ->{
+
+                "unloadWorld" -> {
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
                     val world = Bukkit.getWorld(worldData!!.worldName)
-                    if (world == null){
+                    if (world == null) {
                         return
-                    }else{
-                        if (WorldImpl.unloadWorld(world)){
+                    } else {
+                        if (WorldImpl.unloadWorld(world)) {
                             worldData.onlinePlayerNumber = 0
                             PixelWorldPro.databaseApi.setWorldData(uuid, worldData)
                             RedisManager.push("unloadWorldBack|,|${uuid}")
                         }
                     }
                 }
-                "unloadWorldBack" ->{
+
+                "unloadWorldBack" -> {
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     //获取要卸载是世界uuid，并移除
-                    if (WorldImpl.getUnloadWorldList().contains(uuid)){
+                    if (WorldImpl.getUnloadWorldList().contains(uuid)) {
                         WorldImpl.removeUnloadWorldList(uuid)
                     }
                 }
-                "setSeed" ->{
+
+                "setSeed" -> {
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     val seed = message.split("|,|")[2]
                     WorldImpl.setSeed(uuid, seed)
                 }
-                "getServerData" ->{
+
+                "getServerData" -> {
                     val id = message.split("|,|")[1].toInt()
                     val serverData = Server.getLocalServer()
-                    val msg = if (serverData.type == null){
+                    val msg = if (serverData.type == null) {
                         "returnServerData|,|${id}|,|${serverData.showName}|,|${serverData.realName}|,|${serverData.mode}|,|${serverData.tps}|,|none"
                     } else {
                         "returnServerData|,|${id}|,|${serverData.showName}|,|${serverData.realName}|,|${serverData.mode}|,|${serverData.tps}|,|${serverData.type}"
                     }
                     RedisManager.push(msg)
                 }
-                "returnServerData" ->{
+
+                "returnServerData" -> {
                     val id = message.split("|,|")[1].toInt()
                     val showName = message.split("|,|")[2]
                     val realName = message.split("|,|")[3]
                     val mode = message.split("|,|")[4]
                     val tps = message.split("|,|")[5].toDouble()
                     val type = message.split("|,|")[6]
-                    val serverData = if (type == "none"){
+                    val serverData = if (type == "none") {
                         ServerData(
                             showName,
                             realName,
@@ -228,12 +249,13 @@ class RedisListener : JedisPubSub() {
                     }
                     Server.setServerData(id, serverData)
                 }
-                "BungeeWorldTp" ->{
+
+                "BungeeWorldTp" -> {
                     val uuid = UUID.fromString(message.split("|,|")[1])
                     val worldName = message.split("|,|")[2]
                     val server = message.split("|,|")[3]
                     val serverData = Server.getLocalServer()
-                    if (server != serverData.realName){
+                    if (server != serverData.realName) {
                         return
                     }
                     Thread {
@@ -275,7 +297,7 @@ class RedisListener : JedisPubSub() {
                                         } catch (_: Exception) {
                                             player.teleport(location)
                                         }
-                                        
+
                                     }
                                     break
                                 }
@@ -286,13 +308,15 @@ class RedisListener : JedisPubSub() {
                         }
                     }.start()
                 }
-                else ->{
+
+                else -> {
                     Bukkit.getLogger().warning("未知的redis消息类型")
                 }
             }
         }
     }
-    private fun lang(string: String): String{
+
+    private fun lang(string: String): String {
         return PixelWorldPro.instance.lang().getStringColored(string)
     }
 }

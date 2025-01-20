@@ -1,8 +1,8 @@
 ﻿package com.dongzh1.pixelworldpro.migrate
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
-import com.dongzh1.pixelworldpro.database.WorldData
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
+import com.dongzh1.pixelworldpro.database.WorldData
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import java.io.File
@@ -11,15 +11,15 @@ import java.util.*
 
 object WorldMove {
     private val database = PixelWorldPro.databaseApi
-    fun main(from: UUID, to: UUID, sender: CommandSender){
+    fun main(from: UUID, to: UUID, sender: CommandSender) {
         sender.sendMessage("检查世界数据")
         val fromWorldData = database.getWorldData(from)
-        if(fromWorldData == null){
+        if (fromWorldData == null) {
             sender.sendMessage("无法找到世界数据${from}")
             return
         }
         var toWorldData = database.getWorldData(from)
-        if(toWorldData == null){
+        if (toWorldData == null) {
             sender.sendMessage("无法找到世界数据${to}")
             sender.sendMessage("创建世界数据${to}")
         }
@@ -35,7 +35,7 @@ object WorldMove {
             }
         }
         val fromWorld = Bukkit.getWorld(fromWorldData.worldName + "/world")
-        if(fromWorld != null){
+        if (fromWorld != null) {
             sender.sendMessage("世界${from}已加载")
             return
         }
@@ -49,7 +49,7 @@ object WorldMove {
         //获取路径下对应的world文件夹
         val worldName = "${to}_$timeString"
         val toWorld = Bukkit.getWorld("PixelWorldPro/$worldName/world")
-        if(toWorld != null){
+        if (toWorld != null) {
             sender.sendMessage("世界${to}已加载")
             return
         }
@@ -57,13 +57,13 @@ object WorldMove {
         val fromWorldFile = File(fromWorldData.worldName)
         val toWorldFile = File("PixelWorldPro/$worldName")
         val back = movefile(fromWorldFile, toWorldFile)
-        if(!back){
+        if (!back) {
             sender.sendMessage("移动世界文件失败")
             return
         }
         sender.sendMessage("移动世界文件完成")
         sender.sendMessage("迁移世界数据")
-        if(toWorldData == null){
+        if (toWorldData == null) {
             toWorldData = WorldData(
                 "PixelWorldPro/$worldName",
                 fromWorldData.worldLevel,
@@ -81,7 +81,7 @@ object WorldMove {
                 fromWorldData.gameRule,
                 fromWorldData.location
             )
-        }else{
+        } else {
             toWorldData = WorldData(
                 "PixelWorldPro/$worldName",
                 fromWorldData.worldLevel,
@@ -105,12 +105,12 @@ object WorldMove {
         sender.sendMessage("迁移世界完成")
     }
 
-    private fun movefile(from: File, to: File): Boolean{
+    private fun movefile(from: File, to: File): Boolean {
         return try {
             from.copyRecursively(to)
             from.delete()
             true
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             throw e
         }
     }

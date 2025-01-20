@@ -8,7 +8,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import java.util.*
 
-class ItemsAdder: Listener {
+class ItemsAdder : Listener {
 
     @EventHandler
     fun customBlockBreakEvent(e: CustomBlockBreakEvent) {
@@ -64,7 +64,7 @@ class ItemsAdder: Listener {
         }
     }
 
-    private fun isPlayerWorld(worldName:String,player: UUID):Boolean{
+    private fun isPlayerWorld(worldName: String, player: UUID): Boolean {
         val worldNameReal = getWorldNameUUID(worldName)
         return worldNameReal == player
     }
@@ -74,9 +74,9 @@ class ItemsAdder: Listener {
             return true
         val worldName = player.world.name
         //如果不是玩家世界则返回
-        if(isPlayerWorld(worldName, player.uniqueId))
+        if (isPlayerWorld(worldName, player.uniqueId))
             return true
-        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName)?: return true
+        val worldData = PixelWorldPro.databaseApi.getWorldData(worldName) ?: return true
         //如果玩家不是成员，则取消事件
         if (worldData.members.contains(player.uniqueId))
             return true

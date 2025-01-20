@@ -28,10 +28,11 @@ object Install {
         //System.out.println("jar包所在目录：$filePath")
         return filePath
     }
-    fun start(){
+
+    fun start() {
         val path = getPath()
         val worldPath = config.getString("WorldPath")
-        if ((worldPath == null).or(worldPath == "")){
+        if ((worldPath == null).or(worldPath == "")) {
             when (config.getString("os")) {
                 "windows" -> {
                     val pathList = path.split("\\") as ArrayList
@@ -39,6 +40,7 @@ object Install {
                     pathList.add("PixelWorldPro")
                     config.set("WorldPath", pathList.joinToString("\\"))
                 }
+
                 "linux" -> {
                     val pathList = path.split("/") as ArrayList
                     pathList.removeLast()
@@ -48,7 +50,7 @@ object Install {
             }
         }
         var worldTemplatePath = config.getString("WorldTemplatePath")
-        if ((worldTemplatePath == null).or(worldTemplatePath == "")){
+        if ((worldTemplatePath == null).or(worldTemplatePath == "")) {
             when (config.getString("os")) {
                 "windows" -> {
                     val pathList = path.split("\\") as ArrayList
@@ -57,6 +59,7 @@ object Install {
                     config.set("WorldTemplatePath", pathList.joinToString("\\"))
                     worldTemplatePath = pathList.joinToString("\\")
                 }
+
                 "linux" -> {
                     val pathList = path.split("/") as ArrayList
                     pathList.removeLast()
@@ -64,7 +67,10 @@ object Install {
                     config.set("WorldTemplatePath", pathList.joinToString("/"))
                     worldTemplatePath = pathList.joinToString("\\")
                 }
-                else -> {return}
+
+                else -> {
+                    return
+                }
             }
         }
         config.saveToFile()
@@ -78,7 +84,7 @@ object Install {
         val readme = File(exampleFile, "ReadMe请阅读我!!!.txt")
         readme.createNewFile()
         readme.writeText("world -> 存放主世界|put world\nnether -> 存放地狱世界|put nether world\nthe_end -> 存放末地|put the_end world")
-        if (config.getBoolean("Bungee")){
+        if (config.getBoolean("Bungee")) {
             if (worldPath != null) {
                 bungee(worldPath, path)
             } else {
@@ -86,6 +92,7 @@ object Install {
             }
         }
     }
+
     private fun bungee(worldPath: String, path: String) {
         when (config.getString("os")) {
             "windows" -> {
@@ -98,7 +105,10 @@ object Install {
                 println(command)
                 Runtime.getRuntime().exec(command)
             }
-            else -> {return}
+
+            else -> {
+                return
+            }
         }
     }
 }

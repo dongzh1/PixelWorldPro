@@ -1,8 +1,8 @@
 package com.dongzh1.pixelworldpro.database
 
-import java.util.UUID
+import java.util.*
 
-data class WorldData (
+data class WorldData(
     val worldName: String,
     var worldLevel: String,
     val members: List<UUID>,
@@ -20,12 +20,14 @@ data class WorldData (
     var gameRule: HashMap<String, String>,
     var location: HashMap<String, Double>
 )
-data class PlayerData (
+
+data class PlayerData(
     val joinedWorld: List<UUID>,
     val memberNumber: Int,
     var inviterMsg: List<UUID>
 )
-data class DimensionData (
+
+data class DimensionData(
     val name: String,
     val creator: String,
     val createUse: String,
@@ -33,12 +35,14 @@ data class DimensionData (
     val createPoints: Double,
     val barrier: Boolean
 )
-data class WorldDimensionData (
+
+data class WorldDimensionData(
     val createlist: List<String>,
     val discreatelist: List<String>,
     val seed: String
 )
-data class RedStone (
+
+data class RedStone(
     var frequency: Int,
     val time: Int
 )

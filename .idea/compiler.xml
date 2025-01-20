@@ -3,6 +3,7 @@
   <component name="CompilerConfiguration">
     <option name="BUILD_PROCESS_HEAP_SIZE" value="4096" />
     <bytecodeTargetLevel target="17">
+      <module name="github.PixelWorldPro.main" target="1.8" />
       <module name="PixelWorldPro" target="1.8" />
       <module name="PixelWorldPro.test" target="1.8" />
       <module name="V1.PixelWorldPro.main" target="1.8" />

@@ -13,9 +13,9 @@ import java.util.*
 class MembersEdit(val player: Player) {
     private val memberMap = mutableMapOf<Int, UUID>()
     private val unlockList = mutableListOf<Int>()
-    private var playerData : PlayerData? = null
-    private fun build(gui:String = "MembersEdit.yml"):BasicCharMap{
-        val basicCharMap = Gui.buildBaseGui(gui,player)
+    private var playerData: PlayerData? = null
+    private fun build(gui: String = "MembersEdit.yml"): BasicCharMap {
+        val basicCharMap = Gui.buildBaseGui(gui, player)
         val basic = basicCharMap.basic
         val charMap = basicCharMap.charMap
         val config = Gui.getMembersEditConfig()
@@ -23,19 +23,19 @@ class MembersEdit(val player: Player) {
         var offlinePlayerMap = Gui.getPlayerMembersMap(player)?.toMutableMap()
         //获取玩家数据
         playerData = PixelWorldPro.databaseApi.getPlayerData(player.uniqueId)
-        if (playerData == null){
-            playerData = PlayerData(listOf(),Gui.getMembersEditConfig().getInt("DefaultMembersNumber"), listOf())
+        if (playerData == null) {
+            playerData = PlayerData(listOf(), Gui.getMembersEditConfig().getInt("DefaultMembersNumber"), listOf())
             PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData!!)
         }
-        for (guiData in charMap){
-            if (guiData.value.type == "MemberList"){
+        for (guiData in charMap) {
+            if (guiData.value.type == "MemberList") {
                 //赋值char为MemberList的key
                 char = guiData.key
                 break
             }
         }
         //如果char为null则返回
-        if (char == null){
+        if (char == null) {
             return basicCharMap
         }
         //获取玩家的世界数据
@@ -45,37 +45,37 @@ class MembersEdit(val player: Player) {
         val slotsList = basic.getSlots(char)
         var i = 0
         //填充成员列表
-        for (slot in slotsList){
-            if (i < playerData!!.memberNumber){
-                if (memberUUIDList != null && i < memberUUIDList.size){
+        for (slot in slotsList) {
+            if (i < playerData!!.memberNumber) {
+                if (memberUUIDList != null && i < memberUUIDList.size) {
                     val memberUUID = memberUUIDList[i]
                     var member = Bukkit.getOfflinePlayer(memberUUID)
-                    if (offlinePlayerMap != null && offlinePlayerMap.containsKey(memberUUID)){
+                    if (offlinePlayerMap != null && offlinePlayerMap.containsKey(memberUUID)) {
                         member = offlinePlayerMap[memberUUID]!!
                     }
-                    if (member.name == null){
-                        if (offlinePlayerMap == null){
+                    if (member.name == null) {
+                        if (offlinePlayerMap == null) {
                             val memberName = worldData.memberName[i]
                             member = Bukkit.getOfflinePlayer(memberName)
-                            val map = mutableMapOf<UUID,OfflinePlayer>()
+                            val map = mutableMapOf<UUID, OfflinePlayer>()
                             map[memberUUID] = member
                             offlinePlayerMap = map
-                            Gui.setPlayerMembersMap(player,offlinePlayerMap)
-                        }else{
+                            Gui.setPlayerMembersMap(player, offlinePlayerMap)
+                        } else {
                             val memberName = worldData.memberName[i]
                             member = Bukkit.getOfflinePlayer(memberName)
                             offlinePlayerMap[memberUUID] = member
-                            Gui.setPlayerMembersMap(player,offlinePlayerMap)
+                            Gui.setPlayerMembersMap(player, offlinePlayerMap)
                         }
                     }
-                    if (i == 0){
+                    if (i == 0) {
                         val memberConfig = config.getConfigurationSection("Owner")!!
-                        val item = Gui.buildItem(memberConfig,member)!!
-                        basic.set(slot,item)
-                    }else{
+                        val item = Gui.buildItem(memberConfig, member)!!
+                        basic.set(slot, item)
+                    } else {
                         val memberConfig = config.getConfigurationSection("Member")!!
-                        val item = Gui.buildItem(memberConfig,member)!!
-                        basic.set(slot,item)
+                        val item = Gui.buildItem(memberConfig, member)!!
+                        basic.set(slot, item)
                     }
                     memberMap[slot] = memberUUID
                 }
@@ -83,13 +83,14 @@ class MembersEdit(val player: Player) {
                 continue
             }
             val unMemberConfig = config.getConfigurationSection("UnMember")!!
-            val item = Gui.buildItem(unMemberConfig,player)!!
-            basic.set(slot,item)
+            val item = Gui.buildItem(unMemberConfig, player)!!
+            basic.set(slot, item)
             unlockList.add(slot)
         }
-        return BasicCharMap(basic,charMap)
+        return BasicCharMap(basic, charMap)
     }
-    fun open(gui: String = "MembersEdit.yml"){
+
+    fun open(gui: String = "MembersEdit.yml") {
         val basicCharMap = build(gui)
         val basic = basicCharMap.basic
         val charMap = basicCharMap.charMap
@@ -97,46 +98,51 @@ class MembersEdit(val player: Player) {
         basic.onClick {
             it.isCancelled = true
         }
-        for (guiData in charMap){
-            basic.onClick(guiData.key){
+        for (guiData in charMap) {
+            basic.onClick(guiData.key) {
                 //执行命令
                 if (guiData.value.commands != null) {
                     Gui.runCommand(player, guiData.value.commands!!)
                 }
-                when(guiData.value.type){
-                    "MemberList"->{
-                        if (it.rawSlot in unlockList){
-                            when(guiData.value.value){
-                                "both"->{
-                                    if (Vault().has(player,Gui.getMembersEditConfig().getDouble("Money")) &&
-                                        PlayerPoints().has(player,Gui.getMembersEditConfig().getDouble("Points"))){
-                                        Vault().take(player,Gui.getMembersEditConfig().getDouble("Money"))
-                                        PlayerPoints().take(player,Gui.getMembersEditConfig().getDouble("Points"))
-                                    }else{
+                when (guiData.value.type) {
+                    "MemberList" -> {
+                        if (it.rawSlot in unlockList) {
+                            when (guiData.value.value) {
+                                "both" -> {
+                                    if (Vault().has(player, Gui.getMembersEditConfig().getDouble("Money")) &&
+                                        PlayerPoints().has(player, Gui.getMembersEditConfig().getDouble("Points"))
+                                    ) {
+                                        Vault().take(player, Gui.getMembersEditConfig().getDouble("Money"))
+                                        PlayerPoints().take(player, Gui.getMembersEditConfig().getDouble("Points"))
+                                    } else {
                                         player.sendMessage(lang("MoneyNotEnough"))
                                         return@onClick
                                     }
                                 }
-                                "money"->{
-                                    if (Vault().has(player,Gui.getMembersEditConfig().getDouble("Money"))){
-                                        Vault().take(player,Gui.getMembersEditConfig().getDouble("Money"))
-                                    }else{
+
+                                "money" -> {
+                                    if (Vault().has(player, Gui.getMembersEditConfig().getDouble("Money"))) {
+                                        Vault().take(player, Gui.getMembersEditConfig().getDouble("Money"))
+                                    } else {
                                         player.sendMessage(lang("MoneyNotEnough"))
                                         return@onClick
                                     }
                                 }
-                                "points"->{
-                                    if (PlayerPoints().has(player,Gui.getMembersEditConfig().getDouble("Points"))){
-                                        PlayerPoints().take(player,Gui.getMembersEditConfig().getDouble("Points"))
-                                    }else{
+
+                                "points" -> {
+                                    if (PlayerPoints().has(player, Gui.getMembersEditConfig().getDouble("Points"))) {
+                                        PlayerPoints().take(player, Gui.getMembersEditConfig().getDouble("Points"))
+                                    } else {
                                         player.sendMessage(lang("PointsNotEnough"))
                                         return@onClick
                                     }
                                 }
-                                "permission"->{
+
+                                "permission" -> {
                                     return@onClick
                                 }
-                                else->{
+
+                                else -> {
 
                                 }
                             }
@@ -144,15 +150,15 @@ class MembersEdit(val player: Player) {
                             submit(async = true) {
                                 PixelWorldPro.databaseApi.setPlayerData(player.uniqueId, playerData!!)
                             }
-                            it.inventory.setItem(it.rawSlot,null)
+                            it.inventory.setItem(it.rawSlot, null)
                             unlockList.remove(it.rawSlot)
                         }
-                        if (it.rawSlot in memberMap.keys){
+                        if (it.rawSlot in memberMap.keys) {
                             val memberUUID = memberMap[it.rawSlot]!!
-                            if (memberUUID == player.uniqueId){
+                            if (memberUUID == player.uniqueId) {
                                 return@onClick
                             }
-                            it.inventory.setItem(it.rawSlot,null)
+                            it.inventory.setItem(it.rawSlot, null)
                             memberMap.remove(it.rawSlot)
                             val worldData = PixelWorldPro.databaseApi.getWorldData(player.uniqueId)
                             val memberUUIDList = worldData?.members as MutableList
@@ -161,18 +167,23 @@ class MembersEdit(val player: Player) {
                             val name = memberNameList[int]
                             memberUUIDList.remove(memberUUID)
                             memberNameList.remove(name)
-                            PixelWorldPro.databaseApi.setWorldData(player.uniqueId,worldData.copy(members = memberUUIDList,
-                                memberName = memberNameList))
+                            PixelWorldPro.databaseApi.setWorldData(
+                                player.uniqueId, worldData.copy(
+                                    members = memberUUIDList,
+                                    memberName = memberNameList
+                                )
+                            )
                             submit(async = true) {
                                 var memberData = PixelWorldPro.databaseApi.getPlayerData(memberUUID)
-                                if (memberData != null){
+                                if (memberData != null) {
                                     memberData = memberData.copy(joinedWorld = memberData.joinedWorld - player.uniqueId)
-                                    PixelWorldPro.databaseApi.setPlayerData(memberUUID,memberData)
+                                    PixelWorldPro.databaseApi.setPlayerData(memberUUID, memberData)
                                 }
                             }
                         }
                     }
-                    else->{
+
+                    else -> {
 
                     }
                 }
@@ -180,6 +191,7 @@ class MembersEdit(val player: Player) {
         }
 
     }
+
     private fun lang(string: String): String {
         return PixelWorldPro.instance.lang().getStringColored(string)
     }

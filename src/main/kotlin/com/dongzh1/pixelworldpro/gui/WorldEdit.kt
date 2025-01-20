@@ -1,24 +1,19 @@
 package com.dongzh1.pixelworldpro.gui
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
-import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.dongzh1.pixelworldpro.online.V2
-import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
-import com.dongzh1.pixelworldpro.world.Config
 import com.dongzh1.pixelworldpro.world.Level
-import com.xbaimiao.easylib.bridge.economy.PlayerPoints
-import com.xbaimiao.easylib.bridge.economy.Vault
-import org.bukkit.Bukkit
+import com.dongzh1.pixelworldpro.world.WorldImpl
 import org.bukkit.entity.Player
-import java.util.*
 
 class WorldEdit(val player: Player) {
-    private fun build(gui:String = "WorldEdit.yml"):BasicCharMap{
-        return Gui.buildBaseGui(gui,player)
+    private fun build(gui: String = "WorldEdit.yml"): BasicCharMap {
+        return Gui.buildBaseGui(gui, player)
 
     }
-    fun open(gui: String = "WorldEdit.yml"){
-        if(PixelWorldPro.instance.config.getString("token")?.let { V2.verify(it) } == true) {
+
+    fun open(gui: String = "WorldEdit.yml") {
+        if (PixelWorldPro.instance.config.getString("token")?.let { V2.verify(it) } == true) {
             val basicCharMap = build()
             val basic = basicCharMap.basic
             val charMap = basicCharMap.charMap
@@ -110,6 +105,7 @@ class WorldEdit(val player: Player) {
             }
         }
     }
+
     private fun lang(string: String): String {
         return PixelWorldPro.instance.lang().getStringColored(string)
     }

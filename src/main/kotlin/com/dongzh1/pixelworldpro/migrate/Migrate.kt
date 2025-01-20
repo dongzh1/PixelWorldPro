@@ -13,7 +13,6 @@ import org.bukkit.entity.Player
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.HashMap
 
 object Migrate {
     fun ppw(player: Player) {
@@ -108,7 +107,13 @@ object Migrate {
         }.start()
     }
 
-    private fun moveworld(oldworldname: String, newworldname: String, worldData: WorldData, player: Player, type: String){
+    private fun moveworld(
+        oldworldname: String,
+        newworldname: String,
+        worldData: WorldData,
+        player: Player,
+        type: String
+    ) {
         player.sendMessage("迁移${oldworldname}至${newworldname}")
         Bukkit.getConsoleSender().sendMessage("迁移${oldworldname}至${newworldname}")
         val old = File("./$oldworldname")
@@ -119,10 +124,11 @@ object Migrate {
         getWorldDimensionData(worldData.worldName)
         when (type) {
             "nether" -> {
-                setWorldDimensionData(worldData.worldName,"nether",true)
+                setWorldDimensionData(worldData.worldName, "nether", true)
             }
+
             "end" -> {
-                setWorldDimensionData(worldData.worldName,"the_end",true)
+                setWorldDimensionData(worldData.worldName, "the_end", true)
             }
         }
     }

@@ -6,7 +6,7 @@ import com.dongzh1.pixelworldpro.database.SQLiteDatabaseApi
 class MoveDataBase {
     private val sqlite = SQLiteDatabaseApi()
     private val mysql = MysqlDatabaseApi()
-    fun mysql(){
+    fun mysql() {
         val worldDataMap = sqlite.getWorldDataMap()
         for (key in worldDataMap.keys) {
             val worldData = worldDataMap[key]!!

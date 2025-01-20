@@ -3,7 +3,6 @@
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
 import com.dongzh1.pixelworldpro.world.WorldImpl
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
-import org.bukkit.Bukkit
 
 
 //重要的事情说三遍
@@ -16,50 +15,50 @@ object Server {
     private val bungeeConfig = BuiltInConfiguration("BungeeSet.yml")
     private val debug = bungeeConfig.getBoolean("debug")
 
-    private fun getNewId():Int{
+    private fun getNewId(): Int {
         val keyList = serverMap.keys
-        if (keyList.isEmpty()){
+        if (keyList.isEmpty()) {
             return 1
         }
-        return if (keyList.last() >= 10000){
+        return if (keyList.last() >= 10000) {
             1
-        }else {
+        } else {
             keyList.last() + 1
         }
     }
 
-    fun setServerData(id: Int, serverData: ServerData){
-        val map = serverMap[id]?:return
+    fun setServerData(id: Int, serverData: ServerData) {
+        val map = serverMap[id] ?: return
         map[serverData.realName] = serverData
         serverMap[id] = map
     }
 
-    fun getServerMap(id: Int):HashMap<String, ServerData>?{
-        val map = serverMap[id]?:return null
+    fun getServerMap(id: Int): HashMap<String, ServerData>? {
+        val map = serverMap[id] ?: return null
         serverMap.remove(id)
         return map
     }
 
-    fun getLocalServer():ServerData{
-        if ((localServer["mode"] ?: bungeeConfig.getString("mode")) == "load"){
-            if (((bungeeConfig.getInt("maxWorld")) <= WorldImpl.worldMap.size).and(bungeeConfig.getInt("maxWorld") != -1)){
+    fun getLocalServer(): ServerData {
+        if ((localServer["mode"] ?: bungeeConfig.getString("mode")) == "load") {
+            if (((bungeeConfig.getInt("maxWorld")) <= WorldImpl.worldMap.size).and(bungeeConfig.getInt("maxWorld") != -1)) {
                 val type = localServer["type"]
-                if (type == null){
+                if (type == null) {
                     val list = arrayListOf<String>()
                     list.add("noLoad")
                     list.add("worldMax")
                     localServer["type"] = list.joinToString("||")
-                }else{
+                } else {
                     val list = type.split("||") as ArrayList<String>
-                    if ("noLoad" !in list){
+                    if ("noLoad" !in list) {
                         list.add("noLoad")
                     }
-                    if ("worldMax" !in list){
+                    if ("worldMax" !in list) {
                         list.add("worldMax")
                     }
                     localServer["type"] = list.joinToString("||")
                 }
-            }else{
+            } else {
                 val type = localServer["type"]
                 try {
                     if (type != null) {
@@ -72,26 +71,27 @@ object Server {
                         }
                         localServer["type"] = list.joinToString("||")
                     }
-                }catch (_:Exception){}
+                } catch (_: Exception) {
+                }
             }
-            if (((bungeeConfig.getDouble("leastTps")) > 20.0).and(bungeeConfig.getInt("leastTps") != -1)){
+            if (((bungeeConfig.getDouble("leastTps")) > 20.0).and(bungeeConfig.getInt("leastTps") != -1)) {
                 val type = localServer["type"]
-                if (type == null){
+                if (type == null) {
                     val list = arrayListOf<String>()
                     list.add("noLoad")
                     list.add("leastTps")
                     localServer["type"] = list.joinToString("||")
-                }else{
+                } else {
                     val list = type.split("||") as ArrayList<String>
-                    if ("noLoad" !in list){
+                    if ("noLoad" !in list) {
                         list.add("noLoad")
                     }
-                    if ("leastTps" !in list){
+                    if ("leastTps" !in list) {
                         list.add("leastTps")
                     }
                     localServer["type"] = list.joinToString("||")
                 }
-            }else{
+            } else {
                 val type = localServer["type"]
                 try {
                     if (type != null) {
@@ -104,19 +104,20 @@ object Server {
                         }
                         localServer["type"] = list.joinToString("||")
                     }
-                }catch (_:Exception){}
+                } catch (_: Exception) {
+                }
             }
         }
         return ServerData(
-            localServer["showName"]?:bungeeConfig.getString("showName")!!,
-            localServer["realName"]?:bungeeConfig.getString("realName")!!,
-            localServer["mode"]?:bungeeConfig.getString("mode")!!,
+            localServer["showName"] ?: bungeeConfig.getString("showName")!!,
+            localServer["realName"] ?: bungeeConfig.getString("realName")!!,
+            localServer["mode"] ?: bungeeConfig.getString("mode")!!,
             Bungee.getTPS(),
             localServer["type"]
         )
     }
 
-    fun startGetServer():Int{
+    fun startGetServer(): Int {
         val map = hashMapOf<String, ServerData>()
         val id = getNewId()
         val serverData = getLocalServer()

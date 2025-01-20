@@ -13,20 +13,20 @@ class Server {
     val commandRoot = command<CommandSender>("server") {
         permission = "server.use"
         exec {
-            if (args.size == 0){
+            if (args.size == 0) {
                 sender.sendMessage(lang("NeedArg"))
                 return@exec
             }
-            if (args.size == 1){
-                if (sender !is Player){
+            if (args.size == 1) {
+                if (sender !is Player) {
                     sender.sendMessage(lang("NeedPlayer"))
                     return@exec
                 }
                 val serverName = args[0]
                 TeleportImpl().connect(sender as Player, serverName)
             }
-            if (args.size ==2){
-                if(Bukkit.getPlayer(args[1]) == null){
+            if (args.size == 2) {
+                if (Bukkit.getPlayer(args[1]) == null) {
                     sender.sendMessage(lang("PlayerNotFound"))
                     return@exec
                 }
@@ -36,6 +36,7 @@ class Server {
             }
         }
     }
+
     private fun lang(string: String): String {
         return PixelWorldPro.instance.lang().getStringColored(string)
     }

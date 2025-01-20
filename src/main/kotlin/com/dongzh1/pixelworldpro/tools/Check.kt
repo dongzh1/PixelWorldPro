@@ -2,10 +2,10 @@
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.xbaimiao.easylib.module.utils.submit
-import java.util.UUID
+import java.util.*
 
 object Check {
-    fun playerData(){
+    fun playerData() {
         submit(async = true) {
             val playerDataMap = PixelWorldPro.databaseApi.getPlayerDataMap()
             for (uuid in playerDataMap.keys) {

@@ -23,6 +23,7 @@ object V2 {
     //避免重复new生成多个BouncyCastleProvider对象，因为GC回收不了，会造成内存溢出
     //只在第一次调用decrypt()方法时才new 对象
     private var initialized: Boolean = false
+
     @Throws(Exception::class)
     fun getMacByIP(): String {
         return getMacByIP(InetAddress.getLocalHost().hostAddress)
@@ -42,11 +43,12 @@ object V2 {
         }
         return sb.toString().uppercase(Locale.getDefault())
     }
-    fun auth(token:String): Boolean {
+
+    fun auth(token: String): Boolean {
         var mac = "0"
         try {
             mac = getMacByIP()
-        }catch (_:Exception){
+        } catch (_: Exception) {
         }
         val dummyUrl = URL("https://sh1.plugin.mcyzj.cn:1031/v1/auth/Pixelworldpro")
         val data = JSONObject()
@@ -76,11 +78,11 @@ object V2 {
         return false
     }
 
-    fun verify(token:String): Boolean {
+    fun verify(token: String): Boolean {
         return true
     }
 
-    fun applyExpansion(token:String, lib:String, name:String): JsonObject? {
+    fun applyExpansion(token: String, lib: String, name: String): JsonObject? {
         val mac = getMacByIP()
         val dummyUrl = URL("https://sh1.plugin.mcyzj.cn:1031/v2/Expansion/Pixelworldpro/apply")
         val data = JSONObject()
@@ -107,9 +109,9 @@ object V2 {
                 val g = Gson()
                 val back: JsonObject = g.fromJson(stringLine, JsonObject::class.java)
                 val type = back.get("type").asInt
-                return if (type != 0){
+                return if (type != 0) {
                     back.get("result").asJsonObject
-                }else{
+                } else {
                     null
                 }
             }
@@ -120,7 +122,14 @@ object V2 {
         return null
     }
 
-    fun getExpansion(token:String, lib:String, afn:String, name:String, key: String, iv: String): ByteArrayOutputStream? {
+    fun getExpansion(
+        token: String,
+        lib: String,
+        afn: String,
+        name: String,
+        key: String,
+        iv: String
+    ): ByteArrayOutputStream? {
         val mac = getMacByIP()
         val dummyUrl = URL("https://sh1.plugin.mcyzj.cn:1031/v2/Expansion/Pixelworldpro/get")
         val data = JSONObject()

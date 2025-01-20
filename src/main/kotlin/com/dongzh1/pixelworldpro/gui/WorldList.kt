@@ -2,14 +2,12 @@ package com.dongzh1.pixelworldpro.gui
 
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.impl.TeleportImpl
+import com.dongzh1.pixelworldpro.tools.convertItem
 import com.xbaimiao.easylib.bridge.replacePlaceholder
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.utils.colored
-import com.xbaimiao.easylib.xseries.XItemStack
 import org.bukkit.Bukkit
-import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import java.util.*
 
 class WorldList(val player: Player) {
@@ -31,7 +29,7 @@ class WorldList(val player: Player) {
     //获取list对应的格子
     private var intList = mutableListOf<Int>()
     private fun build(page: Int = 1, isTrust: Boolean = false, gui: String = "WorldList.yml"): BasicCharMap {
-        if (PixelWorldPro.instance.config.getBoolean("debug")){
+        if (PixelWorldPro.instance.config.getBoolean("debug")) {
             Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 构建玩家世界列表菜单")
         }
         val basicCharMap = Gui.buildBaseGui(gui, player)
@@ -55,7 +53,7 @@ class WorldList(val player: Player) {
             isFirst = false
             for (guiData in charMap) {
                 if (guiData.value.type == "Page") {
-                    val item = basic.items[guiData.key]?:continue
+                    val item = basic.items[guiData.key] ?: continue
                     val meta = item.itemMeta!!
                     meta.setDisplayName(meta.displayName.replace("{page}", page.toString()))
                     val lore = meta.lore?.map { it.replace("{page}", page.toString()) }?.toMutableList()
@@ -112,7 +110,7 @@ class WorldList(val player: Player) {
             }
         }
         //填充list格子
-        for (list in listMap){
+        for (list in listMap) {
             if (listChar == null) {
                 break
             }
@@ -125,45 +123,44 @@ class WorldList(val player: Player) {
             listConfig.set("name", listConfig.getString("name")?.replacePlaceholder(worldOwner).colored())
 
             if (list.value == player.uniqueId)
-                listConfig.set("name",listConfig.getString("name")?.
-                replace("{role}",config.getStringColored("List.role.owner")))
+                listConfig.set(
+                    "name", listConfig.getString("name")?.replace("{role}", config.getStringColored("List.role.owner"))
+                )
             if (worldData.banPlayers.contains(player.uniqueId))
-                listConfig.set("name",listConfig.getString("name")?.
-                replace("{role}",config.getStringColored("List.role.ban")))
+                listConfig.set(
+                    "name", listConfig.getString("name")?.replace("{role}", config.getStringColored("List.role.ban"))
+                )
             if (worldData.members.contains(player.uniqueId))
-                listConfig.set("name",listConfig.getString("name")?.
-                replace("{role}",config.getStringColored("List.role.member")))
-            listConfig.set("name",listConfig.getString("name")?.
-            replace("{role}",config.getStringColored("List.role.visitor")))
+                listConfig.set(
+                    "name", listConfig.getString("name")?.replace("{role}", config.getStringColored("List.role.member"))
+                )
+            listConfig.set(
+                "name", listConfig.getString("name")?.replace("{role}", config.getStringColored("List.role.visitor"))
+            )
 
             listConfig.set("lore", listConfig.getStringList("lore").replacePlaceholder(worldOwner).colored())
 
             if (list.value == player.uniqueId)
-                listConfig.set("lore",listConfig.getStringList("lore").map {
-                    it.replace("{role}",config.getStringColored("List.role.owner"))
+                listConfig.set("lore", listConfig.getStringList("lore").map {
+                    it.replace("{role}", config.getStringColored("List.role.owner"))
                 })
             if (worldData.banPlayers.contains(player.uniqueId))
-                listConfig.set("lore",listConfig.getStringList("lore").map {
-                    it.replace("{role}",config.getStringColored("List.role.ban"))
+                listConfig.set("lore", listConfig.getStringList("lore").map {
+                    it.replace("{role}", config.getStringColored("List.role.ban"))
                 })
             if (worldData.members.contains(player.uniqueId))
-                listConfig.set("lore",listConfig.getStringList("lore").map {
-                    it.replace("{role}",config.getStringColored("List.role.member"))
+                listConfig.set("lore", listConfig.getStringList("lore").map {
+                    it.replace("{role}", config.getStringColored("List.role.member"))
                 })
-            listConfig.set("lore",listConfig.getStringList("lore").map {
-                it.replace("{role}",config.getStringColored("List.role.visitor"))
+            listConfig.set("lore", listConfig.getStringList("lore").map {
+                it.replace("{role}", config.getStringColored("List.role.visitor"))
             })
 
             listConfig.set("skull", listConfig.getString("skull")?.replacePlaceholder(worldOwner).colored())
             //if (listConfig.getString("skull") == "%player_name%") {
             //    listConfig.set("skull", null)
             //}
-            val item = XItemStack.deserialize(listConfig)
-            if (skull != null) {
-                val p = Bukkit.getPlayer(skull)
-                val pSkull = ItemStack(Material.PLAYER_HEAD)
-                val mate = pSkull.itemMeta
-            }
+            val item = listConfig.convertItem(player)
             listConfig.set("name", name)
             listConfig.set("lore", lore)
             listConfig.set("skull", skull)
@@ -173,7 +170,7 @@ class WorldList(val player: Player) {
     }
 
     fun open(page: Int = 1, isTrust: Boolean = false, gui: String = "WorldList.yml") {
-        if (PixelWorldPro.instance.config.getBoolean("debug")){
+        if (PixelWorldPro.instance.config.getBoolean("debug")) {
             Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 打开第 $page 页玩家世界列表菜单")
         }
         val basicCharMap = build(page, isTrust, gui)
@@ -183,7 +180,7 @@ class WorldList(val player: Player) {
         basic.onClick {
             it.isCancelled = true
         }
-        if (PixelWorldPro.instance.config.getBoolean("debug")){
+        if (PixelWorldPro.instance.config.getBoolean("debug")) {
             Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 打开玩家世界列表菜单")
         }
         for (guiData in charMap) {
@@ -202,15 +199,17 @@ class WorldList(val player: Player) {
                         val uuid = listMap[slot] ?: return@onClick
                         TeleportImpl().teleport(player.uniqueId, uuid)
                     }
+
                     "Page" -> {
-                        if (PixelWorldPro.instance.config.getBoolean("debug")){
+                        if (PixelWorldPro.instance.config.getBoolean("debug")) {
                             Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 判断翻页类型")
                         }
                         when (guiData.value.value) {
                             "next" -> {
                                 if (!isLastPage) {
-                                    if (PixelWorldPro.instance.config.getBoolean("debug")){
-                                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 打开下一页玩家世界列表菜单")
+                                    if (PixelWorldPro.instance.config.getBoolean("debug")) {
+                                        Bukkit.getConsoleSender()
+                                            .sendMessage("§aPixelWorldPro 打开下一页玩家世界列表菜单")
                                     }
                                     while (true) {
                                         if (guiData.value.type == "Page") {
@@ -228,21 +227,23 @@ class WorldList(val player: Player) {
                                     }
                                     start = intList.size * page
                                     open(page + 1, isTrust, gui)
-                                }else{
-                                    if (PixelWorldPro.instance.config.getBoolean("debug")){
-                                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 打开下一页玩家世界列表菜单失败：已经是最后一页了")
+                                } else {
+                                    if (PixelWorldPro.instance.config.getBoolean("debug")) {
+                                        Bukkit.getConsoleSender()
+                                            .sendMessage("§aPixelWorldPro 打开下一页玩家世界列表菜单失败：已经是最后一页了")
                                     }
                                 }
                             }
 
                             "back" -> {
                                 if (page == 1) {
-                                    if (PixelWorldPro.instance.config.getBoolean("debug")){
-                                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 打开前一页玩家世界列表菜单失败：已经是第一页了")
+                                    if (PixelWorldPro.instance.config.getBoolean("debug")) {
+                                        Bukkit.getConsoleSender()
+                                            .sendMessage("§aPixelWorldPro 打开前一页玩家世界列表菜单失败：已经是第一页了")
                                     }
                                     return@onClick
                                 }
-                                if (PixelWorldPro.instance.config.getBoolean("debug")){
+                                if (PixelWorldPro.instance.config.getBoolean("debug")) {
                                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 打开前一页玩家世界列表菜单")
                                 }
                                 start = intList.size * (page - 2)
@@ -250,6 +251,7 @@ class WorldList(val player: Player) {
                             }
                         }
                     }
+
                     else -> {
                     }
                 }
@@ -271,7 +273,7 @@ class WorldList(val player: Player) {
                         i += 1
                         continue
                     }
-                    if (PixelWorldPro.instance.config.getBoolean("debug")){
+                    if (PixelWorldPro.instance.config.getBoolean("debug")) {
                         Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 添加uuid $uuid")
                     }
                     uuidList.add(uuid)
@@ -285,8 +287,9 @@ class WorldList(val player: Player) {
                     isLastPage = false
                 } else {
                     //数据没超过这一页能显示的内容
-                    if (PixelWorldPro.instance.config.getBoolean("debug")){
-                        Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 构建世界列表尾页：数据量无法超过菜单显示数量 Trust")
+                    if (PixelWorldPro.instance.config.getBoolean("debug")) {
+                        Bukkit.getConsoleSender()
+                            .sendMessage("§aPixelWorldPro 构建世界列表尾页：数据量无法超过菜单显示数量 Trust")
                         Bukkit.getConsoleSender().sendMessage("uuidList长度：${uuidList.size}  菜单长度：${intList.size}")
                     }
                     isLastPage = true
@@ -299,16 +302,16 @@ class WorldList(val player: Player) {
                     }
                 }
             } else {
-                if (PixelWorldPro.instance.config.getBoolean("debug")){
+                if (PixelWorldPro.instance.config.getBoolean("debug")) {
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 构建世界列表尾页：没有加入任何世界")
                 }
                 //没有加入任何世界
                 isLastPage = true
             }
         } else {
-            val worldList = PixelWorldPro.databaseApi.getWorldList(start, intList.size+1) as MutableList<UUID>
+            val worldList = PixelWorldPro.databaseApi.getWorldList(start, intList.size + 1) as MutableList<UUID>
             if (worldList.isEmpty()) {
-                if (PixelWorldPro.instance.config.getBoolean("debug")){
+                if (PixelWorldPro.instance.config.getBoolean("debug")) {
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 构建世界列表尾页：worldlist为空")
                 }
                 isLastPage = true
@@ -323,7 +326,7 @@ class WorldList(val player: Player) {
                 isLastPage = false
             } else {
                 //数据没超过这一页能显示的内容
-                if (PixelWorldPro.instance.config.getBoolean("debug")){
+                if (PixelWorldPro.instance.config.getBoolean("debug")) {
                     Bukkit.getConsoleSender().sendMessage("§aPixelWorldPro 构建世界列表尾页：数据量无法超过菜单显示数量")
                     Bukkit.getConsoleSender().sendMessage("uuidList长度：${worldList.size}  菜单长度：${intList.size}")
                 }

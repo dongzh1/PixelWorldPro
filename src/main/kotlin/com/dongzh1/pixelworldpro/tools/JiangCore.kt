@@ -3,12 +3,12 @@
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
-import java.util.UUID
+import java.util.*
 
 object JiangCore {
     fun getPlayer(arg: String): JiangPlayer? {
         val onlinePlayer = getOnlinePlayer(arg)
-        if(onlinePlayer != null){
+        if (onlinePlayer != null) {
             return JiangPlayer(
                 true,
                 onlinePlayer.name,
@@ -16,7 +16,7 @@ object JiangCore {
             )
         }
         val offlinePlayer = getOfflinePlayer(arg)
-        if(offlinePlayer != null){
+        if (offlinePlayer != null) {
             return JiangPlayer(
                 false,
                 offlinePlayer.name!!,
@@ -25,44 +25,48 @@ object JiangCore {
         }
         return null
     }
-    private fun getOnlinePlayer(arg: String): Player?{
+
+    private fun getOnlinePlayer(arg: String): Player? {
         var player = Bukkit.getPlayer(arg)
-        if(player != null){
+        if (player != null) {
             return player
         }
-        try{
+        try {
             val uuid = UUID.fromString(arg)
             player = Bukkit.getPlayer(uuid)
-            if(player != null){
+            if (player != null) {
                 return player
             }
-        }catch (_:Exception){}
+        } catch (_: Exception) {
+        }
         return null
     }
+
     private fun getOfflinePlayer(arg: String): OfflinePlayer? {
         val offlinePlayerList = Bukkit.getOfflinePlayers()
-        try{
-            for(offline in offlinePlayerList){
-                if(offline.name == arg){
+        try {
+            for (offline in offlinePlayerList) {
+                if (offline.name == arg) {
                     return offline
                 }
             }
-        }catch (e:Exception){
+        } catch (e: Exception) {
             throw e
         }
-        try{
+        try {
             val uuid = UUID.fromString(arg)
-            for(offline in offlinePlayerList){
-                if(offline.uniqueId == uuid){
+            for (offline in offlinePlayerList) {
+                if (offline.uniqueId == uuid) {
                     return offline as Player
                 }
             }
-        }catch (_:Exception){}
+        } catch (_: Exception) {
+        }
         return null
     }
 }
 
-data class JiangPlayer (
+data class JiangPlayer(
     val online: Boolean,
 
     val name: String,

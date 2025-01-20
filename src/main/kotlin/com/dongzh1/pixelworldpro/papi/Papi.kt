@@ -11,26 +11,28 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 
-object Papi: PlaceholderExpansion() {
+object Papi : PlaceholderExpansion() {
     override val identifier: String
         get() = PixelWorldPro.instance.config.getString("mainPapi")!!
     override val version: String
         get() = "1.3.10"
 
     override fun onRequest(p: OfflinePlayer, params: String): String? {
-        when(params){
+        when (params) {
             "iscreateworld" -> {
                 val worldData = PixelWorldPro.databaseApi.getWorldData(p.uniqueId)
-                return if (worldData == null){
+                return if (worldData == null) {
                     "false"
-                }else{
+                } else {
                     "true"
                 }
             }
+
             "showname" -> {
                 //这个玩家对应世界的显示名
                 return PixelWorldPro.instance.config.getString("Papi.showname")!!.colored().replacePlaceholder(p)
             }
+
             "isownworld" -> {
                 if (!p.isOnline) {
                     return "false"
@@ -39,20 +41,27 @@ object Papi: PlaceholderExpansion() {
                 val worldData = PixelWorldPro.databaseApi.getWorldData(player.uniqueId) ?: return "false"
                 return (player.world.name == worldData.worldName + "/world").toString()
             }
-            "showname_world" ->{
+
+            "showname_world" -> {
                 //玩家所在世界的显示名
                 val worldName = (p as Player).world.name
                 val worlds = PixelWorldPro.instance.config.getConfigurationSection("Papi.shownameSet")!!.getKeys(false)
-                for (world in worlds){
-                    if (worldName == world){
-                        return PixelWorldPro.instance.config.getString("Papi.shownameSet.$world")!!.colored().replacePlaceholder(p)
+                for (world in worlds) {
+                    if (worldName == world) {
+                        return PixelWorldPro.instance.config.getString("Papi.shownameSet.$world")!!.colored()
+                            .replacePlaceholder(p)
                     }
                 }
-                val uuid = getUUID(worldName) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(p)
-                return PixelWorldPro.instance.config.getString("Papi.showname")!!.colored().replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
+                val uuid =
+                    getUUID(worldName) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored()
+                        .replacePlaceholder(p)
+                return PixelWorldPro.instance.config.getString("Papi.showname")!!.colored()
+                    .replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
             }
+
             "createtime" -> {
-                val worldData = PixelWorldPro.databaseApi.getWorldData(p.uniqueId) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(p)
+                val worldData = PixelWorldPro.databaseApi.getWorldData(p.uniqueId)
+                    ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(p)
                 val createTime = worldData.createTime.toLong()
                 val date = Date(createTime)
                 //把time时间格式化
@@ -62,92 +71,140 @@ object Papi: PlaceholderExpansion() {
                 //把time时间格式化为字符串
                 return formatter.format(date)
             }
-            "createtime_world" ->{
+
+            "createtime_world" -> {
                 val worldName = (p as Player).world.name
-                val uuid = getUUID(worldName) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(p)
-                val worldData = PixelWorldPro.databaseApi.getWorldData(uuid) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
+                val uuid =
+                    getUUID(worldName) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored()
+                        .replacePlaceholder(p)
+                val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
+                    ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored()
+                        .replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
                 val createTime = worldData.createTime.toLong()
                 val date = Date(createTime)
                 val formatter = SimpleDateFormat(
-                    PixelWorldPro.instance.config.getString("Papi.createtime")!!.replacePlaceholder(Bukkit.getOfflinePlayer(uuid)).colored()
+                    PixelWorldPro.instance.config.getString("Papi.createtime")!!
+                        .replacePlaceholder(Bukkit.getOfflinePlayer(uuid)).colored()
                 )
                 return formatter.format(date)
             }
-            "worldlevel" ->{
-                val worldData = PixelWorldPro.databaseApi.getWorldData(p.uniqueId) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(p)
+
+            "worldlevel" -> {
+                val worldData = PixelWorldPro.databaseApi.getWorldData(p.uniqueId)
+                    ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(p)
                 return worldData.worldLevel
             }
-            "worldlevel_world" ->{
+
+            "worldlevel_world" -> {
                 val worldName = (p as Player).world.name
-                val uuid = getUUID(worldName) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(p)
-                val worldData = PixelWorldPro.databaseApi.getWorldData(uuid) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
+                val uuid =
+                    getUUID(worldName) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored()
+                        .replacePlaceholder(p)
+                val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
+                    ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored()
+                        .replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
                 return worldData.worldLevel
             }
-            "state" ->{
-                val worldData = PixelWorldPro.databaseApi.getWorldData(p.uniqueId) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(p)
-                when(worldData.state){
-                    "anyone" ->{
-                        return PixelWorldPro.instance.config.getString("Papi.state.anyone")!!.colored().replacePlaceholder(p)
+
+            "state" -> {
+                val worldData = PixelWorldPro.databaseApi.getWorldData(p.uniqueId)
+                    ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(p)
+                when (worldData.state) {
+                    "anyone" -> {
+                        return PixelWorldPro.instance.config.getString("Papi.state.anyone")!!.colored()
+                            .replacePlaceholder(p)
                     }
-                    "inviter" ->{
-                        return PixelWorldPro.instance.config.getString("Papi.state.inviter")!!.colored().replacePlaceholder(p)
+
+                    "inviter" -> {
+                        return PixelWorldPro.instance.config.getString("Papi.state.inviter")!!.colored()
+                            .replacePlaceholder(p)
                     }
-                    "member" ->{
-                        return PixelWorldPro.instance.config.getString("Papi.state.member")!!.colored().replacePlaceholder(p)
+
+                    "member" -> {
+                        return PixelWorldPro.instance.config.getString("Papi.state.member")!!.colored()
+                            .replacePlaceholder(p)
                     }
-                    "owner" ->{
-                        return PixelWorldPro.instance.config.getString("Papi.state.owner")!!.colored().replacePlaceholder(p)
+
+                    "owner" -> {
+                        return PixelWorldPro.instance.config.getString("Papi.state.owner")!!.colored()
+                            .replacePlaceholder(p)
                     }
                 }
             }
-            "state_world" ->{
+
+            "state_world" -> {
                 val worldName = (p as Player).world.name
-                val uuid = getUUID(worldName) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(p)
-                val worldData = PixelWorldPro.databaseApi.getWorldData(uuid) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
-                when(worldData.state){
-                    "anyone" ->{
-                        return PixelWorldPro.instance.config.getString("Papi.state.anyone")!!.colored().replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
+                val uuid =
+                    getUUID(worldName) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored()
+                        .replacePlaceholder(p)
+                val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
+                    ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored()
+                        .replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
+                when (worldData.state) {
+                    "anyone" -> {
+                        return PixelWorldPro.instance.config.getString("Papi.state.anyone")!!.colored()
+                            .replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
                     }
-                    "inviter" ->{
-                        return PixelWorldPro.instance.config.getString("Papi.state.inviter")!!.colored().replacePlaceholder(p)
+
+                    "inviter" -> {
+                        return PixelWorldPro.instance.config.getString("Papi.state.inviter")!!.colored()
+                            .replacePlaceholder(p)
                     }
-                    "member" ->{
-                        return PixelWorldPro.instance.config.getString("Papi.state.member")!!.colored().replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
+
+                    "member" -> {
+                        return PixelWorldPro.instance.config.getString("Papi.state.member")!!.colored()
+                            .replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
                     }
-                    "owner" ->{
-                        return PixelWorldPro.instance.config.getString("Papi.state.owner")!!.colored().replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
+
+                    "owner" -> {
+                        return PixelWorldPro.instance.config.getString("Papi.state.owner")!!.colored()
+                            .replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
                     }
                 }
             }
-            "player_state_world" ->{
+
+            "player_state_world" -> {
                 val worldName = (p as Player).world.name
-                val uuid = getUUID(worldName) ?: return PixelWorldPro.instance.config.getString("Papi.group.anyone")!!.colored().replacePlaceholder(p)
-                val worldData = PixelWorldPro.databaseApi.getWorldData(uuid) ?: return PixelWorldPro.instance.config.getString("Papi.group.anyone")!!.colored().replacePlaceholder(p)
-                if (p.uniqueId  == uuid){
+                val uuid = getUUID(worldName) ?: return PixelWorldPro.instance.config.getString("Papi.group.anyone")!!
+                    .colored().replacePlaceholder(p)
+                val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
+                    ?: return PixelWorldPro.instance.config.getString("Papi.group.anyone")!!.colored()
+                        .replacePlaceholder(p)
+                if (p.uniqueId == uuid) {
                     return PixelWorldPro.instance.config.getString("Papi.group.owner")!!.colored().replacePlaceholder(p)
                 }
-                if (p.uniqueId in worldData.members){
-                    return PixelWorldPro.instance.config.getString("Papi.group.member")!!.colored().replacePlaceholder(p)
+                if (p.uniqueId in worldData.members) {
+                    return PixelWorldPro.instance.config.getString("Papi.group.member")!!.colored()
+                        .replacePlaceholder(p)
                 }
-                if (PixelWorldPro.instance.getOnInviter(uuid)?.contains(p.uniqueId) == true){
-                    return PixelWorldPro.instance.config.getString("Papi.group.inviter")!!.colored().replacePlaceholder(p)
+                if (PixelWorldPro.instance.getOnInviter(uuid)?.contains(p.uniqueId) == true) {
+                    return PixelWorldPro.instance.config.getString("Papi.group.inviter")!!.colored()
+                        .replacePlaceholder(p)
                 }
                 return PixelWorldPro.instance.config.getString("Papi.group.anyone")!!.colored().replacePlaceholder(p)
             }
-            "onlineplayernumber" ->{
-                val worldData = PixelWorldPro.databaseApi.getWorldData(p.uniqueId) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(p)
+
+            "onlineplayernumber" -> {
+                val worldData = PixelWorldPro.databaseApi.getWorldData(p.uniqueId)
+                    ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(p)
                 return worldData.onlinePlayerNumber.toString()
             }
-            "onlineplayernumber_world" ->{
+
+            "onlineplayernumber_world" -> {
                 val worldName = (p as Player).world.name
-                val uuid = getUUID(worldName) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(p)
-                val worldData = PixelWorldPro.databaseApi.getWorldData(uuid) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored().replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
+                val uuid =
+                    getUUID(worldName) ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored()
+                        .replacePlaceholder(p)
+                val worldData = PixelWorldPro.databaseApi.getWorldData(uuid)
+                    ?: return PixelWorldPro.instance.config.getString("Papi.noRecord")!!.colored()
+                        .replacePlaceholder(Bukkit.getOfflinePlayer(uuid))
                 return worldData.onlinePlayerNumber.toString()
             }
 
         }
         return null
     }
+
     private fun getUUID(worldName: String): UUID? {
         val realNamelist = worldName.split("/").size
         if (realNamelist < 2) {

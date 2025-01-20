@@ -3,9 +3,9 @@
 import com.dongzh1.pixelworldpro.PixelWorldPro
 import com.dongzh1.pixelworldpro.api.TeleportApi
 import com.dongzh1.pixelworldpro.bungee.redis.RedisManager
+import com.dongzh1.pixelworldpro.bungee.server.Bungee
 import com.dongzh1.pixelworldpro.bungee.server.Server
 import com.dongzh1.pixelworldpro.world.WorldImpl
-import com.dongzh1.pixelworldpro.bungee.server.Bungee
 import com.xbaimiao.easylib.module.chat.BuiltInConfiguration
 import com.xbaimiao.easylib.module.utils.submit
 import org.bukkit.Bukkit
@@ -13,7 +13,6 @@ import org.bukkit.entity.Player
 import java.lang.Thread.sleep
 import java.util.*
 import java.util.concurrent.CompletableFuture
-import kotlin.collections.HashMap
 
 object World {
     val bungeeConfig = BuiltInConfiguration("BungeeSet.yml")
@@ -120,11 +119,11 @@ object World {
                     consoleSender.sendMessage("pwp选中服务器${buildLargeTPS}进行创建操作")
                     player.sendMessage("pwp选中服务器${buildLargeTPS}进行创建操作")
                 }
-                if (buildLargeTPS == Server.getLocalServer().realName){
+                if (buildLargeTPS == Server.getLocalServer().realName) {
                     submit {
                         future.complete(WorldImpl.createWorldLocal(player.uniqueId, template, player.name))
                     }
-                }else {
+                } else {
                     //查询是否创建成功
                     var i = 0
                     submit(async = true, period = 2L, maxRunningNum = 600, delay = 0L) {

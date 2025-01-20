@@ -13,11 +13,12 @@ object Clean {
             File("./PixelWorldPro/clean.yml").createNewFile()
         }
     }
+
     val config = YamlConfiguration.loadConfiguration(File("./PixelWorldPro/clean.yml"))
     private val nextTime = PixelWorldPro.instance.config.getInt("clean")
 
     fun load(world: WorldData) {
-        val time = Calendar.getInstance().getTimeInMillis()/1000/60/60/24
+        val time = Calendar.getInstance().getTimeInMillis() / 1000 / 60 / 60 / 24
         if (nextTime == 0) {
             config.set(world.worldName, time + 900000000000000000)
             config.save(File("./PixelWorldPro/clean.yml"))
@@ -31,7 +32,7 @@ object Clean {
     }
 
     fun clean(all: Boolean = false) {
-        val time = Calendar.getInstance().getTimeInMillis()/1000/60/60/24
+        val time = Calendar.getInstance().getTimeInMillis() / 1000 / 60 / 60 / 24
         if (all) {
             for (world in PixelWorldPro.databaseApi.getWorldDataMap().values) {
                 val oldTime = config.getInt(world.worldName)

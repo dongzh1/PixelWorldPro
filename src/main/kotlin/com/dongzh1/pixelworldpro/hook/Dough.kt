@@ -8,13 +8,13 @@ import java.util.*
 
 @Suppress("unused")
 object Dough {
-    fun hasPermission(p: OfflinePlayer?, l: Location?): Boolean{
-        if ((p == null).or(l == null)){
+    fun hasPermission(p: OfflinePlayer?, l: Location?): Boolean {
+        if ((p == null).or(l == null)) {
             return true
         }
         val world = l!!.world ?: return false
         val uuid = getUUID(world.name) ?: return true
-        if (p!!.uniqueId == uuid){
+        if (p!!.uniqueId == uuid) {
             return true
         }
         val worldData = PixelWorldPro.databaseApi.getWorldData(uuid) ?: return true
@@ -32,7 +32,7 @@ object Dough {
         return UUID.fromString(uuidString)
     }
 
-    fun isPlayerWorld(worldName:String,player: UUID):Boolean{
+    fun isPlayerWorld(worldName: String, player: UUID): Boolean {
         val worldNameReal = getWorldNameUUID(worldName)
         return worldNameReal == player
     }

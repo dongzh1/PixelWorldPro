@@ -24,9 +24,9 @@ class OnPlayerJoin : Listener {
     }
 
     @EventHandler
-    fun login(event: PlayerJoinEvent){
+    fun login(event: PlayerJoinEvent) {
         val playerData = PixelWorldPro.databaseApi.getPlayerData(event.player.uniqueId) ?: return
-        if(playerData.inviterMsg.isNotEmpty()){
+        if (playerData.inviterMsg.isNotEmpty()) {
             val inviterMsg = playerData.inviterMsg as ArrayList
             playerData.inviterMsg = listOf()
             PixelWorldPro.databaseApi.setPlayerData(event.player.uniqueId, playerData)
@@ -35,12 +35,13 @@ class OnPlayerJoin : Listener {
         val worldData = PixelWorldPro.databaseApi.getWorldData(event.player.world.name) ?: return
         WorldImpl.setWorldBorder(event.player.world, worldData.worldLevel)
     }
+
     companion object {
         private val map: MutableMap<UUID, Location> = HashMap()
 
         fun add(uuid: UUID, location: Location) {
             map[uuid] = location
-            submit(delay = 20 * 60){
+            submit(delay = 20 * 60) {
                 map.remove(uuid)
             }
         }

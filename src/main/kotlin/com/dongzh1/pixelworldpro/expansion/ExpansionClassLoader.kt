@@ -6,15 +6,15 @@ import org.bukkit.plugin.InvalidDescriptionException
 import java.io.File
 import java.net.URL
 import java.net.URLClassLoader
-import java.util.*
 
 class ExpansionClassLoader//try {
 //} catch (e: ClassCastException) {
 //    throw java.lang.Exception("主类没有扩展")
 //}
-    (addonsManager: ExpansionManager, data: YamlConfiguration, jarFile: File, parent: ClassLoader?, name: String) : URLClassLoader(
-    arrayOf<URL>(jarFile.toURI().toURL()), parent
-) {
+    (addonsManager: ExpansionManager, data: YamlConfiguration, jarFile: File, parent: ClassLoader?, name: String) :
+    URLClassLoader(
+        arrayOf<URL>(jarFile.toURI().toURL()), parent
+    ) {
     private val classes: MutableMap<String, Class<*>?> = HashMap()
 
     @JvmField
@@ -25,7 +25,7 @@ class ExpansionClassLoader//try {
         val javaClass: Class<*>
         try {
             val mainClass =
-                    data.getString("main") ?: throw java.lang.Exception("§4PixelWorldPro expansion.yml 没有设置一个主类！")
+                data.getString("main") ?: throw java.lang.Exception("§4PixelWorldPro expansion.yml 没有设置一个主类！")
             javaClass = Class.forName(mainClass, true, this)
             if (mainClass.startsWith("com.dongzh1.pixelworldpro")) {
                 throw java.lang.Exception("§4PixelWorldPro 扩展的主类不能是 'com.dongzh1.pixelworldpro'")

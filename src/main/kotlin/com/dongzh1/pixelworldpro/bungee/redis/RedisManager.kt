@@ -9,7 +9,6 @@ import com.dongzh1.pixelworldpro.tools.Serialize
 import com.xbaimiao.easylib.EasyPlugin
 import com.xbaimiao.easylib.module.utils.Module
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 object RedisManager : Module<EasyPlugin> {
@@ -56,6 +55,7 @@ object RedisManager : Module<EasyPlugin> {
         return map.toList().sortedByDescending { (_, value) -> value.onlinePlayerNumber }
             .toMap() as MutableMap<UUID, WorldData>
     }
+
     fun getWorldList(): MutableList<UUID> {
         val list = mutableListOf<UUID>()
         jedisPool.resource.also {
@@ -78,19 +78,19 @@ object RedisManager : Module<EasyPlugin> {
         }
     }
 
-    fun setSeed(uuid: UUID, seed:String){
+    fun setSeed(uuid: UUID, seed: String) {
         push("setSeed|,|${uuid}|,|${seed}")
     }
 
     fun setLock(uuid: UUID) {
         val lockValue = getLock()
-        if (lockValue == null){
+        if (lockValue == null) {
             jedisPool.resource.also {
                 it.set("PixelWorldProlock", "${uuid}:${World.bungeeConfig.getString("realName")},")
                 it.close()
             }
-        }else{
-            if (lockValue.contains("$uuid")){
+        } else {
+            if (lockValue.contains("$uuid")) {
                 return
             }
             jedisPool.resource.also {
@@ -102,9 +102,10 @@ object RedisManager : Module<EasyPlugin> {
 
     fun isLock(uuid: UUID): Boolean {
         val lockValue = getLock()
-        return lockValue?.contains("$uuid") ?: false
+        return lockValue?.contains("$uuid") == true
     }
-    fun getLock(): String?{
+
+    fun getLock(): String? {
         jedisPool.resource.also {
             val value = it.get("PixelWorldProlock")
             it.close()
@@ -115,12 +116,15 @@ object RedisManager : Module<EasyPlugin> {
 
     fun removeLock(uuid: UUID) {
         val lockValue = getLock()
-        if (lockValue == null){
+        if (lockValue == null) {
             return
-        }else{
-            if (lockValue.contains("$uuid")){
+        } else {
+            if (lockValue.contains("$uuid")) {
                 jedisPool.resource.also {
-                    it.set("PixelWorldProlock", lockValue.replace("${uuid}:${PixelWorldPro.instance.config.getString("ServerName")},",""))
+                    it.set(
+                        "PixelWorldProlock",
+                        lockValue.replace("${uuid}:${PixelWorldPro.instance.config.getString("ServerName")},", "")
+                    )
                     it.close()
                 }
             }
@@ -130,9 +134,9 @@ object RedisManager : Module<EasyPlugin> {
     fun getLocks(): ArrayList<UUID> {
         val locks = ArrayList<UUID>()
         val lockValue = getLock()
-        if (lockValue == null){
+        if (lockValue == null) {
             return locks
-        }else {
+        } else {
             for (lock in lockValue.split(",")) {
                 if (lock.contains(":")) {
                     try {
@@ -145,16 +149,16 @@ object RedisManager : Module<EasyPlugin> {
         return locks
     }
 
-    private fun removeLock(serverName: String){
+    private fun removeLock(serverName: String) {
         var lockValue = getLock()
-        if (lockValue == null){
+        if (lockValue == null) {
             return
-        }else{
-            if (lockValue.contains("${serverName},")){
-                for (lock in lockValue!!.split(",")){
-                    if (lock.contains(":")){
-                        if (lock.split(":")[1] == serverName){
-                            lockValue = lockValue.replace("$lock,","")
+        } else {
+            if (lockValue.contains("${serverName},")) {
+                for (lock in lockValue!!.split(",")) {
+                    if (lock.contains(":")) {
+                        if (lock.split(":")[1] == serverName) {
+                            lockValue = lockValue.replace("$lock,", "")
                         }
                     }
                 }
@@ -170,23 +174,23 @@ object RedisManager : Module<EasyPlugin> {
         jedisPool.resource.use { jedis -> jedis.publish(channel, message) }
     }
 
-    fun getAllWordData(): Map<UUID,String>{
+    fun getAllWordData(): Map<UUID, String> {
         jedisPool.resource.also {
             //key匹配UUID格式
             val keys = it.keys("PixelWorldPro*-*-*-*-*")
-            val map = mutableMapOf<UUID,String>()
+            val map = mutableMapOf<UUID, String>()
             for (key in keys) {
-                if (UUID.fromString(key.replace("PixelWorldPro","")) == null) {
+                if (UUID.fromString(key.replace("PixelWorldPro", "")) == null) {
                     continue
                 }
-                map[UUID.fromString(key.replace("PixelWorldPro",""))] = it.get(key)
+                map[UUID.fromString(key.replace("PixelWorldPro", ""))] = it.get(key)
             }
             it.close()
             return map
         }
     }
 
-    fun test():Boolean{
+    fun test(): Boolean {
         jedisPool.resource.also {
             val keys = it.keys("PixelWorldPro*")
             it.close()
@@ -195,7 +199,7 @@ object RedisManager : Module<EasyPlugin> {
         }
     }
 
-    fun closeServer(){
+    fun closeServer() {
         val serverName = Server.getLocalServer().realName
         removeLock(serverName)
     }

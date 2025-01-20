@@ -14,8 +14,8 @@ object Bungee {
         val bungeeTpShow = bungeeConfig.getBoolean("bungeeTpShow")
         if (bungeeTpShow) {
             var msg = bungeeConfig.getString("bungeeTpShowStr")!!
-            msg = msg.replace("{server_showName}",server)
-            msg = msg.replace("{server_realName}",server)
+            msg = msg.replace("{server_showName}", server)
+            msg = msg.replace("{server_realName}", server)
             player.sendMessage(msg)
         }
         val byteArray = ByteArrayOutputStream()

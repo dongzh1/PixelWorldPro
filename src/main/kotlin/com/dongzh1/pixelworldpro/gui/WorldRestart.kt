@@ -6,7 +6,6 @@ import com.dongzh1.pixelworldpro.commands.Commands
 import com.xbaimiao.easylib.bridge.economy.PlayerPoints
 import com.xbaimiao.easylib.bridge.economy.Vault
 import org.bukkit.entity.Player
-import java.util.*
 
 class WorldRestart(val player: Player) {
     private fun build(gui: String = "WorldRestart.yml", templateChoose: String? = null): BasicCharMap {
@@ -22,16 +21,18 @@ class WorldRestart(val player: Player) {
                     defaultTemplate = Gui.getWorldRestartConfig().getStringColored("Template.$templateChoose")
                 val item = basic.items[guiData.key]
                 val itemMeta = item?.itemMeta
-                itemMeta?.setDisplayName(itemMeta.displayName.replace("{template}","$defaultTemplate"))
-                val lore = itemMeta?.lore?.map { it.replace("{template}","$defaultTemplate") }?.toMutableList() ?: continue
+                itemMeta?.setDisplayName(itemMeta.displayName.replace("{template}", "$defaultTemplate"))
+                val lore =
+                    itemMeta?.lore?.map { it.replace("{template}", "$defaultTemplate") }?.toMutableList() ?: continue
                 itemMeta.lore = lore
                 item.itemMeta = itemMeta
-                basic.set(guiData.key,item)
+                basic.set(guiData.key, item)
                 break
             }
         }
         return BasicCharMap(basic, charMap)
     }
+
     fun open(gui: String = "WorldRestart.yml", templateChoose: String? = null) {
         val basicCharMap = build(gui, templateChoose)
         val basic = basicCharMap.basic
@@ -64,6 +65,7 @@ class WorldRestart(val player: Player) {
                             lockTemplate = true
                             open(gui, template)
                         }
+
                         "RestartWorld" -> {
                             if (PixelWorldPro.databaseApi.getWorldData(player.uniqueId) == null) {
                                 player.sendMessage(lang("WorldNotExist"))
@@ -96,6 +98,7 @@ class WorldRestart(val player: Player) {
                                         return@onClick
                                     }
                                 }
+
                                 "money" -> {
                                     if (Vault().has(
                                             player,
@@ -112,6 +115,7 @@ class WorldRestart(val player: Player) {
                                         return@onClick
                                     }
                                 }
+
                                 "points" -> {
                                     if (PlayerPoints().has(
                                             player,
@@ -128,6 +132,7 @@ class WorldRestart(val player: Player) {
                                         return@onClick
                                     }
                                 }
+
                                 "permission" -> {
                                     if (!player.hasPermission(
                                             Gui.getWorldRestartConfig().getString("setting.restartPermission")!!
@@ -138,12 +143,13 @@ class WorldRestart(val player: Player) {
                                         return@onClick
                                     }
                                 }
+
                                 else -> {}
                             }
                             if (value != "random" && !lockTemplate) {
                                 template = value!!
                             }
-                            WorldApi.Factory.worldApi!!.restartWorld(player.uniqueId,template).thenApply {
+                            WorldApi.Factory.worldApi!!.restartWorld(player.uniqueId, template).thenApply {
                                 if (it) {
                                     player.sendMessage(lang("RestartSuccess"))
                                     player.closeInventory()
@@ -161,18 +167,21 @@ class WorldRestart(val player: Player) {
                                                 Gui.getWorldRestartConfig().getDouble("setting.restartPoints")
                                             )
                                         }
+
                                         "money" -> {
                                             Vault().give(
                                                 player,
                                                 Gui.getWorldRestartConfig().getDouble("setting.restartMoney")
                                             )
                                         }
+
                                         "points" -> {
                                             PlayerPoints().give(
                                                 player,
                                                 Gui.getWorldRestartConfig().getDouble("setting.restartPoints")
                                             )
                                         }
+
                                         else -> {}
                                     }
                                 }
